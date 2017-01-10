@@ -1,43 +1,7 @@
 from time import sleep
 
-class MovementControl:
-    def __init__(self, stage, axes):
-        self.stage = stage
-        self.xaxis = axes[0]
-        self.yaxis = axes[1]
-        self.zaxis = axes[2]
-        
-    def moveStepX(self, direction, step): 
-        self.xaxis.move_by((direction*step), wait=True)
-        
-    def moveStepY(self, direction, step):
-        self.yaxis.move_by((direction*step), wait=True)
-        
-    def moveStepZ(self, direction, step):
-        self.zaxis.move_by((direction*step), wait=True)
-        
-    def moveAbsoluteX(self, position): 
-        self.xaxis.move_to((position), wait=True)
-        
-    def moveAbsoluteY(self, position):
-        self.yaxis.move_by((position), wait=True)
-        
-    def moveAbsoluteZ(self, position):
-        self.zaxis.move_by((position), wait=True)    
-    
-    def getXPosition(self):
-        return self.xaxis.position
-        
-    def getYPosition(self):
-        return self.yaxis.position
-    
-    def getZPosition(self):
-        return self.zaxis.position
   
-        
-
-
-class PositionControl:
+class PositionControl(object):
     def __init__(self, stage, axes):
         self.stage = stage
         self.xaxis = axes[0]
@@ -50,6 +14,25 @@ class PositionControl:
         self.ylimhigh = 0
         self.zlimlow = 0
         self.zlimhigh = 0
+            
+    def moveAbsoluteX(self, position): 
+        self.xaxis.move_to((position), wait=True)
+        
+    def moveAbsoluteY(self, position):
+        self.yaxis.move_to((position), wait=True)
+        
+    def moveAbsoluteZ(self, position):
+        self.zaxis.move_to((position), wait=True)    
+    
+    def getXPosition(self):
+        return self.xaxis.position
+        
+    def getYPosition(self):
+        return self.yaxis.position
+    
+    def getZPosition(self):
+        return self.zaxis.position
+    
                          
     def getCurrentHome(self):  
         return (self.xaxis.home, self.yaxis.home, self.zaxis.home)
@@ -100,9 +83,6 @@ class PositionControl:
         self.ylimhigh = self.yaxis.position
         self.yaxis.move_to((self.ylimlow+self.ylimhigh)/2, wait=True)
         
-
-
-  
   
 class ScanControl(object):
     def __init__(self, stage, axes): # plus osci later
@@ -156,26 +136,26 @@ class ScanControl(object):
         
         #scan along focus axis
         for idz in xrange(int(zsteps)+1):
+            if not self.zactive: break
             znext = self.zmin+idz*self.zstep
-            if self.zactive:
-                self.zaxis.move_to(znext, wait=True)
+            self.zaxis.move_to(znext, wait=True)
             
             #along y-axis (up - down)
             for idx in xrange(int(ysteps)+1):
+                if not self.yactive: break
                 ynext = self.ymin+idx*self.ystep
-                if self.yactive:
-                    self.yaxis.move_to(ynext, wait=True)
+                self.yaxis.move_to(ynext, wait=True)
         
                 #along x-axis (left - right)
                 for idy in xrange(int(xsteps)+1):
+                    if self.xactive: break
                     xnext = self.xmin+idy*self.xstep
-                    if self.xactive:
-                        self.xaxis.move_to(xnext, wait=True)
+                    self.xaxis.move_to(xnext, wait=True)
                     
                     if (self.running == False):
                         return
-                    
-                    sleep(0.5)
+                    print "x: %.2f" %self.xaxis.position, " y: %.2f" %self.yaxis.position, " z: %.2f" %self.zaxis.position
+                    sleep(1)
                     # do oscilloscope readout here
                                           
     def startScan(self):
@@ -185,6 +165,24 @@ class ScanControl(object):
     def stopScan(self):    
         self.running = False
     
+  
+    def setXactive(self, val):
+        if val == 1:
+            self.xactive = True
+            return
+        self.xactive = False
+        
+    def setYactive(self, val):
+        if val == 1:
+            self.yactive = True
+            return
+        self.yactive = False   
+
+    def setZactive(self, val):
+        if val == 1:
+            self.zactive = True
+            return
+        self.zactive = False  
   
     #setter and getter methods
     def setXmin(self, val):
