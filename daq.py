@@ -32,8 +32,35 @@ class PositionControl(object):
     
     def getZPosition(self):
         return self.zaxis.position
+      
+    def getXMax(self):
+        return self.xlimhigh
+        
+    def getYMax(self):
+        return self.ylimhigh
     
-                         
+    def getZMax(self):
+        return self.zlimhigh
+    
+    def getXMin(self):
+        return self.xlimlow
+        
+    def getYMin(self):
+        return self.ylimlow
+    
+    def getZMin(self):
+        return self.zlimlow
+    
+    def getXInterval(self):
+        return 0.1 #fixme
+    
+    def getYInterval(self):
+        return 0.1 #fixme
+    
+    def getZInterval(self):
+        return 0.1 #fixme
+    
+                        
     def getCurrentHome(self):  
         return (self.xaxis.home, self.yaxis.home, self.zaxis.home)
                 
@@ -65,7 +92,9 @@ class PositionControl(object):
         self.zaxis.on()
         sleep(1) 
         
+        print('move to hw limit')
         self.xaxis.move_to_hardware_limit(-1, wait=True)
+        print('now there')
         self.xlimlow = self.xaxis.position
         self.xaxis.move_to_hardware_limit(1, wait=True)
         self.xlimhigh = self.xaxis.position

@@ -25,6 +25,7 @@ if __name__ == '__main__':
     
     #initialize classes
     posContr = PositionControl(esp, axes)
+    
     scanContr = ScanControl(esp, axes)
        
     window = Window(posContr, scanContr)

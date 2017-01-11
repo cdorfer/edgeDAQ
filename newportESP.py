@@ -106,7 +106,7 @@ class ESP(object):
 		with DelayedKeyboardInterrupt():
 			# stuff here will not be interrupted by SIGINT
 			strg = self.ser.readline()
-		return strg[0:-2]
+		return str(strg, 'utf-8')
 
 	def write(self, string, axis=None):
 		""" Serial write.
@@ -115,7 +115,8 @@ class ESP(object):
 		
 		:param string: the string to write to the port
 		:param axis: index of the destination axis. If unspecified, the destination is the controller."""
-		self.ser.write((str(axis) if axis is not None else "") + string + "\r")
+		mesg = (str(axis) if axis is not None else "") + string + "\r"
+		self.ser.write(mesg.encode('ascii'))
 
 	def query(self, string, axis=None, check_error=False):
 		"""write a command and read the reply.
@@ -133,7 +134,7 @@ class ESP(object):
 			self.write(string+'?', axis=axis)
 			if check_error:
 				self.raise_error()
-			return self.read()
+			return self.read()[0:-2]
 
 	@property
 	def version(self):

@@ -5,14 +5,16 @@ from PyQt5.Qt import QLabel, QGridLayout, Qt, QDoubleSpinBox,QLCDNumber
 class Window(QWidget):
     
     
-    def __init__(self, positionControl, scanControl):
+    def __init__(self, posC, scanC):
         super().__init__()       
-        self.initUI()
-        self.posContr = positionControl
-        self.scanContr = scanControl
+        self.initUI(posC, scanC)
+
+      
         
-        
-    def initUI(self):
+    def initUI(self, posC, scanC):
+        self.positionControl = posC
+        self.scanControl = scanC
+
         self.setWindowTitle('edgeDAQ')
         self.setMinimumWidth(500)
         #self.setMinimumHeight(600)
@@ -29,6 +31,12 @@ class Window(QWidget):
         
         self.xSlider = QSlider()
         self.xSlider.setOrientation(Qt.Horizontal)
+        self.xSlider.setValue(self.positionControl.getXPosition())
+        self.xSlider.setTickInterval(self.positionControl.getXInterval())
+        self.xSlider.setMaximum(self.positionControl.getXMax())
+        self.xSlider.setMinimum(self.positionControl.getXMin())
+        self.xSlider.valueChanged.connect(self.priint)
+        
         self.xSlider.setMinimumWidth(200)   
         self.ySlider = QSlider()
         self.ySlider.setOrientation(Qt.Horizontal)
@@ -95,15 +103,17 @@ class Window(QWidget):
         
         self.goHome = QPushButton()
         self.goHome.setText('Go Home')
-        self.button.clicked.connect()
+        self.goHome.clicked.connect(self.positionControl.goHome)
         #self.goHome.setMinimumWidth(40)
         
         self.defHome = QPushButton()
         self.defHome.setText('Define Home')
+        self.defHome.clicked.connect(self.positionControl.setHome)
         #self.defHome.setMinimumWidth(200)
         
         self.defHWLim = QPushButton()
         self.defHWLim.setText('Find HW Limits')
+        self.defHWLim.clicked.connect(self.positionControl.findHardwareLimits)
         #self.defHWLim.setMinimumWidth(60)
         
         self.posCtrLayout.addWidget(self.goHome, 8,1,1,1,Qt.AlignCenter)
@@ -133,3 +143,7 @@ class Window(QWidget):
         
                 
         self.show()
+        
+        
+    def priint(self):
+        print('testttttt')
