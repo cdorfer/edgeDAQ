@@ -1,3 +1,4 @@
+import sys
 
 #Hardware imports
 from newportESP import ESP
@@ -6,23 +7,32 @@ from newportESP import ESP
 from daq import PositionControl, ScanControl
 
 #GUI imports
+from gui import Window
+from PyQt5.QtWidgets import QApplication
 
-
-
-#def main():
     
 
     
 
 if __name__ == '__main__':
-    #main()
+    
+    # Create an instance of the application window and run it
+    app = QApplication(sys.argv)
+    
     #open serial connection to newport table
     esp = ESP('/dev/ttyUSB0')
     axes = [esp.axis(2), esp.axis(3), esp.axis(1)] #x, y, z
     
     #initialize classes
-    poscontr = PositionControl(esp, axes)
-    scancontr = ScanControl(esp, axes)
+    posContr = PositionControl(esp, axes)
+    scanContr = ScanControl(esp, axes)
+       
+    window = Window(posContr, scanContr)
+    sys.exit(app.exec_())
+    
+
+
+
     
     #poscontr.findHardwareLimits()
     #poscontr.setHome()

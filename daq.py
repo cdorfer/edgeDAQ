@@ -41,17 +41,17 @@ class PositionControl(object):
         self.xlimlow =  self.xlimlow -self.xaxis.position
         self.xlimhigh = self.xlimhigh - self.xaxis.position
         self.xaxis.home = 0
-        print self.xlimlow, self.xaxis.position, self.xlimhigh
+        print(self.xlimlow, self.xaxis.position, self.xlimhigh)
         
         self.ylimlow = self.ylimlow - self.yaxis.position 
         self.ylimhigh = self.ylimhigh - self.yaxis.position
         self.yaxis.home = 0
-        print self.ylimlow, self.yaxis.position, self.ylimhigh
+        print(self.ylimlow, self.yaxis.position, self.ylimhigh)
         
         self.zlimlow = self.zlimlow - self.zaxis.position
         self.zlimhigh = self.zlimhigh - self.zaxis.position
         self.zaxis.home = 0
-        print self.zlimlow, self.zaxis.position, self.zlimhigh
+        print(self.zlimlow, self.zaxis.position, self.zlimhigh)
                
     def goHome(self):
         self.xaxis.home_search(0)
@@ -59,7 +59,7 @@ class PositionControl(object):
         self.zaxis.home_search(0)
           
     def findHardwareLimits(self):
-        print 'Turning axes on.'
+        print('Turning axes on.')
         self.xaxis.on()
         self.yaxis.on()
         self.zaxis.on()
@@ -112,18 +112,18 @@ class ScanControl(object):
     
         #some sanity checks
         if (self.xmax > self.xmin and self.xstep <= 0) or (self.xmin > self.xmax and self.xstep >= 0) or (abs(self.xstep) > abs(self.xmax - self.xmin)):
-            print 'Check x-limits and step direction/size.'
+            print('Check x-limits and step direction/size.')
             return
         
         if (self.ymax > self.ymin and self.ystep <= 0) or (self.ymin > self.ymax and self.ystep >= 0) or (abs(self.ystep) > abs(self.ymax - self.ymin)):
-            print 'Check y-limits and step direction/size.'
+            print('Check y-limits and step direction/size.')
             return
         
         if (self.zmax > self.zmin and self.zstep <= 0) or (self.zmin > self.zmax and self.zstep >= 0) or (abs(self.zstep) > abs(self.zmax - self.zmin)):
-            print 'Check z-limits and step direction/size.'
+            print('Check z-limits and step direction/size.')
             return
         
-        print 'Turning axes on.'
+        print('Turning axes on.')
         self.xaxis.on()
         self.yaxis.on()
         self.zaxis.on()
@@ -135,26 +135,26 @@ class ScanControl(object):
         zsteps = abs((self.zmin - self.zmax)/self.zstep)
         
         #scan along focus axis
-        for idz in xrange(int(zsteps)+1):
+        for idz in range(int(zsteps)+1):
             if not self.zactive: break
             znext = self.zmin+idz*self.zstep
             self.zaxis.move_to(znext, wait=True)
             
             #along y-axis (up - down)
-            for idx in xrange(int(ysteps)+1):
+            for idx in range(int(ysteps)+1):
                 if not self.yactive: break
                 ynext = self.ymin+idx*self.ystep
                 self.yaxis.move_to(ynext, wait=True)
         
                 #along x-axis (left - right)
-                for idy in xrange(int(xsteps)+1):
+                for idy in range(int(xsteps)+1):
                     if self.xactive: break
                     xnext = self.xmin+idy*self.xstep
                     self.xaxis.move_to(xnext, wait=True)
                     
                     if (self.running == False):
                         return
-                    print "x: %.2f" %self.xaxis.position, " y: %.2f" %self.yaxis.position, " z: %.2f" %self.zaxis.position
+                    print("x: %.2f" %self.xaxis.position, " y: %.2f" %self.yaxis.position, " z: %.2f" %self.zaxis.position)
                     sleep(1)
                     # do oscilloscope readout here
                                           
