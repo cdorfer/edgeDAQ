@@ -8,21 +8,33 @@ class PositionControl(object):
         self.yaxis = axes[1]
         self.zaxis = axes[2]
         
-        self.xlimlow = 0
-        self.xlimhigh = 0
-        self.ylimlow = 0
-        self.ylimhigh = 0
-        self.zlimlow = 0
-        self.zlimhigh = 0
+        self.xlimlow = -50 # all in mm
+        self.xlimhigh = 50
+        self.ylimlow = -2.5
+        self.ylimhigh = 2.5
+        self.zlimlow = -75
+        self.zlimhigh = 75
             
     def moveAbsoluteX(self, position): 
+        self.xaxis.on()
+        print('here in daq: ', position)
         self.xaxis.move_to((position), wait=True)
         
     def moveAbsoluteY(self, position):
         self.yaxis.move_to((position), wait=True)
         
     def moveAbsoluteZ(self, position):
-        self.zaxis.move_to((position), wait=True)    
+        self.zaxis.move_to((position), wait=True)   
+        
+    def moveStepX(self, step): 
+        self.xaxis.on()
+        self.xaxis.move_by((step), wait=True)
+        
+    def moveStepY(self, step):
+        self.yaxis.move_by((step), wait=True)
+        
+    def moveStepZ(self, step):
+        self.zaxis.move_by((step), wait=True)    
     
     def getXPosition(self):
         return self.xaxis.position
@@ -50,16 +62,6 @@ class PositionControl(object):
     
     def getZMin(self):
         return self.zlimlow
-    
-    def getXInterval(self):
-        return 0.1 #fixme
-    
-    def getYInterval(self):
-        return 0.1 #fixme
-    
-    def getZInterval(self):
-        return 0.1 #fixme
-    
                         
     def getCurrentHome(self):  
         return (self.xaxis.home, self.yaxis.home, self.zaxis.home)

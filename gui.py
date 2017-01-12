@@ -1,12 +1,18 @@
 from PyQt5.QtWidgets import QWidget, QPushButton, QHBoxLayout, QVBoxLayout, QSlider
 from PyQt5.Qt import QLabel, QGridLayout, Qt, QDoubleSpinBox,QLCDNumber
+from time import sleep
 
 
 class Window(QWidget):
     
     
     def __init__(self, posC, scanC):
-        super().__init__()       
+        super().__init__()   
+        
+        self.xStepSize = 10 #um
+        self.yStepSize = 1000
+        self.zStepSize = 1000
+        
         self.initUI(posC, scanC)
 
       
@@ -31,11 +37,12 @@ class Window(QWidget):
         
         self.xSlider = QSlider()
         self.xSlider.setOrientation(Qt.Horizontal)
-        self.xSlider.setValue(self.positionControl.getXPosition())
-        self.xSlider.setTickInterval(self.positionControl.getXInterval())
-        self.xSlider.setMaximum(self.positionControl.getXMax())
-        self.xSlider.setMinimum(self.positionControl.getXMin())
-        self.xSlider.valueChanged.connect(self.priint)
+        self.xSlider.setValue(self.positionControl.getXPosition()*(10**6)) #to nm
+        self.xSlider.setTickInterval(1)
+        self.xSlider.setMaximum(self.positionControl.getXMax()*(10**6)) #to nm
+        self.xSlider.setMinimum(self.positionControl.getXMin()*(10**6)) #to nm
+        self.xSlider.valueChanged.connect(self.sliderXChange)
+        print('min: ', self.positionControl.getXMin()*(10**6), ' max: ', self.positionControl.getXMax()*(10**6), ' current: ', self.positionControl.getXPosition()*(10**6))
         
         self.xSlider.setMinimumWidth(200)   
         self.ySlider = QSlider()
@@ -46,64 +53,65 @@ class Window(QWidget):
         self.zSlider.setMinimumWidth(200)
         
         self.xSpinBox = QDoubleSpinBox()
+        self.xSpinBox.setMaximum(10000)
+        self.xSpinBox.setMinimum(0.01)
+        self.xSpinBox.setValue(self.xStepSize)
+        self.xSpinBox.valueChanged.connect(self.xSpinBoxChange)
+        
+        
         self.ySpinBox = QDoubleSpinBox()
         self.zSpinBox = QDoubleSpinBox()
         
-        self.posCtrLayout.addWidget(self.xLabel, 1,1,1,1, Qt.AlignCenter)
-        self.posCtrLayout.addWidget(self.xSlider, 1,2,1,3, Qt.AlignLeft)
-        self.posCtrLayout.addWidget(self.xSpinBox, 1,4,1,1, Qt.AlignCenter)
-        
-        self.posCtrLayout.addWidget(self.yLabel, 2,1,1,1,Qt.AlignCenter)
-        self.posCtrLayout.addWidget(self.ySlider, 2,2,1,3,Qt.AlignLeft)
-        self.posCtrLayout.addWidget(self.ySpinBox, 2,4,1,1,Qt.AlignCenter)
+        self.posCtrLabel = QLabel("Position Control")
+        self.posCtrLayout.addWidget(self.posCtrLabel, 1,1,1,4,Qt.AlignCenter)
 
-        self.posCtrLayout.addWidget(self.zLabel, 3,1,1,1,Qt.AlignCenter)
-        self.posCtrLayout.addWidget(self.zSlider, 3,2,1,3,Qt.AlignLeft)
-        self.posCtrLayout.addWidget(self.zSpinBox, 3,4,1,1,Qt.AlignCenter)
+        self.posCtrLabel = QLabel("Step Size [um]")
+        self.posCtrLayout.addWidget(self.posCtrLabel, 3,4,1,1,Qt.AlignCenter)       
+        
+        self.posCtrLayout.addWidget(self.xLabel, 4,1,1,1, Qt.AlignCenter)
+        self.posCtrLayout.addWidget(self.xSlider, 4,2,1,3, Qt.AlignLeft)
+        self.posCtrLayout.addWidget(self.xSpinBox, 4,4,1,1, Qt.AlignCenter)
+        
+        self.posCtrLayout.addWidget(self.yLabel, 5,1,1,1,Qt.AlignCenter)
+        self.posCtrLayout.addWidget(self.ySlider, 5,2,1,3,Qt.AlignLeft)
+        self.posCtrLayout.addWidget(self.ySpinBox, 5,4,1,1,Qt.AlignCenter)
+
+        self.posCtrLayout.addWidget(self.zLabel, 6,1,1,1,Qt.AlignCenter)
+        self.posCtrLayout.addWidget(self.zSlider, 6,2,1,3,Qt.AlignLeft)
+        self.posCtrLayout.addWidget(self.zSpinBox, 6,4,1,1,Qt.AlignCenter)
         
         #----------------------------------------------------------------------
         
-        self.xLimLowLabel = QLabel('X<sub>LimLow</sub>: ')
-        self.xlimlow = QLCDNumber()
-        self.xlimlow.setMinimumWidth(100)
-        self.xLimHighLabel = QLabel('X<sub>LimHigh</sub>: ')
-        self.xlimhigh = QLCDNumber()
-        self.xlimhigh.setMinimumWidth(100)
-      
-        self.yLimLowLabel = QLabel('Y<sub>LimLow</sub>: ')
-        self.ylimlow = QLCDNumber()
-        self.ylimlow.setMinimumWidth(100)
-        self.yLimHighLabel = QLabel('Y<sub>LimHigh</sub>: ')
-        self.ylimhigh = QLCDNumber()
-        self.ylimhigh.setMinimumWidth(100)
+        self.xCurrLabel = QLabel('X<sub>Pos</sub>: ')
+        self.xCurr = QLCDNumber()
+        self.xCurr.setDigitCount(7)
+        self.xCurr.setMinimumWidth(100)
+        self.showXPos()
+ 
+        self.yCurrLabel = QLabel('Y<sub>Pos</sub>: ')
+        self.yCurr = QLCDNumber()
+        self.yCurr.setMinimumWidth(100)
         
-        self.zLimLowLabel = QLabel('Z<sub>LimLow</sub>: ')
-        self.zlimlow = QLCDNumber()
-        self.zlimlow.setMinimumWidth(100)
-        self.zLimHighLabel = QLabel('Z<sub>LimHigh</sub>: ')
-        self.zlimhigh = QLCDNumber()
-        self.zlimhigh.setMinimumWidth(100)
-        
-        self.posCtrLayout.addWidget(self.xLimLowLabel, 4,1,1,1,Qt.AlignCenter)
-        self.posCtrLayout.addWidget(self.xlimlow, 4,2,1,1,Qt.AlignLeft)
-        self.posCtrLayout.addWidget(self.xLimHighLabel, 4,3,1,1,Qt.AlignCenter)
-        self.posCtrLayout.addWidget(self.xlimhigh, 4,4,1,1,Qt.AlignLeft)
-        
-        self.posCtrLayout.addWidget(self.yLimLowLabel, 5,1,1,1,Qt.AlignCenter)
-        self.posCtrLayout.addWidget(self.ylimlow, 5,2,1,1,Qt.AlignLeft)
-        self.posCtrLayout.addWidget(self.yLimHighLabel, 5,3,1,1,Qt.AlignCenter)
-        self.posCtrLayout.addWidget(self.ylimhigh, 5,4,1,1,Qt.AlignLeft)
+        self.zCurrLabel = QLabel('Z<sub>Pos</sub>: ')
+        self.zCurr = QLCDNumber()
+        self.zCurr.setMinimumWidth(100)
 
-        self.posCtrLayout.addWidget(self.zLimLowLabel, 6,1,1,1,Qt.AlignCenter)
-        self.posCtrLayout.addWidget(self.zlimlow, 6,2,1,1,Qt.AlignLeft)
-        self.posCtrLayout.addWidget(self.zLimHighLabel, 6,3,1,1,Qt.AlignCenter)
-        self.posCtrLayout.addWidget(self.zlimhigh, 6,4,1,1,Qt.AlignLeft)
+        
+        self.posCtrLayout.addWidget(self.xCurrLabel, 7,1,1,1,Qt.AlignCenter)
+        self.posCtrLayout.addWidget(self.xCurr, 7,2,1,1,Qt.AlignLeft)
+        
+        self.posCtrLayout.addWidget(self.yCurrLabel, 8,1,1,1,Qt.AlignCenter)
+        self.posCtrLayout.addWidget(self.yCurr, 8,2,1,1,Qt.AlignLeft)
+
+        self.posCtrLayout.addWidget(self.zCurrLabel, 9,1,1,1,Qt.AlignCenter)
+        self.posCtrLayout.addWidget(self.zCurr, 9,2,1,1,Qt.AlignLeft)
+
 
         #----------------------------------------------------------------------
         
         self.goHome = QPushButton()
         self.goHome.setText('Go Home')
-        self.goHome.clicked.connect(self.positionControl.goHome)
+        self.goHome.clicked.connect(self.goHomeSlot)
         #self.goHome.setMinimumWidth(40)
         
         self.defHome = QPushButton()
@@ -116,9 +124,9 @@ class Window(QWidget):
         self.defHWLim.clicked.connect(self.positionControl.findHardwareLimits)
         #self.defHWLim.setMinimumWidth(60)
         
-        self.posCtrLayout.addWidget(self.goHome, 8,1,1,1,Qt.AlignCenter)
-        self.posCtrLayout.addWidget(self.defHome, 8,2,1,1,Qt.AlignCenter)
-        self.posCtrLayout.addWidget(self.defHWLim, 8,4,1,1,Qt.AlignCenter)
+        self.posCtrLayout.addWidget(self.goHome, 10,1,1,1,Qt.AlignCenter)
+        self.posCtrLayout.addWidget(self.defHome, 10,2,1,1,Qt.AlignCenter)
+        self.posCtrLayout.addWidget(self.defHWLim, 10,4,1,1,Qt.AlignCenter)
         
         #----------------------------------------------------------------------
         
@@ -143,6 +151,34 @@ class Window(QWidget):
         
                 
         self.show()
+    
+    
+    def sliderXChange(self):
+        print('current table position:', self.positionControl.getXPosition(), 'current slider position: ', self.xSlider.value())
+        self.positionControl.moveAbsoluteX((self.xSlider.value()*self.xStepSize))
+        self.showXPos()
+        
+    def xSpinBoxChange(self):
+        self.xStepSize = self.xSpinBox.value() #1000 for um to nm
+        #currSliderPos = 
+        #self.xSlider.blockSignals(True)
+        #self.xSlider.setValue(self.xSlider.value()/self.xStepSize)
+        #print('set slider value to: ', self.xSlider.value()/self.xStepSize)
+        #self.xSlider.blockSignals(False)
+        
+    def goHomeSlot(self):
+        self.positionControl.goHome()
+        sleep(2)
+        self.showXPos()
+        self.xSlider.setValue(self.positionControl.getXPosition())
+        
+        #self.showYPos()
+        #self.showZPos()
+        
+        
+    def showXPos(self):
+        sleep(0.5)
+        self.xCurr.display(self.positionControl.getXPosition())
         
         
     def priint(self):

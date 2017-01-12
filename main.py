@@ -27,6 +27,7 @@ if __name__ == '__main__':
     posContr = PositionControl(esp, axes)
     
     scanContr = ScanControl(esp, axes)
+    #posContr.findHardwareLimits()
        
     window = Window(posContr, scanContr)
     sys.exit(app.exec_())
