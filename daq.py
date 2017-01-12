@@ -142,24 +142,37 @@ class ScanControl(object):
  
     
     def theScan(self):
+        print(self.xmin)
+        print(self.xmax) 
+        print(self.ymin)
+        print(self.ymax)
+        print(self.zmin)
+        print(self.zmax)
+        print(self.xstep) 
+        print(self.ystep) 
+        print(self.zstep) 
+        
+        
     
         #some sanity checks
-        if (self.xmax > self.xmin and self.xstep <= 0) or (self.xmin > self.xmax and self.xstep >= 0) or (abs(self.xstep) > abs(self.xmax - self.xmin)):
-            print('Check x-limits and step direction/size.')
-            return
+        if(self.xactive):
+            if (self.xmax > self.xmin and self.xstep <= 0) or (self.xmin > self.xmax and self.xstep >= 0) or (abs(self.xstep) > abs(self.xmax - self.xmin)):
+                print('Check x-limits and step direction/size.')
+                return
+            self.xaxis.on()
         
-        if (self.ymax > self.ymin and self.ystep <= 0) or (self.ymin > self.ymax and self.ystep >= 0) or (abs(self.ystep) > abs(self.ymax - self.ymin)):
-            print('Check y-limits and step direction/size.')
-            return
+        if(self.yactive):
+            if (self.ymax > self.ymin and self.ystep <= 0) or (self.ymin > self.ymax and self.ystep >= 0) or (abs(self.ystep) > abs(self.ymax - self.ymin)):
+                print('Check y-limits and step direction/size.')
+                return
+            self.yaxis.on()
         
-        if (self.zmax > self.zmin and self.zstep <= 0) or (self.zmin > self.zmax and self.zstep >= 0) or (abs(self.zstep) > abs(self.zmax - self.zmin)):
-            print('Check z-limits and step direction/size.')
-            return
-        
-        print('Turning axes on.')
-        self.xaxis.on()
-        self.yaxis.on()
-        self.zaxis.on()
+        if(self.zactive):
+            if (self.zmax > self.zmin and self.zstep <= 0) or (self.zmin > self.zmax and self.zstep >= 0) or (abs(self.zstep) > abs(self.zmax - self.zmin)):
+                print('Check z-limits and step direction/size.')
+                return
+            self.zaxis.on()
+             
         sleep(1)  
         
         #calculate number of required steps
@@ -169,30 +182,32 @@ class ScanControl(object):
         
         #scan along focus axis
         for idz in range(int(zsteps)+1):
-            if not self.zactive: break
-            znext = self.zmin+idz*self.zstep
-            self.zaxis.move_to(znext, wait=True)
+            if self.zactive:
+                znext = self.zmin+idz*self.zstep
+                self.zaxis.move_to(znext, wait=True)
             
             #along y-axis (up - down)
             for idx in range(int(ysteps)+1):
-                if not self.yactive: break
-                ynext = self.ymin+idx*self.ystep
-                self.yaxis.move_to(ynext, wait=True)
+                if self.yactive:
+                    ynext = self.ymin+idx*self.ystep
+                    self.yaxis.move_to(ynext, wait=True)
         
                 #along x-axis (left - right)
                 for idy in range(int(xsteps)+1):
-                    if self.xactive: break
-                    xnext = self.xmin+idy*self.xstep
-                    self.xaxis.move_to(xnext, wait=True)
+                    if self.xactive:
+                        xnext = self.xmin+idy*self.xstep
+                        self.xaxis.move_to(xnext, wait=True)
                     
                     if (self.running == False):
                         return
                     print("x: %.2f" %self.xaxis.position, " y: %.2f" %self.yaxis.position, " z: %.2f" %self.zaxis.position)
                     sleep(1)
                     # do oscilloscope readout here
+   
                                           
     def startScan(self):
         self.running = True
+        print('Starting a scan.')
         self.theScan()
     
     def stopScan(self):    
@@ -200,22 +215,13 @@ class ScanControl(object):
     
   
     def setXactive(self, val):
-        if val == 1:
-            self.xactive = True
-            return
-        self.xactive = False
-        
+        self.xactive = val
+
     def setYactive(self, val):
-        if val == 1:
-            self.yactive = True
-            return
-        self.yactive = False   
+        self.yactive = val
 
     def setZactive(self, val):
-        if val == 1:
-            self.zactive = True
-            return
-        self.zactive = False  
+        self.zactive = val
   
     #setter and getter methods
     def setXmin(self, val):

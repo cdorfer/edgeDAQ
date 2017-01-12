@@ -294,7 +294,6 @@ class Axis(object):
 		:param wait: whether to block until the motion is finished
 		:type wait: bool
 		"""
-		print('here in the move fuction: ', str(pos))
 		self.write("PA" + str(pos))
 		if wait:
 			self.wait()
