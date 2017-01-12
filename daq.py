@@ -21,9 +21,11 @@ class PositionControl(object):
         self.xaxis.move_to((position), wait=True)
         
     def moveAbsoluteY(self, position):
+        self.yaxis.on()
         self.yaxis.move_to((position), wait=True)
         
     def moveAbsoluteZ(self, position):
+        self.zaxis.on()
         self.zaxis.move_to((position), wait=True)   
         
     def moveStepX(self, step): 
