@@ -71,21 +71,21 @@ class Window(QWidget):
     
         self.xSpinBox = QDoubleSpinBox()
         self.xSpinBox.setMaximum(10000)
-        self.xSpinBox.setMinimum(0.01)
+        self.xSpinBox.setMinimum(0.0001)
         self.xSpinBox.setAlignment(Qt.AlignRight)
         self.xSpinBox.setValue(self.xStepSize)
         self.xSpinBox.valueChanged.connect(self.xSpinBoxChange)
              
         self.ySpinBox = QDoubleSpinBox()
         self.ySpinBox.setMaximum(10000)
-        self.ySpinBox.setMinimum(0.01)
+        self.ySpinBox.setMinimum(0.0001)
         self.ySpinBox.setAlignment(Qt.AlignRight)
         self.ySpinBox.setValue(self.yStepSize)
         self.ySpinBox.valueChanged.connect(self.ySpinBoxChange)
           
         self.zSpinBox = QDoubleSpinBox()
         self.zSpinBox.setMaximum(10000)
-        self.zSpinBox.setMinimum(0.01)
+        self.zSpinBox.setMinimum(0.0001)
         self.zSpinBox.setAlignment(Qt.AlignRight)
         self.zSpinBox.setValue(self.zStepSize)
         self.zSpinBox.valueChanged.connect(self.zSpinBoxChange)
@@ -112,19 +112,25 @@ class Window(QWidget):
         
         self.xCurrLabel = QLabel('X<sub>Pos</sub>: ')
         self.xCurr = QLCDNumber()
+        self.xCurr.setDigitCount(7)
         self.xCurr.setMinimumWidth(100)
+        self.xCurr.setMinimumHeight(25)
         self.xCurr.setDigitCount(7)
         self.showXPos()
  
         self.yCurrLabel = QLabel('Y<sub>Pos</sub>: ')
         self.yCurr = QLCDNumber()
+        self.yCurr.setDigitCount(6)
         self.yCurr.setMinimumWidth(100)
+        self.yCurr.setMinimumHeight(25)
         self.yCurr.setDigitCount(7)
         self.showYPos()
         
         self.zCurrLabel = QLabel('Z<sub>Pos</sub>: ')
         self.zCurr = QLCDNumber()
+        self.zCurr.setDigitCount(7)
         self.zCurr.setMinimumWidth(100)
+        self.zCurr.setMinimumHeight(25)
         self.zCurr.setDigitCount(7)
         self.showZPos()
 
@@ -148,7 +154,7 @@ class Window(QWidget):
         
         self.defHome = QPushButton()
         self.defHome.setText('Define Home')
-        self.defHome.clicked.connect(self.positionControl.setHome)
+        self.defHome.clicked.connect(self.defHomeSlot)
         #self.defHome.setMinimumWidth(200)
         
         self.defHWLim = QPushButton()
@@ -159,6 +165,7 @@ class Window(QWidget):
         self.posCtrLayout.addWidget(self.goHome, 10,1,1,1,Qt.AlignCenter)
         self.posCtrLayout.addWidget(self.defHome, 10,2,1,1,Qt.AlignCenter)
         self.posCtrLayout.addWidget(self.defHWLim, 10,4,1,1,Qt.AlignCenter)
+        self.posCtrLayout.addWidget(QLabel(""), 11,1,1,4,Qt.AlignCenter)
         
         #----------------------------------------------------------------------
         
@@ -279,9 +286,10 @@ class Window(QWidget):
         self.zactive.stateChanged.connect(lambda:self.btnstate(self.zactive))
      
      
-        self.scanCtrLayout.addWidget(QLabel(""), 1,1,1,4,Qt.AlignCenter)
-        self.scanCtrLayout.addWidget(QLabel("<h2>Scan Control</h2>"), 2,1,1,7,Qt.AlignCenter)   
-                 
+        
+        self.scanCtrLayout.addWidget(QLabel("<h2>Scan Control</h2>"), 1,1,1,7,Qt.AlignCenter)   
+        self.scanCtrLayout.addWidget(QLabel(""), 2,1,1,4,Qt.AlignCenter)
+               
         self.scanCtrLayout.addWidget(QLabel('X<sub>min</sub>'), 3,1,1,1,Qt.AlignCenter)
         self.scanCtrLayout.addWidget(self.xlimlow, 3,2,1,1,Qt.AlignLeft)
         self.scanCtrLayout.addWidget(QLabel('X<sub>max</sub>'), 3,3,1,1,Qt.AlignCenter)
@@ -363,11 +371,19 @@ class Window(QWidget):
         
     def showYPos(self):
         sleep(0.5)
-        self.yCurr.display(self.positionControl.getYPosition())
+        self.yCurr.display(round(self.positionControl.getYPosition(),4))
            
     def showZPos(self):
         sleep(0.5)
         self.zCurr.display(self.positionControl.getZPosition())
+        
+    def defHomeSlot(self):
+        self.positionControl.setHome()
+        sleep(1)
+        self.showXPos()
+        self.showYPos()
+        self.showZPos()  
+    
             
     def goHomeSlot(self):
         self.positionControl.goHome()
