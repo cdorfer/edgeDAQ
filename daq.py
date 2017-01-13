@@ -1,5 +1,5 @@
 from time import sleep
-
+import threading
   
 class PositionControl(object):
     def __init__(self, stage, axes):
@@ -181,6 +181,15 @@ class ScanControl(object):
         zsteps = abs((self.zmin - self.zmax)/self.zstep)
         
         #scan along focus axis
+        if not self.zactive:
+            zsteps = 0
+        if not self.yactive:
+            ysteps = 0
+        if not self.xactive:
+            xsteps = 0
+            
+        
+        
         for idz in range(int(zsteps)+1):
             if self.zactive:
                 znext = self.zmin+idz*self.zstep
