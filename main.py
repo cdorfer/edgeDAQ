@@ -34,6 +34,22 @@ if __name__ == '__main__':
     
 
 
+    '''
+    tek = TektronixMSO5204B('TCPIP0::192.168.1.111::inst0::INSTR')
+    tek.configure()
+    
+    (wfdata, timedata) = tek.acquireWaveforms()
+ 
+    #plot the figure with correct scaling
+    plt.plot(timedata,wfdata[0:2000])
+    plt.plot(timedata,wfdata[2000:4000])
+    plt.plot(timedata,wfdata[98000:100000])
+    plt.ylabel('Voltage (V)')
+    plt.xlabel('Time (sec)')
+    plt.show()
+    print('Plot generated.')
+    '''
+
 
     
     #poscontr.findHardwareLimits()

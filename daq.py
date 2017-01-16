@@ -1,5 +1,4 @@
 from time import sleep
-import threading
   
 class PositionControl(object):
     def __init__(self, stage, axes):
@@ -17,7 +16,6 @@ class PositionControl(object):
             
     def moveAbsoluteX(self, position): 
         self.xaxis.on()
-        print('here in daq: ', position)
         self.xaxis.move_to((position), wait=True)
         
     def moveAbsoluteY(self, position):
@@ -72,17 +70,17 @@ class PositionControl(object):
         self.xlimlow =  self.xlimlow -self.xaxis.position
         self.xlimhigh = self.xlimhigh - self.xaxis.position
         self.xaxis.home = 0
-        print(self.xlimlow, self.xaxis.position, self.xlimhigh)
+        #print(self.xlimlow, self.xaxis.position, self.xlimhigh)
         
         self.ylimlow = self.ylimlow - self.yaxis.position 
         self.ylimhigh = self.ylimhigh - self.yaxis.position
         self.yaxis.home = 0
-        print(self.ylimlow, self.yaxis.position, self.ylimhigh)
+        #print(self.ylimlow, self.yaxis.position, self.ylimhigh)
         
         self.zlimlow = self.zlimlow - self.zaxis.position
         self.zlimhigh = self.zlimhigh - self.zaxis.position
         self.zaxis.home = 0
-        print(self.zlimlow, self.zaxis.position, self.zlimhigh)
+        #print(self.zlimlow, self.zaxis.position, self.zlimhigh)
                
     def goHome(self):
         self.xaxis.home_search(0)
@@ -90,15 +88,12 @@ class PositionControl(object):
         self.zaxis.home_search(0)
           
     def findHardwareLimits(self):
-        print('Turning axes on.')
         self.xaxis.on()
         self.yaxis.on()
         self.zaxis.on()
         sleep(1) 
-        
-        print('move to hw limit')
+
         self.xaxis.move_to_hardware_limit(-1, wait=True)
-        print('now there')
         self.xlimlow = self.xaxis.position
         self.xaxis.move_to_hardware_limit(1, wait=True)
         self.xlimhigh = self.xaxis.position
@@ -142,18 +137,7 @@ class ScanControl(object):
  
     
     def theScan(self):
-        print(self.xmin)
-        print(self.xmax) 
-        print(self.ymin)
-        print(self.ymax)
-        print(self.zmin)
-        print(self.zmax)
-        print(self.xstep) 
-        print(self.ystep) 
-        print(self.zstep) 
-        
-        
-    
+
         #some sanity checks
         if(self.xactive):
             if (self.xmax > self.xmin and self.xstep <= 0) or (self.xmin > self.xmax and self.xstep >= 0) or (abs(self.xstep) > abs(self.xmax - self.xmin)):
