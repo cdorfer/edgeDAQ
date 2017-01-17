@@ -26,8 +26,10 @@ if __name__ == '__main__':
     #axes = [esp.axis(2), esp.axis(3), esp.axis(1)] #x, y, z
     
     #open connection to oscilloscope
-    #tek = TektronixMSO5204B('TCPIP0::192.168.1.111::inst0::INSTR')
-    #tek.configure()
+    tek = TektronixMSO5204B('TCPIP0::192.168.1.111::inst0::INSTR')
+    tek.configure()
+    tek.acquireWaveforms()
+    tek.close()
     
     #initialize classes
     #posContr = PositionControl(esp, axes)
@@ -35,9 +37,10 @@ if __name__ == '__main__':
     #scanContr = ScanControl(esp, axes)
     #posContr.findHardwareLimits()
     
-    config = configparser.ConfigParser()
-    config.read('config.ini')
-    print(config.get('Others', 'Route'))
+    #config = configparser.ConfigParser()
+    #config.read('config.ini')
+    
+    #print(config.get('Others', 'Route'))
     
     
        

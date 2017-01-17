@@ -2,7 +2,7 @@ import visa
 import numpy
 from struct import unpack
 from time import sleep
-
+import socket
 
 
 class TektronixMSO5204B(object):
@@ -15,6 +15,7 @@ class TektronixMSO5204B(object):
         # Configure VISA resource
         self.rm = visa.ResourceManager()
         self.inst = self.rm.open_resource(resource) 
+        
         print('Connected to: ', self.inst.ask('*idn?'))
         self.inst.write('*rst')  #default the instrument
 
@@ -97,6 +98,7 @@ class TektronixMSO5204B(object):
         self.inst.write('curve?')
         rawdata = self.inst.read_raw()
 
+
         headerlength = len(rawdata)%100 - 1 #determining the length of the header (dirty fix)
         #header = rawdata[:headerlength]     #header for later use?
         rawdata = rawdata[headerlength:-1]  #strip the header
@@ -105,6 +107,7 @@ class TektronixMSO5204B(object):
         scaledtime = numpy.arange(self.xzero,self.xzero+(self.xincrement*self.numberofpoints),self.xincrement)  #always the same time
         print('Waveforms acquired.\n')
         return (scaleddata, scaledtime)
+
 
     def close(self):
         self.inst.close()
