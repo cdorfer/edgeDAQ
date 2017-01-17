@@ -1,7 +1,9 @@
 import sys
+import configparser
 
 #Hardware imports
 from newportESP import ESP
+from tektronix import TektronixMSO5204B
 
 #DAQ imports
 from daq import PositionControl, ScanControl
@@ -17,20 +19,30 @@ from PyQt5.QtWidgets import QApplication
 if __name__ == '__main__':
     
     # Create an instance of the application window and run it
-    app = QApplication(sys.argv)
+    #app = QApplication(sys.argv)
     
     #open serial connection to newport table
-    esp = ESP('/dev/ttyUSB0')
-    axes = [esp.axis(2), esp.axis(3), esp.axis(1)] #x, y, z
+    #esp = ESP('/dev/ttyUSB0')
+    #axes = [esp.axis(2), esp.axis(3), esp.axis(1)] #x, y, z
+    
+    #open connection to oscilloscope
+    #tek = TektronixMSO5204B('TCPIP0::192.168.1.111::inst0::INSTR')
+    #tek.configure()
     
     #initialize classes
-    posContr = PositionControl(esp, axes)
+    #posContr = PositionControl(esp, axes)
     
-    scanContr = ScanControl(esp, axes)
+    #scanContr = ScanControl(esp, axes)
     #posContr.findHardwareLimits()
+    
+    config = configparser.ConfigParser()
+    config.read('config.ini')
+    print(config.get('Others', 'Route'))
+    
+    
        
-    window = Window(posContr, scanContr)
-    sys.exit(app.exec_())
+    #window = Window(posContr, scanContr)
+    #sys.exit(app.exec_())
     
 
 
