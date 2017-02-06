@@ -1,5 +1,4 @@
-from PyQt5.QtWidgets import QWidget, QPushButton, QHBoxLayout, QVBoxLayout, QSlider,\
-    QCheckBox
+from PyQt5.QtWidgets import QWidget, QPushButton, QHBoxLayout, QVBoxLayout, QSlider, QCheckBox
 from PyQt5.Qt import QLabel, QGridLayout, Qt, QDoubleSpinBox,QLCDNumber
 from time import sleep
 
@@ -7,25 +6,34 @@ from time import sleep
 class Window(QWidget):
     
     
-    def __init__(self, posC, scanC):
+    def __init__(self, posC, acqC):
         super().__init__()   
         
-        #defaults position control
-        self.xStepSize = 500 #um
-        self.yStepSize = 50
-        self.zStepSize = 1000
-            
+        #defaults for position control
+        self.xStepSize = posC.xStepSize
+        self.yStepSize = posC.yStepSize
+        self.zStepSize = posC.zStepSize
         
-        self.initUI(posC, scanC)
+        #defaults for scan control
+        self.xScanMin = acqC.xScanMin
+        self.xScanMax = acqC.xScanMax
+        self.xScanStep = acqC.xScanStep
+        self.yScanMin = acqC.yScanMin
+        self.yScanMax = acqC.yScanMax
+        self.yScanStep = acqC.yScanStep
+        self.zScanMin = acqC.zScanMin
+        self.zScanMax = acqC.zScanMax
+        self.zScanStep = acqC.zScanStep
+        
+        self.initUI(posC, acqC)
 
-      
-        
-    def initUI(self, posC, scanC):
+
+    def initUI(self, posC, acqC):
         self.positionControl = posC
-        self.scanControl = scanC
+        self.acqControl = acqC
 
         self.setWindowTitle('edgeDAQ')
-        self.setMinimumWidth(500)
+        self.setMinimumWidth(600)
         #self.setMinimumHeight(600)
         
         ############################ position control ##############################
@@ -162,10 +170,10 @@ class Window(QWidget):
         self.defHWLim.clicked.connect(self.positionControl.findHardwareLimits)
         #self.defHWLim.setMinimumWidth(60)
         
-        self.posCtrLayout.addWidget(self.goHome, 10,1,1,1,Qt.AlignCenter)
-        self.posCtrLayout.addWidget(self.defHome, 10,2,1,1,Qt.AlignCenter)
-        self.posCtrLayout.addWidget(self.defHWLim, 10,4,1,1,Qt.AlignCenter)
-        self.posCtrLayout.addWidget(QLabel(""), 11,1,1,4,Qt.AlignCenter)
+        self.posCtrLayout.addWidget(self.goHome, 7,3,1,1,Qt.AlignLeft)
+        self.posCtrLayout.addWidget(self.defHome, 8,3,1,1,Qt.AlignLeft)
+        self.posCtrLayout.addWidget(self.defHWLim, 9,3,1,1,Qt.AlignLeft)
+        self.posCtrLayout.addWidget(QLabel(""), 10,1,1,4,Qt.AlignCenter)
         
         #----------------------------------------------------------------------
         
@@ -174,12 +182,12 @@ class Window(QWidget):
         
         ############################ end position control ##############################
         
-        ############################ start scan control ##############################
+        ############################ start acquisiton control ##############################
         
-        self.scanCtrLayout = QGridLayout()
-        self.scanCtrLayout.setContentsMargins(4, 4, 4, 4)
-        self.scanCtrLayout.setSpacing(2)
-        self.scanCtrLayout.setObjectName("scanCtrLayout") 
+        self.acqCtrLayout = QGridLayout()
+        self.acqCtrLayout.setContentsMargins(4, 4, 4, 4)
+        self.acqCtrLayout.setSpacing(2)
+        self.acqCtrLayout.setObjectName("acqCtrLayout") 
             
         self.xlimlow = QDoubleSpinBox()
         self.xlimlow.setMaximum(100)
@@ -187,7 +195,7 @@ class Window(QWidget):
         self.xlimlow.setAlignment(Qt.AlignRight)
         self.xlimlow.setDecimals(3)
         self.xlimlow.setMinimumWidth(90)
-        self.xlimlow.setValue(0)
+        self.xlimlow.setValue(self.xScanMin)
         self.xlimlow.valueChanged.connect(self.xLimLowChange)
         self.xLimLowChange()
         
@@ -197,7 +205,7 @@ class Window(QWidget):
         self.xlimhigh.setAlignment(Qt.AlignRight)
         self.xlimhigh.setDecimals(3)
         self.xlimhigh.setMinimumWidth(90)
-        self.xlimhigh.setValue(0)
+        self.xlimhigh.setValue(self.xScanMax)
         self.xlimhigh.valueChanged.connect(self.xLimHighChange) 
         self.xLimHighChange()
         
@@ -207,7 +215,7 @@ class Window(QWidget):
         self.xstep.setAlignment(Qt.AlignRight)
         self.xstep.setDecimals(3)
         self.xstep.setMinimumWidth(90)
-        self.xstep.setValue(1)
+        self.xstep.setValue(self.xScanStep)
         self.xstep.valueChanged.connect(self.xStepChange)
         self.xStepChange()
         
@@ -222,7 +230,7 @@ class Window(QWidget):
         self.ylimlow.setAlignment(Qt.AlignRight)
         self.ylimlow.setDecimals(3)
         self.ylimlow.setMinimumWidth(90)
-        self.ylimlow.setValue(0)
+        self.ylimlow.setValue(self.yScanMin)
         self.ylimlow.valueChanged.connect(self.yLimLowChange)
         self.yLimLowChange()
         
@@ -232,7 +240,7 @@ class Window(QWidget):
         self.ylimhigh.setAlignment(Qt.AlignRight)
         self.ylimhigh.setDecimals(3)
         self.ylimhigh.setMinimumWidth(90)
-        self.ylimhigh.setValue(0)
+        self.ylimhigh.setValue(self.yScanMax)
         self.ylimhigh.valueChanged.connect(self.yLimHighChange) 
         self.yLimHighChange()
         
@@ -242,7 +250,7 @@ class Window(QWidget):
         self.ystep.setAlignment(Qt.AlignRight)
         self.ystep.setDecimals(3)
         self.ystep.setMinimumWidth(90)
-        self.ystep.setValue(1)
+        self.ystep.setValue(self.yScanStep)
         self.ystep.valueChanged.connect(self.yStepChange)   
         self.yStepChange()
         
@@ -257,7 +265,7 @@ class Window(QWidget):
         self.zlimlow.setAlignment(Qt.AlignRight)
         self.zlimlow.setDecimals(3)
         self.zlimlow.setMinimumWidth(90)
-        self.zlimlow.setValue(0)
+        self.zlimlow.setValue(self.zScanMin)
         self.zlimlow.valueChanged.connect(self.zLimLowChange)
         self.zLimLowChange()
         
@@ -267,7 +275,7 @@ class Window(QWidget):
         self.zlimhigh.setAlignment(Qt.AlignRight)
         self.zlimhigh.setDecimals(3)
         self.zlimhigh.setMinimumWidth(90)
-        self.zlimhigh.setValue(0)
+        self.zlimhigh.setValue(self.zScanMax)
         self.zlimhigh.valueChanged.connect(self.zLimHighChange)
         self.zLimLowChange() 
         
@@ -277,42 +285,63 @@ class Window(QWidget):
         self.zstep.setAlignment(Qt.AlignRight)
         self.zstep.setDecimals(3)
         self.zstep.setMinimumWidth(90)
-        self.zstep.setValue(1)
+        self.zstep.setValue(self.zScanStep)
         self.zstep.valueChanged.connect(self.zStepChange) 
         self.zStepChange()
         
         self.zactive = QCheckBox('onZ')
         self.zactive.setChecked(True)
         self.zactive.stateChanged.connect(lambda:self.btnstate(self.zactive))
+        
+        
+        
+        
+        
      
      
         
-        self.scanCtrLayout.addWidget(QLabel("<h2>Scan Control</h2>"), 1,1,1,7,Qt.AlignCenter)   
-        self.scanCtrLayout.addWidget(QLabel(""), 2,1,1,4,Qt.AlignCenter)
-               
-        self.scanCtrLayout.addWidget(QLabel('X<sub>min</sub>'), 3,1,1,1,Qt.AlignCenter)
-        self.scanCtrLayout.addWidget(self.xlimlow, 3,2,1,1,Qt.AlignLeft)
-        self.scanCtrLayout.addWidget(QLabel('X<sub>max</sub>'), 3,3,1,1,Qt.AlignCenter)
-        self.scanCtrLayout.addWidget(self.xlimhigh, 3,4,1,1,Qt.AlignLeft)
-        self.scanCtrLayout.addWidget(QLabel('X<sub>step</sub>'), 3,5,1,1,Qt.AlignCenter)
-        self.scanCtrLayout.addWidget(self.xstep, 3,6,1,1,Qt.AlignLeft)
-        self.scanCtrLayout.addWidget(self.xactive, 3,7,1,1,Qt.AlignCenter)
+        self.acqCtrLayout.addWidget(QLabel("<h2>Acquisition Control</h2>"), 1,1,1,7,Qt.AlignCenter)   
+        self.acqCtrLayout.addWidget(QLabel(""), 2,1,1,4,Qt.AlignCenter)
         
-        self.scanCtrLayout.addWidget(QLabel('Y<sub>min</sub>'), 4,1,1,1,Qt.AlignCenter)
-        self.scanCtrLayout.addWidget(self.ylimlow, 4,2,1,1,Qt.AlignLeft)
-        self.scanCtrLayout.addWidget(QLabel('Y<sub>max</sub>'), 4,3,1,1,Qt.AlignCenter)
-        self.scanCtrLayout.addWidget(self.ylimhigh, 4,4,1,1,Qt.AlignLeft)
-        self.scanCtrLayout.addWidget(QLabel('Y<sub>step</sub>'), 4,5,1,1,Qt.AlignCenter)
-        self.scanCtrLayout.addWidget(self.ystep, 4,6,1,1,Qt.AlignLeft)
-        self.scanCtrLayout.addWidget(self.yactive, 4,7,1,1,Qt.AlignCenter)
+        #add diamond name, side, bias voltage, amplifier, laser pulse energy, pcb version
+        self.acqCtrLayout.addWidget(QLabel('    Run Number:'), 3,1,1,1,Qt.AlignLeft)
+        self.acqCtrLayout.addWidget(QLabel('    Diamond Name:'), 4,1,1,1,Qt.AlignLeft)
+        self.acqCtrLayout.addWidget(QLabel('    Side:'), 5,1,1,1,Qt.AlignLeft)
+        self.acqCtrLayout.addWidget(QLabel('    Bias Voltage:'), 6,1,1,1,Qt.AlignLeft)
+        self.acqCtrLayout.addWidget(QLabel('    Amplifier:'), 7,1,1,1,Qt.AlignLeft)
+        self.acqCtrLayout.addWidget(QLabel('    Laser Pulse Energy:'), 8,1,1,1,Qt.AlignLeft)
+        self.acqCtrLayout.addWidget(QLabel('    PCB Version:'), 9,1,1,1,Qt.AlignLeft)
+        
+        self.acqCtrLayout.addWidget(QLabel(""), 10,1,1,4,Qt.AlignCenter)
+        
+        
+        
+        
+        
+             
+        self.acqCtrLayout.addWidget(QLabel('X<sub>min</sub>'), 13,1,1,1,Qt.AlignCenter)
+        self.acqCtrLayout.addWidget(self.xlimlow, 13,2,1,1,Qt.AlignLeft)
+        self.acqCtrLayout.addWidget(QLabel('X<sub>max</sub>'), 13,3,1,1,Qt.AlignCenter)
+        self.acqCtrLayout.addWidget(self.xlimhigh, 13,4,1,1,Qt.AlignLeft)
+        self.acqCtrLayout.addWidget(QLabel('X<sub>step</sub>'), 13,5,1,1,Qt.AlignCenter)
+        self.acqCtrLayout.addWidget(self.xstep, 13,6,1,1,Qt.AlignLeft)
+        self.acqCtrLayout.addWidget(self.xactive, 13,7,1,1,Qt.AlignCenter)
+        
+        self.acqCtrLayout.addWidget(QLabel('Y<sub>min</sub>'), 14,1,1,1,Qt.AlignCenter)
+        self.acqCtrLayout.addWidget(self.ylimlow, 14,2,1,1,Qt.AlignLeft)
+        self.acqCtrLayout.addWidget(QLabel('Y<sub>max</sub>'), 14,3,1,1,Qt.AlignCenter)
+        self.acqCtrLayout.addWidget(self.ylimhigh, 14,4,1,1,Qt.AlignLeft)
+        self.acqCtrLayout.addWidget(QLabel('Y<sub>step</sub>'), 14,5,1,1,Qt.AlignCenter)
+        self.acqCtrLayout.addWidget(self.ystep, 14,6,1,1,Qt.AlignLeft)
+        self.acqCtrLayout.addWidget(self.yactive, 14,7,1,1,Qt.AlignCenter)
 
-        self.scanCtrLayout.addWidget(QLabel('Z<sub>min</sub>'), 5,1,1,1,Qt.AlignCenter)
-        self.scanCtrLayout.addWidget(self.zlimlow, 5,2,1,1,Qt.AlignLeft)
-        self.scanCtrLayout.addWidget(QLabel('Z<sub>max</sub>'), 5,3,1,1,Qt.AlignCenter)
-        self.scanCtrLayout.addWidget(self.zlimhigh, 5,4,1,1,Qt.AlignLeft)
-        self.scanCtrLayout.addWidget(QLabel('Z<sub>step</sub>'), 5,5,1,1,Qt.AlignCenter)
-        self.scanCtrLayout.addWidget(self.zstep, 5,6,1,1,Qt.AlignLeft)
-        self.scanCtrLayout.addWidget(self.zactive, 5,7,1,1,Qt.AlignCenter)
+        self.acqCtrLayout.addWidget(QLabel('Z<sub>min</sub>'), 15,1,1,1,Qt.AlignCenter)
+        self.acqCtrLayout.addWidget(self.zlimlow, 15,2,1,1,Qt.AlignLeft)
+        self.acqCtrLayout.addWidget(QLabel('Z<sub>max</sub>'), 15,3,1,1,Qt.AlignCenter)
+        self.acqCtrLayout.addWidget(self.zlimhigh, 15,4,1,1,Qt.AlignLeft)
+        self.acqCtrLayout.addWidget(QLabel('Z<sub>step</sub>'), 15,5,1,1,Qt.AlignCenter)
+        self.acqCtrLayout.addWidget(self.zstep, 15,6,1,1,Qt.AlignLeft)
+        self.acqCtrLayout.addWidget(self.zactive, 15,7,1,1,Qt.AlignCenter)
         
         
         self.startScan = QPushButton()
@@ -323,13 +352,13 @@ class Window(QWidget):
         self.stopScan.setText('Stop Scan')
         self.stopScan.clicked.connect(self.stopScanSlot)  
         
-        self.scanCtrLayout.addWidget(self.startScan, 6,1,1,1,Qt.AlignCenter)
-        self.scanCtrLayout.addWidget(self.stopScan, 6,2,1,1,Qt.AlignCenter)     
+        self.acqCtrLayout.addWidget(self.startScan, 16,1,1,1,Qt.AlignCenter)
+        self.acqCtrLayout.addWidget(self.stopScan, 16,2,1,1,Qt.AlignCenter)     
         
   
  
         self.scanWin = QHBoxLayout()
-        self.scanWin.addLayout(self.scanCtrLayout)
+        self.scanWin.addLayout(self.acqCtrLayout)
 
    
         self.mainLayout = QVBoxLayout()
@@ -397,60 +426,60 @@ class Window(QWidget):
         
  
     def xLimLowChange(self):
-        self.scanControl.setXmin(self.xlimlow.value())
+        self.acqControl.setXmin(self.xlimlow.value())
         
     def xLimHighChange(self):
-        self.scanControl.setXmax(self.xlimhigh.value())
+        self.acqControl.setXmax(self.xlimhigh.value())
         
     def xStepChange(self):
-        self.scanControl.setStepX(self.xstep.value())
+        self.acqControl.setStepX(self.xstep.value())
         
     
     def yLimLowChange(self):
-        self.scanControl.setYmin(self.ylimlow.value())
+        self.acqControl.setYmin(self.ylimlow.value())
         
     def yLimHighChange(self):
-        self.scanControl.setYmax(self.ylimhigh.value())
+        self.acqControl.setYmax(self.ylimhigh.value())
         
     def yStepChange(self):
-        self.scanControl.setStepY(self.ystep.value())
+        self.acqControl.setStepY(self.ystep.value())
      
         
     def zLimLowChange(self):
-        self.scanControl.setZmin(self.zlimlow.value())
+        self.acqControl.setZmin(self.zlimlow.value())
         
     def zLimHighChange(self):
-        self.scanControl.setZmax(self.zlimhigh.value())
+        self.acqControl.setZmax(self.zlimhigh.value())
         
     def zStepChange(self):
-        self.scanControl.setStepZ(self.zstep.value())
+        self.acqControl.setStepZ(self.zstep.value())
         print('xstep: ', self.zstep.value())
   
     
     def btnstate(self,b):
         if b.text() == 'onX':
             if b.isChecked() == True:
-                self.scanControl.setXactive(True)
+                self.acqControl.setXactive(True)
             else:
-                self.scanControl.setXactive(False)
+                self.acqControl.setXactive(False)
 
         if b.text() == 'onY':
             if b.isChecked() == True:
-                self.scanControl.setYactive(True)
+                self.acqControl.setYactive(True)
             else:
-                self.scanControl.setYactive(False)
+                self.acqControl.setYactive(False)
 
         if b.text() == 'onZ':
             if b.isChecked() == True:
-                self.scanControl.setZactive(True)
+                self.acqControl.setZactive(True)
             else:
-                self.scanControl.setZactive(False)
+                self.acqControl.setZactive(False)
     
         
     def startScanSlot(self):
-        self.scanControl.startScan()
+        self.acqControl.startScan()
         
     def stopScanSlot(self):
-        self.scanControl.stopScan()
+        self.acqControl.stopScan()
     
     

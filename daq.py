@@ -2,6 +2,7 @@ from time import sleep
 import datetime
 import numpy as np
 import h5py
+import tektronix
 
 class DataHandling(object):
     """
@@ -34,14 +35,11 @@ class DataHandling(object):
         #self.createFile()
 
     def createFile(self):
-        #read run number
-        with open('data/runnumber.dat', "r+") as f:
-            runnumber = int(f.readline())
-            f.seek(0)
-            f.write(str(runnumber+1))
+        #read and increase run number
+        self.runnumber = self.increaseRunNumber()
          
         #create new h5py file
-        fname = 'data/run' + str(runnumber) + ".hdf5"
+        fname = 'data/run' + str(self.runnumber) + ".hdf5"
         self.hdf = h5py.File(fname, "w", libver='latest')
         self.hdf.attrs['timestamp'] = '{:%Y-%m-%d %H:%M:%S}'.format(datetime.datetime.now())
 
@@ -61,8 +59,16 @@ class DataHandling(object):
         print("Writing data for scanpoint ", sp)
         self.tctdata.create_dataset(sp, data=arr)
         self.spcount += 1
-
-
+        
+    
+    def increaseRunNumber(self):
+        with open('data/runnumber.dat', "r+") as f:
+            runnumber = int(f.readline())
+            f.seek(0)
+            f.write(str(runnumber+1))
+        return runnumber
+        
+        
     def closeFile(self):
         self.hdf.flush()
         self.hdf.close()
@@ -71,12 +77,17 @@ class DataHandling(object):
 
 
 class PositionControl(object):
-    def __init__(self, stage, axes):
+    def __init__(self, stage, axes, config):
         self.stage = stage
         self.xaxis = axes[0]
         self.yaxis = axes[1]
         self.zaxis = axes[2]
         
+        self.xStepSize = config.getfloat('PositionControl', 'xStepSize')
+        self.yStepSize = config.getfloat('PositionControl', 'yStepSize')
+        self.zStepSize = config.getfloat('PositionControl', 'zStepSize')
+        
+        #hardware limits:
         self.xlimlow = -50 # all in mm
         self.xlimhigh = 50
         self.ylimlow = -2.5
@@ -181,24 +192,30 @@ class PositionControl(object):
         self.ylimhigh = self.yaxis.position
         self.yaxis.move_to((self.ylimlow+self.ylimhigh)/2, wait=True)
         
-  
-class ScanControl(object):
-    def __init__(self, stage, axes): # plus osci later
+
+
+class AcquisitionControl(object):
+    def __init__(self, stage, axes, tektronix, datahandler, configuration): # plus osci later
         self.stage = stage
         self.xaxis = axes[0]
         self.yaxis = axes[1]
         self.zaxis = axes[2]
         
-        self.xmin = 0
-        self.xmax = 0
-        self.ymin = 0
-        self.ymax = 0
-        self.zmin = 0
-        self.zmax = 0
+        self.tek = tektronix
+        self.dh = datahandler
+        self.config = configuration
         
-        self.xstep = 0
-        self.ystep = 0
-        self.zstep = 0
+        self.xScanMin = self.config.getfloat('AcquisitionControl', 'xMin')
+        self.xScanMax = self.config.getfloat('AcquisitionControl', 'xMax')
+        self.xScanStep =self.config.getfloat('AcquisitionControl', 'xStep') 
+        
+        self.yScanMin = self.config.getfloat('AcquisitionControl', 'yMin')
+        self.yScanMax = self.config.getfloat('AcquisitionControl', 'yMax')
+        self.yScanStep =self.config.getfloat('AcquisitionControl', 'yStep')
+        
+        self.zScanMin = self.config.getfloat('AcquisitionControl', 'zMin')
+        self.zScanMax = self.config.getfloat('AcquisitionControl', 'zMax')
+        self.zScanStep =self.config.getfloat('AcquisitionControl', 'zStep')
         
         self.xactive = True
         self.yactive = True
@@ -207,22 +224,25 @@ class ScanControl(object):
  
     
     def theScan(self):
+        
+        #configure the oscilloscope for data taking
+        self.tek.configure()
 
         #some sanity checks
         if(self.xactive):
-            if (self.xmax > self.xmin and self.xstep <= 0) or (self.xmin > self.xmax and self.xstep >= 0) or (abs(self.xstep) > abs(self.xmax - self.xmin)):
+            if (self.xScanMax > self.xScanMin and self.xScanStep <= 0) or (self.xScanMin > self.xScanMax and self.xScanStep >= 0) or (abs(self.xScanStep) > abs(self.xScanMax - self.xScanMin)):
                 print('Check x-limits and step direction/size.')
                 return
             self.xaxis.on()
         
         if(self.yactive):
-            if (self.ymax > self.ymin and self.ystep <= 0) or (self.ymin > self.ymax and self.ystep >= 0) or (abs(self.ystep) > abs(self.ymax - self.ymin)):
+            if (self.yScanMax > self.yScanMin and self.yScanStep <= 0) or (self.yScanMin > self.yScanMax and self.yScanStep >= 0) or (abs(self.yScanStep) > abs(self.yScanMax - self.yScanMin)):
                 print('Check y-limits and step direction/size.')
                 return
             self.yaxis.on()
         
         if(self.zactive):
-            if (self.zmax > self.zmin and self.zstep <= 0) or (self.zmin > self.zmax and self.zstep >= 0) or (abs(self.zstep) > abs(self.zmax - self.zmin)):
+            if (self.zScanMax > self.zScanMin and self.zScanStep <= 0) or (self.zScanMin > self.zScanMax and self.zScanStep >= 0) or (abs(self.zScanStep) > abs(self.zScanMax - self.zScanMin)):
                 print('Check z-limits and step direction/size.')
                 return
             self.zaxis.on()
@@ -230,9 +250,9 @@ class ScanControl(object):
         sleep(1)  
         
         #calculate number of required steps
-        xsteps = abs((self.xmin - self.xmax)/self.xstep)
-        ysteps = abs((self.ymin - self.ymax)/self.ystep)
-        zsteps = abs((self.zmin - self.zmax)/self.zstep)
+        xsteps = abs((self.xScanMin - self.xScanMax)/self.xScanStep)
+        ysteps = abs((self.yScanMin - self.yScanMax)/self.yScanStep)
+        zsteps = abs((self.zScanMin - self.zScanMax)/self.zScanStep)
         
         #scan along focus axis
         if not self.zactive:
@@ -246,19 +266,19 @@ class ScanControl(object):
         
         for idz in range(int(zsteps)+1):
             if self.zactive:
-                znext = self.zmin+idz*self.zstep
+                znext = self.zScanMin+idz*self.zScanStep
                 self.zaxis.move_to(znext, wait=True)
             
             #along y-axis (up - down)
             for idx in range(int(ysteps)+1):
                 if self.yactive:
-                    ynext = self.ymin+idx*self.ystep
+                    ynext = self.yScanMin+idx*self.yScanStep
                     self.yaxis.move_to(ynext, wait=True)
         
                 #along x-axis (left - right)
                 for idy in range(int(xsteps)+1):
                     if self.xactive:
-                        xnext = self.xmin+idy*self.xstep
+                        xnext = self.xScanMin+idy*self.xScanStep
                         self.xaxis.move_to(xnext, wait=True)
                     
                     if (self.running == False):
@@ -288,56 +308,60 @@ class ScanControl(object):
   
     #setter and getter methods
     def setXmin(self, val):
-        self.xmin = val
+        self.xScanMin = val
         
     def setXmax(self, val):
-        self.xmax = val
+        self.xScanMax = val
         
     def setYmin(self, val):
-        self.ymin = val
+        self.yScanMin = val
         
     def setYmax(self, val):
-        self.ymax = val
+        self.yScanMax = val
         
     def setZmin(self, val):
-        self.zmin = val
+        self.zScanMin = val
         
     def setZmax(self, val):
-        self.zmax = val
+        self.zScanMax = val
      
     def setStepX(self, val):
-        self.xstep = val
+        self.xScanStep = val
         
     def setStepY(self, val):
-        self.ystep = val
+        self.yScanStep = val
         
     def setStepZ(self, val):
-        self.zstep = val
+        self.zScanStep = val
+    
+    
+    def getRunNumber(self):
+        return self.dh.runnumber
     
     
     def getXmin(self):
-        return self.xmin
+        return self.xScanMin
     
     def getXmax(self):
-        return self.xmax
+        return self.xScanMax
         
     def getYmin(self):
-        return self.ymin
+        return self.yScanMin
         
     def getYmax(self):
-        return self.ymax
+        return self.yScanMax
         
     def getZmin(self):
-        return self.zmin
+        return self.zScanMin
         
     def getZmax(self):
-        return self.zmax    
+        return self.zScanMax    
         
     def getStepX(self):
-        return self.xstep
+        return self.xScanStep
         
     def getStepY(self):
-        return self.ystep
+        return self.yScanStep
         
     def getStepZ(self):
-        return self.zstep
+        return self.zScanStep

@@ -1,12 +1,15 @@
+#EDGE-TCT DAQ SOFTWARE
+#dorfer@phys.ethz.ch
+
 import sys
 import configparser
 
 #Hardware imports
-from newportESP import ESP
 from tektronix import TektronixMSO5204B
+from newportESP import ESP
 
 #DAQ imports
-from daq import PositionControl, ScanControl, DataHandling
+from daq import PositionControl, AcquisitionControl, DataHandling
 
 #GUI imports
 from gui import Window
@@ -14,41 +17,41 @@ from PyQt5.QtWidgets import QApplication
 import numpy as np
 
     
-
-    
-
 if __name__ == '__main__':
+    #read the configuration file
+    config = configparser.ConfigParser()
+    config.read('config.ini')
     
-    # Create an instance of the application window and run it
-    #app = QApplication(sys.argv)
+    #create data handler
+    dh = DataHandling()
+    
+    #open connection to oscilloscope and pass on the configuration file
+    tekaddr = config.get('Tektronix', 'address')
+    tek = TektronixMSO5204B(tekaddr, config)
+    #tek.configure()
     
     #open serial connection to newport table
-    #esp = ESP('/dev/ttyUSB0')
-    #axes = [esp.axis(2), esp.axis(3), esp.axis(1)] #x, y, z
+    espaddr = config.get('Newport', 'address')
+    esp = ESP(espaddr)
+    axes = [esp.axis(2), esp.axis(3), esp.axis(1)] #x, y, z
     
-    #open connection to oscilloscope
-    #tek = TektronixMSO5204B('TCPIP0::192.168.1.111::inst0::INSTR')
-    #tek.configure()
-    #tek.acquireWaveforms()
-    #tek.close()
+    #initialize position and scan control
+    posContr = PositionControl(esp, axes, config) #todo: remove setter and getter functions
+    acqContr = AcquisitionControl(esp, axes, tek, dh, config) #todo: remove setter and getter functions
     
-    #initialize classes
-    #posContr = PositionControl(esp, axes)
     
-    #scanContr = ScanControl(esp, axes)
+    
+    #create an instance of the application window and run it
+    app = QApplication(sys.argv)
+    window = Window(posContr, acqContr)
+    sys.exit(app.exec_())
+    
+    
+    
+    
+    
+    
     #posContr.findHardwareLimits()
-    
-    #config = configparser.ConfigParser()
-    #config.read('config.ini')
-    
-    #print(config.get('Others', 'Route'))
-    
-    
-       
-    #window = Window(posContr, scanContr)
-    #sys.exit(app.exec_())
-    
-
 
     '''
     tek = TektronixMSO5204B('TCPIP0::192.168.1.111::inst0::INSTR')
