@@ -1,5 +1,56 @@
 from time import sleep
-  
+import datetime
+import numpy as np
+import h5py
+
+class DataHandling(object):
+    def __init__(self):
+        self.hdf = None
+        self.tctdata = None
+        self.spcount = 0
+
+        #parameters that are set through the GUI (at startup read from configuration file)
+        self.diamond_name = "S119"
+        self.side = 1
+        self.bias_voltage = "-400"
+        self.laser_pulse_energy = "5" #pJ
+        
+        #self.createFile()
+
+    def createFile(self):
+        #read run number
+        with open('data/runnumber.dat', "r+") as f:
+            runnumber = int(f.readline())
+            f.seek(0)
+            f.write(str(runnumber+1))
+         
+        #create new h5py file
+        fname = 'data/run' + str(runnumber) + ".hdf5"
+        self.hdf = h5py.File(fname, "w", libver='latest')
+        self.hdf.attrs['timestamp'] = '{:%Y-%m-%d %H:%M:%S}'.format(datetime.datetime.now())
+
+        self.tctdata = self.hdf.create_group("tctdata")
+        self.tctdata.attrs['diamond_name'] = self.diamond_name
+        self.tctdata.attrs['side'] = self.side
+        self.tctdata.attrs['bias_voltage'] = self.bias_voltage
+        self.tctdata.attrs['laser_pulse_energy'] = self.laser_pulse_energy
+    
+        
+    def setTimScale(self, time_array):    
+        self.tctdata.attrs['time_array'] = time_array
+        
+    
+    def addScanPointData(self, data_array):
+        self.tctdata.create_dataset(str(self.spcount), data_array)
+        self.spcount += 1
+
+    def closeFile(self):
+        self.hdf.flush()
+        self.hdf.close()
+
+
+
+
 class PositionControl(object):
     def __init__(self, stage, axes):
         self.stage = stage

@@ -22,12 +22,14 @@ class TektronixMSO5204B(object):
         #FIXME: get from config file: variables for individual settings
         self.horizscale = '20e-9'      #sec/div
         self.samplerate = '10e9'       #S/sec
-        self.numberofframes = 50
+        self.numberofframes = 500
         self.voltsperdiv = .5
         self.position = -3
         self.highthresh = 2
         self.lowthresh = 0.75
         self.trig_level = 1
+        self.ch1_termination = 50
+        self.ch2_termination = 50
         
         #class variables for data processing
         self.yoffset = 0
@@ -36,6 +38,8 @@ class TektronixMSO5204B(object):
         self.numberofpoints = 0
         self.xincrement = 0
         self.xzero = 0
+        
+        self.configure()
 
 
     def configure(self):
@@ -49,6 +53,10 @@ class TektronixMSO5204B(object):
         self.inst.write('horizontal:fastframe:count {0}'.format(self.numberofframes))   #specify number of frames
         self.inst.write('ch1:scale {0}'.format(self.voltsperdiv))                       #set vertical scale
         self.inst.write('ch1:position {0}'.format(self.position))                       #set vertical position
+        self.inst.write('ch1:termination {0}'.format(self.ch1_termination))             #set channel 1 termination
+        self.inst.write('ch2:termination {0}'.format(self.ch2_termination))             #set channel 2 termination
+    
+        
         print('Channel settings configured.')
         
         #configure triggering:
