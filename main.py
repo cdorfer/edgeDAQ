@@ -6,11 +6,12 @@ from newportESP import ESP
 from tektronix import TektronixMSO5204B
 
 #DAQ imports
-from daq import PositionControl, ScanControl
+from daq import PositionControl, ScanControl, DataHandling
 
 #GUI imports
 from gui import Window
 from PyQt5.QtWidgets import QApplication
+import numpy as np
 
     
 
@@ -26,10 +27,10 @@ if __name__ == '__main__':
     #axes = [esp.axis(2), esp.axis(3), esp.axis(1)] #x, y, z
     
     #open connection to oscilloscope
-    tek = TektronixMSO5204B('TCPIP0::192.168.1.111::inst0::INSTR')
-    tek.configure()
-    tek.acquireWaveforms()
-    tek.close()
+    #tek = TektronixMSO5204B('TCPIP0::192.168.1.111::inst0::INSTR')
+    #tek.configure()
+    #tek.acquireWaveforms()
+    #tek.close()
     
     #initialize classes
     #posContr = PositionControl(esp, axes)
@@ -64,6 +65,22 @@ if __name__ == '__main__':
     plt.show()
     print('Plot generated.')
     '''
+
+    '''
+    dh = DataHandling()
+    dh.createFile()
+    
+    t = np.random.random(size=1000)
+    dh.setTimScale(t)
+    
+    a = np.random.random(size=(400,1000))
+    dh.addScanPointData(a)
+    dh.addScanPointData(a)
+    dh.addScanPointData(a)
+    
+    dh.closeFile()
+    '''
+
 
 
     

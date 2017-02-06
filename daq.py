@@ -4,10 +4,26 @@ import numpy as np
 import h5py
 
 class DataHandling(object):
+    """
+    Usage:
+    dh = DataHandling()
+    dh.createFile()
+    
+    t = np.random.random(size=1000)
+    dh.setTimScale(t)
+    
+    a = np.random.random(size=(400,1000))
+    dh.addScanPointData(a)
+    dh.addScanPointData(a)
+    dh.addScanPointData(a)
+    
+    dh.closeFile()
+    """
+     
     def __init__(self):
         self.hdf = None
         self.tctdata = None
-        self.spcount = 0
+        self.spcount = 1
 
         #parameters that are set through the GUI (at startup read from configuration file)
         self.diamond_name = "S119"
@@ -40,9 +56,12 @@ class DataHandling(object):
         self.tctdata.attrs['time_array'] = time_array
         
     
-    def addScanPointData(self, data_array):
-        self.tctdata.create_dataset(str(self.spcount), data_array)
+    def addScanPointData(self, arr):
+        sp = str(self.spcount)
+        print("Writing data for scanpoint ", sp)
+        self.tctdata.create_dataset(sp, data=arr)
         self.spcount += 1
+
 
     def closeFile(self):
         self.hdf.flush()
