@@ -25,8 +25,7 @@ if __name__ == '__main__':
     dh = DataHandling(config)
     
     #open connection to oscilloscope and pass on the configuration file
-    tekaddr = config['Tektronix']['address']
-    tek = TektronixMSO5204B(tekaddr, config)
+    tek = TektronixMSO5204B(config)
     #tek.configure()
     
     #open serial connection to newport table

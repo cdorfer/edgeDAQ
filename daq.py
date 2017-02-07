@@ -1,4 +1,4 @@
-from time import sleep
+from time import sleep, time
 import datetime
 import numpy as np
 import h5py
@@ -39,31 +39,43 @@ class DataHandling(object):
         
         #self.createFile()
 
-    def createFile(self):
+    def createFile(self, comment):
+        
+        #reset old one
+        self.hdf= None
+        self.tctdata = None
+        self.spcount = 1
+        
         #read and increase run number
         self.runnumber = self.increaseRunNumber()
+        print('Run number: ', self.runnumber)
          
         #create new h5py file
         fname = 'data/run' + str(self.runnumber) + ".hdf5"
         self.hdf = h5py.File(fname, "w", libver='latest')
         self.hdf.attrs['timestamp'] = '{:%Y-%m-%d %H:%M:%S}'.format(datetime.datetime.now())
+        print(comment)
+        self.hdf.attrs['comments'] = comment
+        
 
         self.tctdata = self.hdf.create_group("tctdata")
         self.tctdata.attrs['diamond_name'] = self.diamond_name
         self.tctdata.attrs['side'] = self.side
         self.tctdata.attrs['bias_voltage'] = self.bias_voltage
         self.tctdata.attrs['laser_pulse_energy'] = self.laser_pulse_energy
+        print('File ', fname, ' created.')
+    
     
         
-    def setTimScale(self, time_array):    
+    def setTimeScale(self, time_array):    
         self.tctdata.attrs['time_array'] = time_array
         
     
-    def addScanPointData(self, arr):
+    def addScanPointData(self, timestamp, x,y,z, time_axis, wfarr):
         sp = str(self.spcount)
-        print("Writing data for scanpoint ", sp)
-        self.tctdata.create_dataset(sp, data=arr)
+        self.tctdata.create_dataset(sp, data=wfarr)   
         self.spcount += 1
+        print('Scanpoint ', sp, ' written to file.')
         
     
     def increaseRunNumber(self):
@@ -71,7 +83,7 @@ class DataHandling(object):
             runnumber = int(f.readline())
             f.seek(0)
             f.write(str(runnumber+1))
-            self.runnumber = runnumber+1
+            return (runnumber+1)
             
     def readRunNumber(self):
         with open('data/runnumber.dat', "r") as f:
@@ -82,6 +94,7 @@ class DataHandling(object):
     def closeFile(self):
         self.hdf.flush()
         self.hdf.close()
+        print('File for run ', str(self.runnumber), ' closed.')
 
 
     #setter methods to write GUI values back to the configuration file
@@ -345,7 +358,22 @@ class AcquisitionControl(object):
     def stopScan(self):    
         self.running = False
     
+    def openTek(self):
+        self.tek.open()
+        
+    def closeTek(self):
+        self.tek.close()
+    
+    def configureTek(self):
+        self.tek.configure()
   
+  
+    def collectNWfs(self):
+        timestamp = time()
+        (scaleddata, scaledtime) = self.tek.acquireWaveforms()
+        self.dh.addScanPointData(timestamp, self.xaxis.position, self.yaxis.position, self.zaxis.position, scaledtime, scaleddata)
+        
+
     def setXactive(self, val):
         self.xactive = val
 

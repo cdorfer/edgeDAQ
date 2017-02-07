@@ -11,23 +11,23 @@ class TektronixMSO5204B(object):
     >>> tek = TektronixMSO5204('TCPIP0::192.168.1.111::inst0::INSTR') # open communication with the scope
     """
     
-    def __init__(self, resource, config):
-        #configure VISA resource
-        self.rm = visa.ResourceManager()
-        self.inst = self.rm.open_resource(resource) 
+    def __init__(self, conf):
+    
         
-        print('Connected to: ', self.inst.ask('*idn?'))
-        self.inst.write('*rst')  #default the instrument
-
+        self.config = conf
+        self.rm = None
+        self.inst = None
+        
         #get settings form config file
-        self.horizscale = config['Tektronix']['horizscale']  #sec/div
-        self.samplerate = config['Tektronix']['samplerate']  #S/sec
-        self.numberofwf = int(config['Tektronix']['numberofwf'])
-        self.voltsperdiv = float(config['Tektronix']['voltsperdiv'])
-        self.ch1_offset = float(config['Tektronix']['ch1_offset'])
-        self.ch2_trig_level =  float(config['Tektronix']['ch2_trig_level'])
-        self.ch1_termination = int(config['Tektronix']['ch1_termination'])
-        self.ch2_termination = int(config['Tektronix']['ch1_termination'])
+        self.resource = self.config['Tektronix']['address']
+        self.horizscale = self.config['Tektronix']['horizscale']  #sec/div
+        self.samplerate = self.config['Tektronix']['samplerate']  #S/sec
+        self.numberofwf = int(self.config['AcquisitionControl']['number_of_waveforms'])
+        self.voltsperdiv = float(self.config['Tektronix']['voltsperdiv'])
+        self.ch1_offset = float(self.config['Tektronix']['ch1_offset'])
+        self.ch2_trig_level =  float(self.config['Tektronix']['ch2_trig_level'])
+        self.ch1_termination = int(self.config['Tektronix']['ch1_termination'])
+        self.ch2_termination = int(self.config['Tektronix']['ch1_termination'])
         
         #class variables for data processing
         self.yoffset = 0
@@ -40,7 +40,20 @@ class TektronixMSO5204B(object):
         #self.configure()
 
 
+    def open(self):
+        #configure VISA resource
+        self.rm = visa.ResourceManager()
+        self.inst = self.rm.open_resource(self.resource) 
+        
+        print('Connected to: ', self.inst.ask('*idn?').rstrip())
+        self.inst.write('*rst')  #default the instrument
+    
+    
+
     def configure(self):
+        #update number of waveforms to be acquired
+        self.numberofwf = int(self.config['AcquisitionControl']['number_of_waveforms'])
+        
         #configure general settings and channels
         self.inst.write('acquire:state 0')                                          #turn off the acquisition system
         self.inst.write('horizontal:mode auto')                                     #set horizontal settings to auto
@@ -110,12 +123,16 @@ class TektronixMSO5204B(object):
         data = numpy.array(unpack('{0}b'.format(self.numberofpoints*self.numberofwf), rawdata))             #unpack data to numpy array
         scaleddata = (data-self.yoffset)*self.ymult+self.yzero                                                  #scale data to volts
         scaledtime = numpy.arange(self.xzero,self.xzero+(self.xincrement*self.numberofpoints),self.xincrement)  #always the same time
-        print('Waveforms acquired.\n')
+        print('Waveforms acquired.')
         return (scaleddata, scaledtime)
 
 
     def close(self):
-        self.inst.close()
+        if(self.inst):
+            self.inst.close()
+            self.rm = None
+            self.inst = None
+            print("Connection to DPO5204B closed.")
 
 
     

@@ -25,6 +25,8 @@ class Window(QWidget):
         self.zScanMax = acqC.zScanMax
         self.zScanStep = acqC.zScanStep
         
+        self.tekconfigured = False
+        
         self.initUI(posC, acqC, dh)
 
 
@@ -181,14 +183,10 @@ class Window(QWidget):
         self.posWin = QHBoxLayout()
         self.posWin.addLayout(self.posCtrLayout)
         
-        ############################ end position control ##############################
-        
-        ############################ start acquisiton control ##############################
-        
-        self.acqCtrLayout = QGridLayout()
-        self.acqCtrLayout.setContentsMargins(4, 4, 4, 4)
-        self.acqCtrLayout.setSpacing(2)
-        self.acqCtrLayout.setObjectName("acqCtrLayout") 
+
+
+
+
             
         self.xlimlow = QDoubleSpinBox()
         self.xlimlow.setMaximum(100)
@@ -295,18 +293,59 @@ class Window(QWidget):
         self.zactive.stateChanged.connect(lambda:self.btnstate(self.zactive))
         
         
+        self.scanCtrLayout = QGridLayout()
+        self.scanCtrLayout.setContentsMargins(4, 4, 4, 4)
+        self.scanCtrLayout.setSpacing(2)
+        self.scanCtrLayout.setObjectName("scanCtrLayout") 
+   
+        self.scanCtrLayout.addWidget(QLabel('Limits for Automatic Scan<br>'), 10,1,1,7,Qt.AlignCenter)
+        #scan limits and steps     
+        self.scanCtrLayout.addWidget(QLabel('X<sub>min</sub>'), 13,1,1,1,Qt.AlignCenter)
+        self.scanCtrLayout.addWidget(self.xlimlow, 13,2,1,1,Qt.AlignLeft)
+        self.scanCtrLayout.addWidget(QLabel('X<sub>max</sub>'), 13,3,1,1,Qt.AlignCenter)
+        self.scanCtrLayout.addWidget(self.xlimhigh, 13,4,1,1,Qt.AlignLeft)
+        self.scanCtrLayout.addWidget(QLabel('X<sub>step</sub>'), 13,5,1,1,Qt.AlignCenter)
+        self.scanCtrLayout.addWidget(self.xstep, 13,6,1,1,Qt.AlignLeft)
+        self.scanCtrLayout.addWidget(self.xactive, 13,7,1,1,Qt.AlignCenter)
+        
+        self.scanCtrLayout.addWidget(QLabel('Y<sub>min</sub>'), 14,1,1,1,Qt.AlignCenter)
+        self.scanCtrLayout.addWidget(self.ylimlow, 14,2,1,1,Qt.AlignLeft)
+        self.scanCtrLayout.addWidget(QLabel('Y<sub>max</sub>'), 14,3,1,1,Qt.AlignCenter)
+        self.scanCtrLayout.addWidget(self.ylimhigh, 14,4,1,1,Qt.AlignLeft)
+        self.scanCtrLayout.addWidget(QLabel('Y<sub>step</sub>'), 14,5,1,1,Qt.AlignCenter)
+        self.scanCtrLayout.addWidget(self.ystep, 14,6,1,1,Qt.AlignLeft)
+        self.scanCtrLayout.addWidget(self.yactive, 14,7,1,1,Qt.AlignCenter)
+
+        self.scanCtrLayout.addWidget(QLabel('Z<sub>min</sub>'), 15,1,1,1,Qt.AlignCenter)
+        self.scanCtrLayout.addWidget(self.zlimlow, 15,2,1,1,Qt.AlignLeft)
+        self.scanCtrLayout.addWidget(QLabel('Z<sub>max</sub>'), 15,3,1,1,Qt.AlignCenter)
+        self.scanCtrLayout.addWidget(self.zlimhigh, 15,4,1,1,Qt.AlignLeft)
+        self.scanCtrLayout.addWidget(QLabel('Z<sub>step</sub>'), 15,5,1,1,Qt.AlignCenter)
+        self.scanCtrLayout.addWidget(self.zstep, 15,6,1,1,Qt.AlignLeft)
+        self.scanCtrLayout.addWidget(self.zactive, 15,7,1,1,Qt.AlignCenter)
+        self.scanCtrLayout.addWidget(QLabel('<br>'), 16,1,1,1,Qt.AlignCenter)
         
         
+        self.scanWin = QHBoxLayout()
+        self.scanWin.addLayout(self.scanCtrLayout)
         
         
-     
-     
+        ############################ end position control ##############################
         
-        self.acqCtrLayout.addWidget(QLabel("<h2>Acquisition Control</h2>"), 1,1,1,7,Qt.AlignCenter)   
+        ############################ start acquisiton control ##############################
+        
+        #start Acquisition control
+        self.acqCtrLayout = QGridLayout()
+        self.acqCtrLayout.setContentsMargins(4, 4, 4, 4)
+        self.acqCtrLayout.setSpacing(2)
+        self.acqCtrLayout.setObjectName("acqCtrLayout") 
+        
+        
+        self.acqCtrLayout.addWidget(QLabel("<h2>Acquisition Control</h2>"), 1,1,1,8,Qt.AlignCenter)   
         self.acqCtrLayout.addWidget(QLabel(""), 2,1,1,4,Qt.AlignCenter)
-        
         self.acqCtrLayout.addWidget(QLabel('    Run Number:'), 3,1,1,1,Qt.AlignLeft)
         self.run_number = QLabel(str(self.datahandler.runnumber))
+        
         self.acqCtrLayout.addWidget(self.run_number, 3,2,1,1, Qt.AlignCenter)
         
         self.acqCtrLayout.addWidget(QLabel('    Diamond Name:'), 4,1,1,1,Qt.AlignLeft)
@@ -317,15 +356,7 @@ class Window(QWidget):
         self.diamond_name.currentIndexChanged.connect(self.diamNameSlot)
         self.acqCtrLayout.addWidget(self.diamond_name, 4,2,1,1, Qt.AlignLeft)
         
-        self.acqCtrLayout.addWidget(QLabel('    Side:'), 5,1,1,1,Qt.AlignLeft)
-        self.diamond_side = QComboBox()
-        self.diamond_side.addItems(['0', '1'])
-        self.diamond_side.setMinimumWidth(110)
-        self.diamond_side.setCurrentText(str(self.datahandler.side))
-        self.diamond_side.currentIndexChanged.connect(self.diamSideSlot)
-        self.acqCtrLayout.addWidget(self.diamond_side, 5,2,1,1, Qt.AlignLeft)
-        
-        self.acqCtrLayout.addWidget(QLabel('    Bias Voltage [V]:'), 6,1,1,1,Qt.AlignLeft)
+        self.acqCtrLayout.addWidget(QLabel('    Bias Voltage [V]:'), 5,1,1,1,Qt.AlignLeft)
         self.bias_voltage = QDoubleSpinBox()
         self.bias_voltage.setMinimum(-1500)
         self.bias_voltage.setMaximum(1500)
@@ -333,9 +364,9 @@ class Window(QWidget):
         self.bias_voltage.setMinimumWidth(110)
         self.bias_voltage.setValue(self.datahandler.bias_voltage)
         self.bias_voltage.valueChanged.connect(self.biasVoltageSlot) 
-        self.acqCtrLayout.addWidget(self.bias_voltage, 6,2,1,1, Qt.AlignLeft)
+        self.acqCtrLayout.addWidget(self.bias_voltage, 5,2,1,1, Qt.AlignLeft)
         
-        self.acqCtrLayout.addWidget(QLabel('    Number of WF:'), 7,1,1,1,Qt.AlignLeft)
+        self.acqCtrLayout.addWidget(QLabel('    Number of WF:'), 6,1,1,1,Qt.AlignLeft)
         self.nwf = QSpinBox()
         self.nwf.setMinimum(0)
         self.nwf.setMaximum(1990)
@@ -343,17 +374,9 @@ class Window(QWidget):
         self.nwf.setMinimumWidth(110)
         self.nwf.setValue(self.datahandler.nwf)
         self.nwf.valueChanged.connect(self.nwfSlot) 
-        self.acqCtrLayout.addWidget(self.nwf, 7,2,1,1, Qt.AlignLeft)
-        
-        self.acqCtrLayout.addWidget(QLabel('    Amplifier:'), 8,1,1,1,Qt.AlignLeft)
-        self.amplifier = QComboBox()
-        self.amplifier.addItems(['cividec', 'particulars'])
-        self.amplifier.setMinimumWidth(110)
-        self.amplifier.setCurrentText(self.datahandler.amplifier)
-        self.amplifier.currentIndexChanged.connect(self.AmplifierSlot)
-        self.acqCtrLayout.addWidget(self.amplifier, 8,2,1,1, Qt.AlignLeft)
-             
-        self.acqCtrLayout.addWidget(QLabel('    Laser Pulse Energy [pJ]:'), 9,1,1,1,Qt.AlignLeft)
+        self.acqCtrLayout.addWidget(self.nwf, 6,2,1,1, Qt.AlignLeft)
+                
+        self.acqCtrLayout.addWidget(QLabel('    Laser Pulse Energy [pJ]:   '), 7,1,1,1,Qt.AlignLeft)
         self.pulse_energy = QDoubleSpinBox()
         self.pulse_energy.setMinimum(0)
         self.pulse_energy.setMaximum(1000000)
@@ -361,8 +384,24 @@ class Window(QWidget):
         self.pulse_energy.setMinimumWidth(110)
         self.pulse_energy.setValue(self.datahandler.laser_pulse_energy)
         self.pulse_energy.valueChanged.connect(self.pulseEnergySlot) 
-        self.acqCtrLayout.addWidget(self.pulse_energy, 9,2,1,1, Qt.AlignLeft)
+        self.acqCtrLayout.addWidget(self.pulse_energy, 7,2,1,1, Qt.AlignLeft)
         
+        self.acqCtrLayout.addWidget(QLabel('    Side:'), 8,1,1,1,Qt.AlignLeft)
+        self.diamond_side = QComboBox()
+        self.diamond_side.addItems(['0', '1'])
+        self.diamond_side.setMinimumWidth(110)
+        self.diamond_side.setCurrentText(str(self.datahandler.side))
+        self.diamond_side.currentIndexChanged.connect(self.diamSideSlot)
+        self.acqCtrLayout.addWidget(self.diamond_side, 8,2,1,1, Qt.AlignLeft)
+        
+        self.acqCtrLayout.addWidget(QLabel('    Amplifier:'), 9,1,1,1,Qt.AlignLeft)
+        self.amplifier = QComboBox()
+        self.amplifier.addItems(['cividec', 'particulars'])
+        self.amplifier.setMinimumWidth(110)
+        self.amplifier.setCurrentText(self.datahandler.amplifier)
+        self.amplifier.currentIndexChanged.connect(self.AmplifierSlot)
+        self.acqCtrLayout.addWidget(self.amplifier, 9,2,1,1, Qt.AlignLeft)
+          
         self.acqCtrLayout.addWidget(QLabel('    PCB Version:'), 10,1,1,1,Qt.AlignLeft) 
         self.pcb = QComboBox()
         self.pcb.addItems(['simple', 'car'])
@@ -377,56 +416,58 @@ class Window(QWidget):
         self.comments.setMaximumHeight(50)
         self.acqCtrLayout.addWidget(self.comments, 11,2,1,8, Qt.AlignLeft)
         
-         
-        #self.acqCtrLayout.addWidget(QLabel(""), 12,1,1,1,Qt.AlignCenter)
-        
-        
-        #scan limits and steps     
-        self.acqCtrLayout.addWidget(QLabel('X<sub>min</sub>'), 13,1,1,1,Qt.AlignCenter)
-        self.acqCtrLayout.addWidget(self.xlimlow, 13,2,1,1,Qt.AlignLeft)
-        self.acqCtrLayout.addWidget(QLabel('X<sub>max</sub>'), 13,3,1,1,Qt.AlignCenter)
-        self.acqCtrLayout.addWidget(self.xlimhigh, 13,4,1,1,Qt.AlignLeft)
-        self.acqCtrLayout.addWidget(QLabel('X<sub>step</sub>'), 13,5,1,1,Qt.AlignCenter)
-        self.acqCtrLayout.addWidget(self.xstep, 13,6,1,1,Qt.AlignLeft)
-        self.acqCtrLayout.addWidget(self.xactive, 13,7,1,1,Qt.AlignCenter)
-        
-        self.acqCtrLayout.addWidget(QLabel('Y<sub>min</sub>'), 14,1,1,1,Qt.AlignCenter)
-        self.acqCtrLayout.addWidget(self.ylimlow, 14,2,1,1,Qt.AlignLeft)
-        self.acqCtrLayout.addWidget(QLabel('Y<sub>max</sub>'), 14,3,1,1,Qt.AlignCenter)
-        self.acqCtrLayout.addWidget(self.ylimhigh, 14,4,1,1,Qt.AlignLeft)
-        self.acqCtrLayout.addWidget(QLabel('Y<sub>step</sub>'), 14,5,1,1,Qt.AlignCenter)
-        self.acqCtrLayout.addWidget(self.ystep, 14,6,1,1,Qt.AlignLeft)
-        self.acqCtrLayout.addWidget(self.yactive, 14,7,1,1,Qt.AlignCenter)
+        self.acqWin = QHBoxLayout()
+        self.acqWin.addLayout(self.acqCtrLayout)
+    
+    
+        #start Acquisition control
+        self.acqCtr2Layout = QGridLayout()
+        self.acqCtr2Layout.setContentsMargins(4, 4, 4, 4)
+        self.acqCtr2Layout.setSpacing(2)
+        self.acqCtr2Layout.setObjectName("acqCtr2Layout") 
 
-        self.acqCtrLayout.addWidget(QLabel('Z<sub>min</sub>'), 15,1,1,1,Qt.AlignCenter)
-        self.acqCtrLayout.addWidget(self.zlimlow, 15,2,1,1,Qt.AlignLeft)
-        self.acqCtrLayout.addWidget(QLabel('Z<sub>max</sub>'), 15,3,1,1,Qt.AlignCenter)
-        self.acqCtrLayout.addWidget(self.zlimhigh, 15,4,1,1,Qt.AlignLeft)
-        self.acqCtrLayout.addWidget(QLabel('Z<sub>step</sub>'), 15,5,1,1,Qt.AlignCenter)
-        self.acqCtrLayout.addWidget(self.zstep, 15,6,1,1,Qt.AlignLeft)
-        self.acqCtrLayout.addWidget(self.zactive, 15,7,1,1,Qt.AlignCenter)
-        
-        
+        self.opMode = QPushButton()
+        self.opMode.setText('Manual')
+        self.opMode.setStyleSheet("background-color: red")
+        self.opMode.clicked.connect(self.operatingMode)
+
+        self.newFile = QPushButton()
+        self.newFile.setText('New File')
+        self.newFile.clicked.connect(self.newFileSlot)
+        self.newFile.setEnabled(False)
+
+        self.collectWf = QPushButton()
+        self.collectWf.setText('Collect <N> WF')
+        self.collectWf.clicked.connect(self.collectWfSlot)
+        self.collectWf.setEnabled(False)
+    
         self.startScan = QPushButton()
         self.startScan.setText('Start Scan')
         self.startScan.clicked.connect(self.startScanSlot)
+        self.startScan.setEnabled(False)
         
-        self.stopScan = QPushButton()
-        self.stopScan.setText('Stop Scan')
-        self.stopScan.clicked.connect(self.stopScanSlot)  
+        self.closeFile = QPushButton()
+        self.closeFile.setText('Close File')
+        self.closeFile.clicked.connect(self.closeFileSlot)
+        self.closeFile.setEnabled(False)  
         
-        self.acqCtrLayout.addWidget(self.startScan, 16,1,1,1,Qt.AlignCenter)
-        self.acqCtrLayout.addWidget(self.stopScan, 16,2,1,1,Qt.AlignCenter)     
+        self.acqCtr2Layout.addWidget(QLabel('Tektronix Operation'), 1,1,1,1,Qt.AlignCenter) 
+        self.acqCtr2Layout.addWidget(self.opMode, 2,1,1,1,Qt.AlignCenter)
+        self.acqCtr2Layout.addWidget(self.newFile, 2,2,1,1,Qt.AlignCenter)
+        self.acqCtr2Layout.addWidget(self.collectWf, 2,3,1,1,Qt.AlignCenter)     
+        self.acqCtr2Layout.addWidget(self.startScan, 2,4,1,1,Qt.AlignCenter)
+        self.acqCtr2Layout.addWidget(self.closeFile, 2,5,1,1,Qt.AlignCenter)     
         
-  
- 
-        self.scanWin = QHBoxLayout()
-        self.scanWin.addLayout(self.acqCtrLayout)
+        self.acq2Win = QHBoxLayout()
+        self.acq2Win.addLayout(self.acqCtr2Layout)
+    
 
-   
         self.mainLayout = QVBoxLayout()
         self.mainLayout.addLayout(self.posWin)
         self.mainLayout.addLayout(self.scanWin)
+        self.mainLayout.addLayout(self.acqWin)
+        self.mainLayout.addLayout(self.acq2Win)
+
         self.setLayout(self.mainLayout)
         
         self.show()
@@ -541,9 +582,6 @@ class Window(QWidget):
     def startScanSlot(self):
         self.acqControl.startScan()
         
-    def stopScanSlot(self):
-        self.acqControl.stopScan()
-        
     def diamNameSlot(self):
         self.datahandler.setDiamondName(self.diamond_name.currentText())
         
@@ -564,3 +602,42 @@ class Window(QWidget):
 
     def biasVoltageSlot(self):
         self.datahandler.setBiasVoltage(self.bias_voltage.value())
+
+    def newFileSlot(self):
+        comment = str(self.comments.toPlainText())
+        self.datahandler.createFile(comment)
+        self.run_number.setText(str(self.datahandler.runnumber))
+        self.collectWf.setEnabled(True)
+        self.closeFile.setEnabled(True)
+        self.startScan.setEnabled(True)
+        
+        
+    def closeFileSlot(self):
+        self.datahandler.closeFile()
+        self.collectWf.setEnabled(False)
+        self.closeFile.setEnabled(False)
+        self.startScan.setEnabled(False)
+        
+        
+    def collectWfSlot(self):
+        if (not self.tekconfigured):
+            self.acqControl.configureTek()
+            self.tekconfigured = True
+        self.acqControl.collectNWfs()
+        
+    def operatingMode(self):
+        if(self.opMode.text() == 'Manual'):
+            self.opMode.setText('Software')
+            self.opMode.setStyleSheet("background-color: green")
+            self.acqControl.openTek()
+            self.acqControl.configureTek()
+            self.tekconfigured = True
+            self.newFile.setEnabled(True)
+            
+        else:
+            self.opMode.setText('Manual')
+            self.opMode.setStyleSheet("background-color: red")
+            self.acqControl.closeTek()
+            self.startScan.setEnabled(False)
+            self.collectWf.setEnabled(False)
+            
