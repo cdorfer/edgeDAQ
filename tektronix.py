@@ -20,14 +20,14 @@ class TektronixMSO5204B(object):
         self.inst.write('*rst')  #default the instrument
 
         #get settings form config file
-        self.horizscale = config.get('Tektronix', 'horizscale')  #sec/div
-        self.samplerate = config.get('Tektronix', 'samplerate')  #S/sec
-        self.numberofwf = config.getint('Tektronix', 'numberofwf')
-        self.voltsperdiv = config.getfloat('Tektronix', 'voltsperdiv')
-        self.ch1_offset = config.getfloat('Tektronix', 'ch1_offset')
-        self.ch2_trig_level =  config.getfloat('Tektronix', 'ch2_trig_level')
-        self.ch1_termination = config.getint('Tektronix', 'ch1_termination')
-        self.ch2_termination = config.getint('Tektronix', 'ch1_termination')
+        self.horizscale = config['Tektronix']['horizscale']  #sec/div
+        self.samplerate = config['Tektronix']['samplerate']  #S/sec
+        self.numberofwf = int(config['Tektronix']['numberofwf'])
+        self.voltsperdiv = float(config['Tektronix']['voltsperdiv'])
+        self.ch1_offset = float(config['Tektronix']['ch1_offset'])
+        self.ch2_trig_level =  float(config['Tektronix']['ch2_trig_level'])
+        self.ch1_termination = int(config['Tektronix']['ch1_termination'])
+        self.ch2_termination = int(config['Tektronix']['ch1_termination'])
         
         #class variables for data processing
         self.yoffset = 0

@@ -21,16 +21,21 @@ class DataHandling(object):
     dh.closeFile()
     """
      
-    def __init__(self):
+    def __init__(self, conf):
         self.hdf = None
         self.tctdata = None
         self.spcount = 1
+        self.runnumber = self.readRunNumber()+1
+        self.config = conf
 
         #parameters that are set through the GUI (at startup read from configuration file)
-        self.diamond_name = "S119"
-        self.side = 1
-        self.bias_voltage = "-400"
-        self.laser_pulse_energy = "5" #pJ
+        self.diamond_name = self.config['AcquisitionControl']['diamond_name']
+        self.side = int(self.config['AcquisitionControl']['side'])
+        self.bias_voltage = float(self.config['AcquisitionControl']['bias_voltage'])
+        self.amplifier = self.config['AcquisitionControl']['amplifier']
+        self.laser_pulse_energy = float(self.config['AcquisitionControl']['laser_pulse_energy'])
+        self.pcb = self.config['AcquisitionControl']['pcb']
+        self.nwf = int(self.config['AcquisitionControl']['number_of_waveforms'])
         
         #self.createFile()
 
@@ -66,13 +71,54 @@ class DataHandling(object):
             runnumber = int(f.readline())
             f.seek(0)
             f.write(str(runnumber+1))
-        return runnumber
+            self.runnumber = runnumber+1
+            
+    def readRunNumber(self):
+        with open('data/runnumber.dat', "r") as f:
+            return int(f.readline())
+        
         
         
     def closeFile(self):
         self.hdf.flush()
         self.hdf.close()
 
+
+    #setter methods to write GUI values back to the configuration file
+    def setDiamondName(self, val):
+        self.diamond_name = val
+        self.config['AcquisitionControl']['diamond_name'] = val
+        self.config.write()
+
+    def setSide(self, val):
+        self.side = val
+        self.config['AcquisitionControl']['side'] = int(val)
+        self.config.write()
+
+    def setBiasVoltage(self, val):
+        self.bias_voltage = val
+        self.config['AcquisitionControl']['bias_voltage'] = val
+        self.config.write()
+        
+    def setLaserPulseEnergy(self, val):
+        self.laser_pulse_energy = val
+        self.config['AcquisitionControl']['laser_pulse_energy'] = val
+        self.config.write()
+        
+    def setAmplifier(self, val):
+        self.amplifier = val
+        self.config['AcquisitionControl']['amplifier'] = val
+        self.config.write()
+
+    def setPCB(self, val):
+        self.pcb = val
+        self.config['AcquisitionControl']['pcb'] = val
+        self.config.write()
+        
+    def setNWf(self, val):
+        self.nwf = val
+        self.config['AcquisitionControl']['number_of_waveforms'] = int(val)
+        self.config.write()
 
 
 
@@ -83,10 +129,10 @@ class PositionControl(object):
         self.yaxis = axes[1]
         self.zaxis = axes[2]
         
-        self.xStepSize = config.getfloat('PositionControl', 'xStepSize')
-        self.yStepSize = config.getfloat('PositionControl', 'yStepSize')
-        self.zStepSize = config.getfloat('PositionControl', 'zStepSize')
-        
+        self.xStepSize = float(config['PositionControl']['xStepSize'])
+        self.yStepSize = float(config['PositionControl']['yStepSize'])
+        self.zStepSize = float(config['PositionControl']['zStepSize'])
+                                                       
         #hardware limits:
         self.xlimlow = -50 # all in mm
         self.xlimhigh = 50
@@ -116,7 +162,8 @@ class PositionControl(object):
         
     def moveStepZ(self, step):
         self.zaxis.move_by((step), wait=True)    
-    
+     
+    #getter methods do not return class variables but read back values from Newport table
     def getXPosition(self):
         return self.xaxis.position
         
@@ -146,6 +193,8 @@ class PositionControl(object):
                         
     def getCurrentHome(self):  
         return (self.xaxis.home, self.yaxis.home, self.zaxis.home)
+     
+     
                 
     def setHome(self):
         self.xlimlow =  self.xlimlow -self.xaxis.position
@@ -204,18 +253,18 @@ class AcquisitionControl(object):
         self.tek = tektronix
         self.dh = datahandler
         self.config = configuration
-        
-        self.xScanMin = self.config.getfloat('AcquisitionControl', 'xMin')
-        self.xScanMax = self.config.getfloat('AcquisitionControl', 'xMax')
-        self.xScanStep =self.config.getfloat('AcquisitionControl', 'xStep') 
-        
-        self.yScanMin = self.config.getfloat('AcquisitionControl', 'yMin')
-        self.yScanMax = self.config.getfloat('AcquisitionControl', 'yMax')
-        self.yScanStep =self.config.getfloat('AcquisitionControl', 'yStep')
-        
-        self.zScanMin = self.config.getfloat('AcquisitionControl', 'zMin')
-        self.zScanMax = self.config.getfloat('AcquisitionControl', 'zMax')
-        self.zScanStep =self.config.getfloat('AcquisitionControl', 'zStep')
+
+        self.xScanMin = float(self.config['AcquisitionControl']['xMin'])
+        self.xScanMax = float(self.config['AcquisitionControl']['xMax'])
+        self.xScanStep = float(self.config['AcquisitionControl']['xStep']) 
+                           
+        self.yScanMin = float(self.config['AcquisitionControl']['yMin'])
+        self.yScanMax = float(self.config['AcquisitionControl']['yMax'])
+        self.yScanStep = float(self.config['AcquisitionControl']['yStep'])
+                                       
+        self.zScanMin = float(self.config['AcquisitionControl']['zMin'])
+        self.zScanMax = float(self.config['AcquisitionControl']['zMax'])
+        self.zScanStep = float(self.config['AcquisitionControl']['zStep'])
         
         self.xactive = True
         self.yactive = True
@@ -306,62 +355,50 @@ class AcquisitionControl(object):
     def setZactive(self, val):
         self.zactive = val
   
-    #setter and getter methods
+    #setter methods
     def setXmin(self, val):
         self.xScanMin = val
+        self.config['AcquisitionControl']['xMin'] = val
+        self.config.write()
         
     def setXmax(self, val):
         self.xScanMax = val
+        self.config['AcquisitionControl']['xMax'] = val
+        self.config.write()
         
     def setYmin(self, val):
         self.yScanMin = val
+        self.config['AcquisitionControl']['yMin'] = val
+        self.config.write()
         
     def setYmax(self, val):
         self.yScanMax = val
+        self.config['AcquisitionControl']['yMax'] = val
+        self.config.write()
         
     def setZmin(self, val):
         self.zScanMin = val
+        self.config['AcquisitionControl']['zMin'] = val
+        self.config.write()
+        
         
     def setZmax(self, val):
         self.zScanMax = val
-     
+        self.config['AcquisitionControl']['zMax'] = val
+        self.config.write()
+       
     def setStepX(self, val):
         self.xScanStep = val
+        self.config['AcquisitionControl']['xStep'] = val
+        self.config.write()
         
     def setStepY(self, val):
         self.yScanStep = val
+        self.config['AcquisitionControl']['yStep'] = val
+        self.config.write()
         
     def setStepZ(self, val):
         self.zScanStep = val
+        self.config['AcquisitionControl']['zStep'] = val
+        self.config.write()
     
-    
-    def getRunNumber(self):
-        return self.dh.runnumber
-    
-    
-    def getXmin(self):
-        return self.xScanMin
-    
-    def getXmax(self):
-        return self.xScanMax
-        
-    def getYmin(self):
-        return self.yScanMin
-        
-    def getYmax(self):
-        return self.yScanMax
-        
-    def getZmin(self):
-        return self.zScanMin
-        
-    def getZmax(self):
-        return self.zScanMax    
-        
-    def getStepX(self):
-        return self.xScanStep
-        
-    def getStepY(self):
-        return self.yScanStep
-        
-    def getStepZ(self):
-        return self.zScanStep

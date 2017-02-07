@@ -2,7 +2,7 @@
 #dorfer@phys.ethz.ch
 
 import sys
-import configparser
+from configobj import ConfigObj
 
 #Hardware imports
 from tektronix import TektronixMSO5204B
@@ -18,20 +18,19 @@ import numpy as np
 
     
 if __name__ == '__main__':
-    #read the configuration file
-    config = configparser.ConfigParser()
-    config.read('config.ini')
+    #get a configuration object   
+    config = ConfigObj('config.ini')
     
     #create data handler
-    dh = DataHandling()
+    dh = DataHandling(config)
     
     #open connection to oscilloscope and pass on the configuration file
-    tekaddr = config.get('Tektronix', 'address')
+    tekaddr = config['Tektronix']['address']
     tek = TektronixMSO5204B(tekaddr, config)
     #tek.configure()
     
     #open serial connection to newport table
-    espaddr = config.get('Newport', 'address')
+    espaddr = config['Newport']['address']
     esp = ESP(espaddr)
     axes = [esp.axis(2), esp.axis(3), esp.axis(1)] #x, y, z
     
@@ -39,11 +38,9 @@ if __name__ == '__main__':
     posContr = PositionControl(esp, axes, config) #todo: remove setter and getter functions
     acqContr = AcquisitionControl(esp, axes, tek, dh, config) #todo: remove setter and getter functions
     
-    
-    
     #create an instance of the application window and run it
     app = QApplication(sys.argv)
-    window = Window(posContr, acqContr)
+    window = Window(posContr, acqContr, dh)
     sys.exit(app.exec_())
     
     

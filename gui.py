@@ -1,4 +1,4 @@
-from PyQt5.QtWidgets import QWidget, QPushButton, QHBoxLayout, QVBoxLayout, QSlider, QCheckBox
+from PyQt5.QtWidgets import QWidget, QPushButton, QHBoxLayout, QVBoxLayout, QSlider, QCheckBox, QComboBox, QSpinBox, QTextEdit
 from PyQt5.Qt import QLabel, QGridLayout, Qt, QDoubleSpinBox,QLCDNumber
 from time import sleep
 
@@ -6,7 +6,7 @@ from time import sleep
 class Window(QWidget):
     
     
-    def __init__(self, posC, acqC):
+    def __init__(self, posC, acqC, dh):
         super().__init__()   
         
         #defaults for position control
@@ -25,12 +25,13 @@ class Window(QWidget):
         self.zScanMax = acqC.zScanMax
         self.zScanStep = acqC.zScanStep
         
-        self.initUI(posC, acqC)
+        self.initUI(posC, acqC, dh)
 
 
-    def initUI(self, posC, acqC):
+    def initUI(self, posC, acqC, dh):
         self.positionControl = posC
         self.acqControl = acqC
+        self.datahandler = dh
 
         self.setWindowTitle('edgeDAQ')
         self.setMinimumWidth(600)
@@ -297,28 +298,90 @@ class Window(QWidget):
         
         
         
+        
      
      
         
         self.acqCtrLayout.addWidget(QLabel("<h2>Acquisition Control</h2>"), 1,1,1,7,Qt.AlignCenter)   
         self.acqCtrLayout.addWidget(QLabel(""), 2,1,1,4,Qt.AlignCenter)
         
-        #add diamond name, side, bias voltage, amplifier, laser pulse energy, pcb version
         self.acqCtrLayout.addWidget(QLabel('    Run Number:'), 3,1,1,1,Qt.AlignLeft)
+        self.run_number = QLabel(str(self.datahandler.runnumber))
+        self.acqCtrLayout.addWidget(self.run_number, 3,2,1,1, Qt.AlignCenter)
+        
         self.acqCtrLayout.addWidget(QLabel('    Diamond Name:'), 4,1,1,1,Qt.AlignLeft)
+        self.diamond_name = QComboBox()
+        self.diamond_name.addItems(['S116', 'S118', 'Heisenberg', 'Dirac', 'Einstein', 'Higgs', 'Other'])
+        self.diamond_name.setMinimumWidth(110)
+        self.diamond_name.setCurrentText(self.datahandler.diamond_name)
+        self.diamond_name.currentIndexChanged.connect(self.diamNameSlot)
+        self.acqCtrLayout.addWidget(self.diamond_name, 4,2,1,1, Qt.AlignLeft)
+        
         self.acqCtrLayout.addWidget(QLabel('    Side:'), 5,1,1,1,Qt.AlignLeft)
-        self.acqCtrLayout.addWidget(QLabel('    Bias Voltage:'), 6,1,1,1,Qt.AlignLeft)
-        self.acqCtrLayout.addWidget(QLabel('    Amplifier:'), 7,1,1,1,Qt.AlignLeft)
-        self.acqCtrLayout.addWidget(QLabel('    Laser Pulse Energy:'), 8,1,1,1,Qt.AlignLeft)
-        self.acqCtrLayout.addWidget(QLabel('    PCB Version:'), 9,1,1,1,Qt.AlignLeft)
+        self.diamond_side = QComboBox()
+        self.diamond_side.addItems(['0', '1'])
+        self.diamond_side.setMinimumWidth(110)
+        self.diamond_side.setCurrentText(str(self.datahandler.side))
+        self.diamond_side.currentIndexChanged.connect(self.diamSideSlot)
+        self.acqCtrLayout.addWidget(self.diamond_side, 5,2,1,1, Qt.AlignLeft)
         
-        self.acqCtrLayout.addWidget(QLabel(""), 10,1,1,4,Qt.AlignCenter)
+        self.acqCtrLayout.addWidget(QLabel('    Bias Voltage [V]:'), 6,1,1,1,Qt.AlignLeft)
+        self.bias_voltage = QDoubleSpinBox()
+        self.bias_voltage.setMinimum(-1500)
+        self.bias_voltage.setMaximum(1500)
+        self.bias_voltage.setAlignment(Qt.AlignLeft)
+        self.bias_voltage.setMinimumWidth(110)
+        self.bias_voltage.setValue(self.datahandler.bias_voltage)
+        self.bias_voltage.valueChanged.connect(self.biasVoltageSlot) 
+        self.acqCtrLayout.addWidget(self.bias_voltage, 6,2,1,1, Qt.AlignLeft)
         
+        self.acqCtrLayout.addWidget(QLabel('    Number of WF:'), 7,1,1,1,Qt.AlignLeft)
+        self.nwf = QSpinBox()
+        self.nwf.setMinimum(0)
+        self.nwf.setMaximum(1990)
+        self.nwf.setAlignment(Qt.AlignLeft)
+        self.nwf.setMinimumWidth(110)
+        self.nwf.setValue(self.datahandler.nwf)
+        self.nwf.valueChanged.connect(self.nwfSlot) 
+        self.acqCtrLayout.addWidget(self.nwf, 7,2,1,1, Qt.AlignLeft)
         
-        
-        
-        
+        self.acqCtrLayout.addWidget(QLabel('    Amplifier:'), 8,1,1,1,Qt.AlignLeft)
+        self.amplifier = QComboBox()
+        self.amplifier.addItems(['cividec', 'particulars'])
+        self.amplifier.setMinimumWidth(110)
+        self.amplifier.setCurrentText(self.datahandler.amplifier)
+        self.amplifier.currentIndexChanged.connect(self.AmplifierSlot)
+        self.acqCtrLayout.addWidget(self.amplifier, 8,2,1,1, Qt.AlignLeft)
              
+        self.acqCtrLayout.addWidget(QLabel('    Laser Pulse Energy [pJ]:'), 9,1,1,1,Qt.AlignLeft)
+        self.pulse_energy = QDoubleSpinBox()
+        self.pulse_energy.setMinimum(0)
+        self.pulse_energy.setMaximum(1000000)
+        self.pulse_energy.setAlignment(Qt.AlignLeft)
+        self.pulse_energy.setMinimumWidth(110)
+        self.pulse_energy.setValue(self.datahandler.laser_pulse_energy)
+        self.pulse_energy.valueChanged.connect(self.pulseEnergySlot) 
+        self.acqCtrLayout.addWidget(self.pulse_energy, 9,2,1,1, Qt.AlignLeft)
+        
+        self.acqCtrLayout.addWidget(QLabel('    PCB Version:'), 10,1,1,1,Qt.AlignLeft) 
+        self.pcb = QComboBox()
+        self.pcb.addItems(['simple', 'car'])
+        self.pcb.setMinimumWidth(110)
+        self.pcb.setCurrentText(self.datahandler.pcb)
+        self.pcb.currentIndexChanged.connect(self.PCBSlot)
+        self.acqCtrLayout.addWidget(self.pcb, 10,2,1,1, Qt.AlignLeft)
+        
+        self.acqCtrLayout.addWidget(QLabel('    Comments:'), 11,1,1,1,Qt.AlignLeft) 
+        self.comments = QTextEdit()
+        self.comments.setMinimumWidth(400)
+        self.comments.setMaximumHeight(50)
+        self.acqCtrLayout.addWidget(self.comments, 11,2,1,8, Qt.AlignLeft)
+        
+         
+        #self.acqCtrLayout.addWidget(QLabel(""), 12,1,1,1,Qt.AlignCenter)
+        
+        
+        #scan limits and steps     
         self.acqCtrLayout.addWidget(QLabel('X<sub>min</sub>'), 13,1,1,1,Qt.AlignCenter)
         self.acqCtrLayout.addWidget(self.xlimlow, 13,2,1,1,Qt.AlignLeft)
         self.acqCtrLayout.addWidget(QLabel('X<sub>max</sub>'), 13,3,1,1,Qt.AlignCenter)
@@ -434,7 +497,7 @@ class Window(QWidget):
     def xStepChange(self):
         self.acqControl.setStepX(self.xstep.value())
         
-    
+        
     def yLimLowChange(self):
         self.acqControl.setYmin(self.ylimlow.value())
         
@@ -453,7 +516,6 @@ class Window(QWidget):
         
     def zStepChange(self):
         self.acqControl.setStepZ(self.zstep.value())
-        print('xstep: ', self.zstep.value())
   
     
     def btnstate(self,b):
@@ -481,5 +543,24 @@ class Window(QWidget):
         
     def stopScanSlot(self):
         self.acqControl.stopScan()
-    
-    
+        
+    def diamNameSlot(self):
+        self.datahandler.setDiamondName(self.diamond_name.currentText())
+        
+    def diamSideSlot(self):
+        self.datahandler.setSide(self.diamond_side.currentText())    
+ 
+    def AmplifierSlot(self):
+        self.datahandler.setAmplifier(self.amplifier.currentText())
+       
+    def PCBSlot(self):
+        self.datahandler.setPCB(self.pcb.currentText())
+        
+    def nwfSlot(self):
+        self.datahandler.setNWf(self.nwf.value())
+        
+    def pulseEnergySlot(self):
+        self.datahandler.setLaserPulseEnergy(self.pulse_energy.value())
+
+    def biasVoltageSlot(self):
+        self.datahandler.setBiasVoltage(self.bias_voltage.value())
