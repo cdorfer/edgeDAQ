@@ -1,12 +1,13 @@
 from PyQt5.QtWidgets import QWidget, QPushButton, QHBoxLayout, QVBoxLayout, QSlider, QCheckBox, QComboBox, QSpinBox, QTextEdit
 from PyQt5.Qt import QLabel, QGridLayout, Qt, QDoubleSpinBox,QLCDNumber
 from time import sleep
+from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as NavigationToolbar
 
 
 class Window(QWidget):
     
     
-    def __init__(self, posC, acqC, dh):
+    def __init__(self, posC, acqC, dh, mon):
         super().__init__()   
         
         #defaults for position control
@@ -28,13 +29,14 @@ class Window(QWidget):
         self.tekconfigured = False
         self.fileOpen = False
         
-        self.initUI(posC, acqC, dh)
+        self.initUI(posC, acqC, dh, mon)
 
 
-    def initUI(self, posC, acqC, dh):
+    def initUI(self, posC, acqC, dh, mon):
         self.positionControl = posC
         self.acqControl = acqC
         self.datahandler = dh
+        self.livemon = mon
 
         self.setWindowTitle('edgeDAQ')
         #self.setMinimumWidth(600)
@@ -352,7 +354,7 @@ class Window(QWidget):
         self.acqCtrLayout.addWidget(QLabel('    Diamond Name:'), 4,1,1,1,Qt.AlignLeft)
         self.diamond_name = QComboBox()
         self.diamond_name.addItems(['S116', 'S118', 'Heisenberg', 'Dirac', 'Einstein', 'Higgs', 'Other'])
-        self.diamond_name.setMinimumWidth(110)
+        self.diamond_name.setMinimumWidth(104)
         self.diamond_name.setCurrentText(self.datahandler.diamond_name)
         self.diamond_name.currentIndexChanged.connect(self.diamNameSlot)
         self.acqCtrLayout.addWidget(self.diamond_name, 4,2,1,1, Qt.AlignLeft)
@@ -362,7 +364,7 @@ class Window(QWidget):
         self.bias_voltage.setMinimum(-1500)
         self.bias_voltage.setMaximum(1500)
         self.bias_voltage.setAlignment(Qt.AlignLeft)
-        self.bias_voltage.setMinimumWidth(110)
+        self.bias_voltage.setMinimumWidth(104)
         self.bias_voltage.setValue(self.datahandler.bias_voltage)
         self.bias_voltage.valueChanged.connect(self.biasVoltageSlot) 
         self.acqCtrLayout.addWidget(self.bias_voltage, 5,2,1,1, Qt.AlignLeft)
@@ -372,48 +374,48 @@ class Window(QWidget):
         self.nwf.setMinimum(0)
         self.nwf.setMaximum(1000)
         self.nwf.setAlignment(Qt.AlignLeft)
-        self.nwf.setMinimumWidth(110)
+        self.nwf.setMinimumWidth(104)
         self.nwf.setValue(self.datahandler.nwf)
         self.nwf.valueChanged.connect(self.nwfSlot) 
         self.acqCtrLayout.addWidget(self.nwf, 6,2,1,1, Qt.AlignLeft)
                 
-        self.acqCtrLayout.addWidget(QLabel('    Laser Pulse Energy [pJ]:   '), 7,1,1,1,Qt.AlignLeft)
+        self.acqCtrLayout.addWidget(QLabel('        Pulse Energy [pJ]:   '), 3,3,1,1,Qt.AlignLeft)
         self.pulse_energy = QDoubleSpinBox()
         self.pulse_energy.setMinimum(0)
-        self.pulse_energy.setMaximum(1000000)
+        self.pulse_energy.setMaximum(10000)
         self.pulse_energy.setAlignment(Qt.AlignLeft)
-        self.pulse_energy.setMinimumWidth(110)
+        self.pulse_energy.setMinimumWidth(104)
         self.pulse_energy.setValue(self.datahandler.laser_pulse_energy)
         self.pulse_energy.valueChanged.connect(self.pulseEnergySlot) 
-        self.acqCtrLayout.addWidget(self.pulse_energy, 7,2,1,1, Qt.AlignLeft)
+        self.acqCtrLayout.addWidget(self.pulse_energy, 3,4,1,1, Qt.AlignLeft)
         
-        self.acqCtrLayout.addWidget(QLabel('    Side:'), 8,1,1,1,Qt.AlignLeft)
+        self.acqCtrLayout.addWidget(QLabel('        Side:'), 4,3,1,1,Qt.AlignLeft)
         self.diamond_side = QComboBox()
         self.diamond_side.addItems(['0', '1'])
-        self.diamond_side.setMinimumWidth(110)
+        self.diamond_side.setMinimumWidth(104)
         self.diamond_side.setCurrentText(str(self.datahandler.side))
         self.diamond_side.currentIndexChanged.connect(self.diamSideSlot)
-        self.acqCtrLayout.addWidget(self.diamond_side, 8,2,1,1, Qt.AlignLeft)
+        self.acqCtrLayout.addWidget(self.diamond_side, 4,4,1,1, Qt.AlignLeft)
         
-        self.acqCtrLayout.addWidget(QLabel('    Amplifier:'), 9,1,1,1,Qt.AlignLeft)
+        self.acqCtrLayout.addWidget(QLabel('        Amplifier:'), 5,3,1,1,Qt.AlignLeft)
         self.amplifier = QComboBox()
         self.amplifier.addItems(['cividec', 'particulars'])
-        self.amplifier.setMinimumWidth(110)
+        self.amplifier.setMinimumWidth(104)
         self.amplifier.setCurrentText(self.datahandler.amplifier)
         self.amplifier.currentIndexChanged.connect(self.AmplifierSlot)
-        self.acqCtrLayout.addWidget(self.amplifier, 9,2,1,1, Qt.AlignLeft)
+        self.acqCtrLayout.addWidget(self.amplifier, 5,4,1,1, Qt.AlignLeft)
           
-        self.acqCtrLayout.addWidget(QLabel('    PCB Version:'), 10,1,1,1,Qt.AlignLeft) 
+        self.acqCtrLayout.addWidget(QLabel('        PCB Version:'), 6,3,1,1,Qt.AlignLeft) 
         self.pcb = QComboBox()
         self.pcb.addItems(['simple', 'car'])
-        self.pcb.setMinimumWidth(110)
+        self.pcb.setMinimumWidth(104)
         self.pcb.setCurrentText(self.datahandler.pcb)
         self.pcb.currentIndexChanged.connect(self.PCBSlot)
-        self.acqCtrLayout.addWidget(self.pcb, 10,2,1,1, Qt.AlignLeft)
+        self.acqCtrLayout.addWidget(self.pcb, 6,4,1,1, Qt.AlignLeft)
         
         self.acqCtrLayout.addWidget(QLabel('    Comments:'), 11,1,1,1,Qt.AlignLeft) 
         self.comments = QTextEdit()
-        self.comments.setMinimumWidth(400)
+        self.comments.setMinimumWidth(370)
         self.comments.setMaximumHeight(50)
         self.acqCtrLayout.addWidget(self.comments, 11,2,1,8, Qt.AlignLeft)
         
@@ -463,14 +465,35 @@ class Window(QWidget):
         self.acq2Win.addLayout(self.acqCtr2Layout)
     
 
-        self.mainLayout = QVBoxLayout()
-        self.mainLayout.addLayout(self.posWin)
-        self.mainLayout.addLayout(self.scanWin)
-        self.mainLayout.addLayout(self.acqWin)
-        self.mainLayout.addLayout(self.acq2Win)
-
-        self.setLayout(self.mainLayout)
+        ############################ end acquisiton control ##############################
         
+        ############################    start plotting      ##############################
+        
+        # generate layout
+        plotLayout = QVBoxLayout()
+        plotLayout.addWidget(self.livemon.canvas)
+        self.toolbar = NavigationToolbar(self.livemon.canvas, self) #navigation widget
+        plotLayout.addWidget(self.toolbar)
+        
+        
+        ############################     end plotting       ##############################
+        
+
+        #master layout
+        self.mainLayout = QHBoxLayout()
+        
+        #the control layout, add it to master layout
+        self.controlLayout = QVBoxLayout()
+        self.controlLayout.addLayout(self.posWin)
+        self.controlLayout.addLayout(self.scanWin)
+        self.controlLayout.addLayout(self.acqWin)
+        self.controlLayout.addLayout(self.acq2Win)
+        self.mainLayout.addLayout(self.controlLayout)
+        
+        #add plot layout to master layout
+        self.mainLayout.addLayout(plotLayout)
+        
+        self.setLayout(self.mainLayout)
         self.show()
     
     
@@ -682,5 +705,3 @@ class Window(QWidget):
                 self.collectWf.setEnabled(False)
                 self.startScan.setEnabled(False)
                 self.closeFile.setEnabled(False)
-
-            

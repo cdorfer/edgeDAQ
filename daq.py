@@ -1,5 +1,6 @@
 from time import sleep, time
 import datetime
+import numpy as np
 import h5py
 
 
@@ -20,12 +21,13 @@ class DataHandling(object):
     dh.closeFile()
     """
      
-    def __init__(self, conf):
+    def __init__(self, conf, livemon):
         self.hdf = None
         self.tctdata = None
         self.spcount = 1
         self.runnumber = self.readRunNumber()+1
         self.config = conf
+        self.livemon = livemon
 
         #parameters that are set through the GUI (at startup read from configuration file)
         self.diamond_name = self.config['AcquisitionControl']['diamond_name']
@@ -63,11 +65,6 @@ class DataHandling(object):
         self.tctdata.attrs['pcb'] = self.pcb
         self.tctdata.attrs['comments'] = comment
         print('File ', fname, ' created.')
-    
-    
-        
-    def setTimeScale(self, time_array):    
-        self.tctdata.attrs['time_array'] = time_array
         
     
     def addScanPointData(self, timestamp, x,y,z, time_axis, wfarr):
@@ -81,6 +78,12 @@ class DataHandling(object):
         self.spcount += 1
         print('Scanpoint ', sp, ' written to file.')
         
+        #send data to online monitor
+        self.livemon.setWaveform(time_axis, wfarr[0:len(time_axis)], wfarr[len(wfarr)-len(time_axis):len(wfarr)]) #wf plot
+        self.livemon.setScanPoint(x, y, z, np.sum(wfarr[0:len(time_axis)]))
+        print("Updating plots.")
+        self.livemon.updatePlots()
+        
     
     def increaseRunNumber(self):
         with open('data/runnumber.dat', "r+") as f:
@@ -93,12 +96,11 @@ class DataHandling(object):
         with open('data/runnumber.dat', "r") as f:
             return int(f.readline())
         
-        
-        
     def closeFile(self):
         self.hdf.flush()
         self.hdf.close()
         print('File for run ', str(self.runnumber), ' closed.')
+    
 
 
     #setter methods to write GUI values back to the configuration file

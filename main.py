@@ -10,6 +10,7 @@ from newportESP import ESP
 
 #DAQ imports
 from daq import PositionControl, AcquisitionControl, DataHandling
+from livemonitor import LiveMonitor
 
 #GUI imports
 from gui import Window
@@ -21,8 +22,11 @@ if __name__ == '__main__':
     #get a configuration object   
     config = ConfigObj('config.ini')
     
+    #initialize the LiveMonitor class
+    livemon = LiveMonitor()
+    
     #create data handler
-    dh = DataHandling(config)
+    dh = DataHandling(config, livemon)
     
     #open connection to oscilloscope and pass on the configuration file
     tek = TektronixMSO5204B(config)
@@ -39,7 +43,7 @@ if __name__ == '__main__':
     
     #create an instance of the application window and run it
     app = QApplication(sys.argv)
-    window = Window(posContr, acqContr, dh)
+    window = Window(posContr, acqContr, dh, livemon)
     sys.exit(app.exec_())
     
     
