@@ -1,5 +1,6 @@
 from time import sleep, time
 import datetime
+import threading
 import numpy as np
 import h5py
 
@@ -77,11 +78,10 @@ class DataHandling(object):
         self.tctdata[sp].attrs['time_axis'] = time_axis
         self.spcount += 1
         print('Scanpoint ', sp, ' written to file.')
-        
+            
         #send data to online monitor
         self.livemon.setWaveform(time_axis, wfarr[0:len(time_axis)], wfarr[len(wfarr)-len(time_axis):len(wfarr)]) #wf plot
         self.livemon.setScanPoint(x, y, z, np.sum(wfarr[0:len(time_axis)]))
-        print("Updating plots.")
         self.livemon.updatePlots()
         
     
@@ -291,11 +291,7 @@ class AcquisitionControl(object):
         self.running = False
  
     
-    def theScan(self):
-        
-        #configure the oscilloscope for data taking
-        self.tek.configure()
-
+    def startScan(self, stop_event, arg):        
         #some sanity checks
         if(self.xactive):
             if (self.xScanMax > self.xScanMin and self.xScanStep <= 0) or (self.xScanMin > self.xScanMax and self.xScanStep >= 0) or (abs(self.xScanStep) > abs(self.xScanMax - self.xScanMin)):
@@ -329,8 +325,6 @@ class AcquisitionControl(object):
             ysteps = 0
         if not self.xactive:
             xsteps = 0
-            
-        
         
         for idz in range(int(zsteps)+1):
             if self.zactive:
@@ -349,22 +343,18 @@ class AcquisitionControl(object):
                         xnext = self.xScanMin+idy*self.xScanStep
                         self.xaxis.move_to(xnext, wait=True)
                     
-                    if (self.running == False):
+                    
+                    #check if thread was terminated
+                    if stop_event.wait(0.1):
+                        print('Scan finished.')
                         return
-                    print("x: %.2f" %self.xaxis.position, " y: %.2f" %self.yaxis.position, " z: %.2f" %self.zaxis.position)
-                    sleep(1)
-                    # do oscilloscope readout here:
+                    
+                    #print("x: %.2f" %self.xaxis.position, " y: %.2f" %self.yaxis.position, " z: %.2f" %self.zaxis.position)
                     self.collectNWfs()
    
         print('Scan finished.')
-                                          
-    def startScan(self):
-        self.running = True
-        print('Starting a scan.')
-        self.theScan()
-    
-    def stopScan(self):    
-        self.running = False
+        return 1
+
     
     def openTek(self):
         self.tek.open()

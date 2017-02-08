@@ -24,7 +24,7 @@ if __name__ == '__main__':
     print('PCB: ', tctdata.attrs['pcb'])
     print('Comments:\n', tctdata.attrs['comments'], '\n')
 
-
+    #check how to get total number of datasets
     for idx in range(0,6):
         i = str(idx)
         timestamp = tctdata[i].attrs['timestamp'] #single array, serves all wfs in data as time axis

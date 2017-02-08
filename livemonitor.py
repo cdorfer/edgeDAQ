@@ -20,6 +20,10 @@ class LiveMonitor(object):
         self.y = []
         self.z = []
         self.sp = []
+
+        self.stepx = 0
+        self.stepy = 0
+        self.stepz = 0
                
     def setWaveform(self, timea, wfa, wfo):
         self.time_arr = timea
@@ -32,10 +36,13 @@ class LiveMonitor(object):
         self.z.append(z)
         self.sp.append(val)
 
-    
+    def setStepSize(self, ss):
+        self.stepx = ss[0]
+        self.stepy = ss[1]
+        self.stepz = ss[2]
+
 
     def updatePlots(self):
-        data = [random.random() for i in range(10)]
         
         wf = self.fig.add_subplot(211)
         wf.hold(False) #discards the old graph
@@ -43,7 +50,8 @@ class LiveMonitor(object):
         
         scan = self.fig.add_subplot(212)
         scan.hold(False) #discards the old graph
-        scan.scatter(-1.0*np.array(self.x), -1.0*np.array(self.y), c=np.array(self.sp),edgecolors='none')
+        #scan.scatter(-1.0*np.array(self.x), -1.0*np.array(self.y), c=np.array(self.sp),edgecolors='none')
+
 
         plt.tight_layout(pad=1, w_pad=0.5, h_pad=2)
         self.canvas.draw()

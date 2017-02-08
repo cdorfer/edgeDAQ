@@ -2,7 +2,7 @@ from PyQt5.QtWidgets import QWidget, QPushButton, QHBoxLayout, QVBoxLayout, QSli
 from PyQt5.Qt import QLabel, QGridLayout, Qt, QDoubleSpinBox,QLCDNumber
 from time import sleep
 from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as NavigationToolbar
-
+import threading
 
 class Window(QWidget):
     
@@ -28,16 +28,21 @@ class Window(QWidget):
         
         self.tekconfigured = False
         self.fileOpen = False
-        
-        self.initUI(posC, acqC, dh, mon)
 
-
-    def initUI(self, posC, acqC, dh, mon):
-        self.positionControl = posC
         self.acqControl = acqC
+        self.positionControl = posC
         self.datahandler = dh
         self.livemon = mon
+        self.livemon.setStepSize([self.xScanStep, self.yScanStep, self.zScanStep])
+        
+        #thread for the scan loop
+        self.pill2kill = threading.Event()
+        self.scanThread = threading.Thread(target=self.acqControl.startScan, args=(self.pill2kill, 'test'))
+        
+        self.initUI()
 
+
+    def initUI(self):
         self.setWindowTitle('edgeDAQ')
         #self.setMinimumWidth(600)
         #self.setMaximumHeight(780)
@@ -440,7 +445,7 @@ class Window(QWidget):
         self.newFile.setEnabled(False)
 
         self.collectWf = QPushButton()
-        self.collectWf.setText('Collect <N> WF')
+        self.collectWf.setText('Collect WF')
         self.collectWf.clicked.connect(self.collectWfSlot)
         self.collectWf.setEnabled(False)
     
@@ -449,17 +454,23 @@ class Window(QWidget):
         self.startScan.clicked.connect(self.startScanSlot)
         self.startScan.setEnabled(False)
         
+        self.stopScan = QPushButton()
+        self.stopScan.setText('Stop Scan')
+        self.stopScan.clicked.connect(self.stopScanSlot)
+        self.stopScan.setEnabled(False)
+        
         self.closeFile = QPushButton()
         self.closeFile.setText('Close File')
         self.closeFile.clicked.connect(self.closeFileSlot)
         self.closeFile.setEnabled(False)  
         
-        self.acqCtr2Layout.addWidget(QLabel('Tektronix Operation'), 1,1,1,1,Qt.AlignCenter) 
+        self.acqCtr2Layout.addWidget(QLabel('Tektronix Mode'), 1,1,1,1,Qt.AlignCenter) 
         self.acqCtr2Layout.addWidget(self.opMode, 2,1,1,1,Qt.AlignCenter)
         self.acqCtr2Layout.addWidget(self.newFile, 2,2,1,1,Qt.AlignCenter)
         self.acqCtr2Layout.addWidget(self.collectWf, 2,3,1,1,Qt.AlignCenter)     
         self.acqCtr2Layout.addWidget(self.startScan, 2,4,1,1,Qt.AlignCenter)
-        self.acqCtr2Layout.addWidget(self.closeFile, 2,5,1,1,Qt.AlignCenter)     
+        self.acqCtr2Layout.addWidget(self.stopScan, 2,5,1,1,Qt.AlignCenter)
+        self.acqCtr2Layout.addWidget(self.closeFile, 2,6,1,1,Qt.AlignCenter)     
         
         self.acq2Win = QHBoxLayout()
         self.acq2Win.addLayout(self.acqCtr2Layout)
@@ -513,14 +524,17 @@ class Window(QWidget):
     def xSpinBoxChange(self):
         self.xStepSize = self.xSpinBox.value() 
         self.xSlider.setPageStep(self.xStepSize*1000)
+        self.livemon.setStepSize([self.xScanStep, self.yScanStep, self.zScanStep])
         
     def ySpinBoxChange(self):
         self.yStepSize = self.ySpinBox.value() 
-        self.ySlider.setPageStep(self.yStepSize*1000)    
+        self.ySlider.setPageStep(self.yStepSize*1000)
+        self.livemon.setStepSize([self.xScanStep, self.yScanStep, self.zScanStep]) 
         
     def zSpinBoxChange(self):
         self.zStepSize = self.zSpinBox.value() 
         self.zSlider.setPageStep(self.zStepSize*1000)
+        self.livemon.setStepSize([self.xScanStep, self.yScanStep, self.zScanStep])
         
     def showXPos(self):
         sleep(0.5)
@@ -604,8 +618,23 @@ class Window(QWidget):
     
         
     def startScanSlot(self):
-        self.acqControl.startScan()
+        self.scanThread.start()
+        self.stopScan.setEnabled(True)
+        self.collectWf.setEnabled(False)
+        self.startScan.setEnabled(False)
+        self.closeFile.setEnabled(False)
         
+        
+    def stopScanSlot(self):
+        self.pill2kill.set()
+        self.scanThread.join(2)
+        self.stopScan.setEnabled(False)
+        self.collectWf.setEnabled(True)
+        self.startScan.setEnabled(True)
+        self.closeFile.setEnabled(True)
+        self.pill2kill = threading.Event()
+        self.scanThread = threading.Thread(target=self.acqControl.startScan, args=(self.pill2kill, 'test'))
+             
     def diamNameSlot(self):
         self.datahandler.setDiamondName(self.diamond_name.currentText())
         
