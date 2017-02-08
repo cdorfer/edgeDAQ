@@ -120,15 +120,18 @@ class TektronixMSO5204B(object):
         headerlength = len(rawdata)%100 - 1 #determining the length of the header (dirty fix)
         #header = rawdata[:headerlength]     #header for later use?
         rawdata = rawdata[headerlength:-1]  #strip the header
-        data = numpy.array(unpack('{0}b'.format(self.numberofpoints*self.numberofwf), rawdata))             #unpack data to numpy array
-        scaleddata = (data-self.yoffset)*self.ymult+self.yzero                                                  #scale data to volts
+        #format string gives (size of array)b - where b is the unsigned char, osci data is only 8 bit but 32 bit is faster in the CPU?
+        data = numpy.array(unpack('{0}b'.format(self.numberofpoints*self.numberofwf), rawdata), dtype=numpy.int32)  #unpack data to numpy array
+        scaleddata = (data-self.yoffset)*self.ymult+self.yzero
+        #scale data to volts
         scaledtime = numpy.arange(self.xzero,self.xzero+(self.xincrement*self.numberofpoints),self.xincrement)  #always the same time
         print('Waveforms acquired.')
-        return (scaleddata, scaledtime)
+        return (scaleddata.astype(numpy.float32), scaledtime.astype(numpy.float32))
 
 
     def close(self):
         if(self.inst):
+            self.inst.write('horizontal:fastframe:state 0') #turn  FastFrame off
             self.inst.close()
             self.rm = None
             self.inst = None

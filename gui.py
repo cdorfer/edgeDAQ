@@ -26,6 +26,7 @@ class Window(QWidget):
         self.zScanStep = acqC.zScanStep
         
         self.tekconfigured = False
+        self.fileOpen = False
         
         self.initUI(posC, acqC, dh)
 
@@ -36,8 +37,8 @@ class Window(QWidget):
         self.datahandler = dh
 
         self.setWindowTitle('edgeDAQ')
-        self.setMinimumWidth(600)
-        #self.setMinimumHeight(600)
+        #self.setMinimumWidth(600)
+        #self.setMaximumHeight(780)
         
         ############################ position control ##############################
         self.posCtrLayout = QGridLayout()
@@ -369,7 +370,7 @@ class Window(QWidget):
         self.acqCtrLayout.addWidget(QLabel('    Number of WF:'), 6,1,1,1,Qt.AlignLeft)
         self.nwf = QSpinBox()
         self.nwf.setMinimum(0)
-        self.nwf.setMaximum(1990)
+        self.nwf.setMaximum(1000)
         self.nwf.setAlignment(Qt.AlignLeft)
         self.nwf.setMinimumWidth(110)
         self.nwf.setValue(self.datahandler.nwf)
@@ -607,9 +608,21 @@ class Window(QWidget):
         comment = str(self.comments.toPlainText())
         self.datahandler.createFile(comment)
         self.run_number.setText(str(self.datahandler.runnumber))
+        self.newFile.setEnabled(False)
         self.collectWf.setEnabled(True)
         self.closeFile.setEnabled(True)
         self.startScan.setEnabled(True)
+        self.fileOpen = True
+        
+        #disable other input options
+        self.diamond_name.setEnabled(False)
+        self.bias_voltage.setEnabled(False)
+        self.nwf.setEnabled(False)
+        self.pulse_energy.setEnabled(False)
+        self.diamond_side.setEnabled(False)
+        self.amplifier.setEnabled(False)
+        self.pcb.setEnabled(False)
+        self.comments.setEnabled(False)
         
         
     def closeFileSlot(self):
@@ -617,6 +630,18 @@ class Window(QWidget):
         self.collectWf.setEnabled(False)
         self.closeFile.setEnabled(False)
         self.startScan.setEnabled(False)
+        self.newFile.setEnabled(True)
+        self.fileOpen = False
+        
+        #enable other input options
+        self.diamond_name.setEnabled(True)
+        self.bias_voltage.setEnabled(True)
+        self.nwf.setEnabled(True)
+        self.pulse_energy.setEnabled(True)
+        self.diamond_side.setEnabled(True)
+        self.amplifier.setEnabled(True)
+        self.pcb.setEnabled(True)
+        self.comments.setEnabled(True)
         
         
     def collectWfSlot(self):
@@ -632,12 +657,30 @@ class Window(QWidget):
             self.acqControl.openTek()
             self.acqControl.configureTek()
             self.tekconfigured = True
-            self.newFile.setEnabled(True)
+            if(self.fileOpen):
+                self.newFile.setEnabled(False)
+                self.collectWf.setEnabled(True)
+                self.startScan.setEnabled(True)
+                self.closeFile.setEnabled(True)
+            else:
+                self.newFile.setEnabled(True)
+                self.collectWf.setEnabled(False)
+                self.startScan.setEnabled(False)
+                self.closeFile.setEnabled(False)
             
         else:
             self.opMode.setText('Manual')
             self.opMode.setStyleSheet("background-color: red")
             self.acqControl.closeTek()
-            self.startScan.setEnabled(False)
-            self.collectWf.setEnabled(False)
+            if(self.fileOpen):
+                self.newFile.setEnabled(False)
+                self.collectWf.setEnabled(False)
+                self.startScan.setEnabled(False)
+                self.closeFile.setEnabled(True)
+            else:
+                self.newFile.setEnabled(True)
+                self.collectWf.setEnabled(False)
+                self.startScan.setEnabled(False)
+                self.closeFile.setEnabled(False)
+
             

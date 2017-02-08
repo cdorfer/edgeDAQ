@@ -1,8 +1,7 @@
 from time import sleep, time
 import datetime
-import numpy as np
 import h5py
-import tektronix
+
 
 class DataHandling(object):
     """
@@ -44,7 +43,7 @@ class DataHandling(object):
         #reset old one
         self.hdf= None
         self.tctdata = None
-        self.spcount = 1
+        self.spcount = 0
         
         #read and increase run number
         self.runnumber = self.increaseRunNumber()
@@ -54,15 +53,15 @@ class DataHandling(object):
         fname = 'data/run' + str(self.runnumber) + ".hdf5"
         self.hdf = h5py.File(fname, "w", libver='latest')
         self.hdf.attrs['timestamp'] = '{:%Y-%m-%d %H:%M:%S}'.format(datetime.datetime.now())
-        print(comment)
-        self.hdf.attrs['comments'] = comment
-        
-
         self.tctdata = self.hdf.create_group("tctdata")
         self.tctdata.attrs['diamond_name'] = self.diamond_name
-        self.tctdata.attrs['side'] = self.side
         self.tctdata.attrs['bias_voltage'] = self.bias_voltage
+        self.tctdata.attrs['number_of_waveforms'] = self.nwf
         self.tctdata.attrs['laser_pulse_energy'] = self.laser_pulse_energy
+        self.tctdata.attrs['side'] = self.side
+        self.tctdata.attrs['amplifier'] = self.amplifier
+        self.tctdata.attrs['pcb'] = self.pcb
+        self.tctdata.attrs['comments'] = comment
         print('File ', fname, ' created.')
     
     
@@ -73,7 +72,12 @@ class DataHandling(object):
     
     def addScanPointData(self, timestamp, x,y,z, time_axis, wfarr):
         sp = str(self.spcount)
-        self.tctdata.create_dataset(sp, data=wfarr)   
+        self.tctdata.create_dataset(sp, data=wfarr, compression="gzip")
+        self.tctdata[sp].attrs['timestamp'] = timestamp
+        self.tctdata[sp].attrs['x'] = x
+        self.tctdata[sp].attrs['y'] = y
+        self.tctdata[sp].attrs['z'] = z
+        self.tctdata[sp].attrs['time_axis'] = time_axis
         self.spcount += 1
         print('Scanpoint ', sp, ' written to file.')
         
@@ -347,8 +351,10 @@ class AcquisitionControl(object):
                         return
                     print("x: %.2f" %self.xaxis.position, " y: %.2f" %self.yaxis.position, " z: %.2f" %self.zaxis.position)
                     sleep(1)
-                    # do oscilloscope readout here
+                    # do oscilloscope readout here:
+                    self.collectNWfs()
    
+        print('Scan finished.')
                                           
     def startScan(self):
         self.running = True
