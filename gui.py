@@ -701,6 +701,7 @@ class Window(QWidget):
         self.amplifier.setEnabled(True)
         self.pcb.setEnabled(True)
         self.comments.setEnabled(True)
+        self.livemon.resetPlots()
         
         
     def collectWfSlot(self):

@@ -32,6 +32,20 @@ class LiveMonitor(object):
         self.y = []
         self.z = []
         self.sp = []
+        
+    def resetPlots(self):
+        self.time_arr = None
+        self.wfa_arr = None     #fist wf
+        self.wfo_arr = None     #last wf
+        
+        self.x = []
+        self.y = []
+        self.z = []
+        self.sp = []
+        
+        self.fig.clf()
+        self.canvas.draw()
+    
       
     def setWaveform(self, timea, wfa, wfo):
         self.time_arr = timea
@@ -52,13 +66,17 @@ class LiveMonitor(object):
 
     def updatePlots(self):
         
+        
         self.fig.add_subplot(211)
         plt.hold(False) #discards the old graph
-        plt.plot(self.time_arr, self.wfa_arr, 'k', self.time_arr, self.wfo_arr, 'r') #first wf: black, second one: red
+        if(self.time_arr != None):
+            plt.plot(self.time_arr, self.wfa_arr, 'k', self.time_arr, self.wfo_arr, 'r') #first wf: black, second one: red
          
     
         self.fig.add_subplot(212)
-        plt.scatter(-1.0*np.array(self.x), -1.0*np.array(self.y), c='r',edgecolors='none')
+        plt.hold(False) #discards the old graph
+        if(len(self.x) != 0):
+            plt.scatter(-1.0*np.array(self.x), -1.0*np.array(self.y), c='r',edgecolors='none')
 
 
         plt.tight_layout(pad=1, w_pad=0.5, h_pad=2)
