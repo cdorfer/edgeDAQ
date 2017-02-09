@@ -34,6 +34,7 @@ class Window(QWidget):
         self.datahandler = dh
         self.livemon = mon
         self.livemon.setStepSize([self.xScanStep, self.yScanStep, self.zScanStep])
+        self.livemon.setPlotLimits([self.xScanMin, self.xScanMax, self.yScanMin, self.yScanMax, self.zScanMin, self.zScanMax])
         
         #thread for the scan loop
         self.pill2kill = threading.Event()
@@ -519,22 +520,19 @@ class Window(QWidget):
     def sliderZChange(self):
         self.positionControl.moveAbsoluteZ(1.0*self.zSlider.value()/(10**6))
         self.showZPos()    
-        
-        
+              
     def xSpinBoxChange(self):
         self.xStepSize = self.xSpinBox.value() 
         self.xSlider.setPageStep(self.xStepSize*1000)
-        self.livemon.setStepSize([self.xScanStep, self.yScanStep, self.zScanStep])
-        
+              
     def ySpinBoxChange(self):
         self.yStepSize = self.ySpinBox.value() 
-        self.ySlider.setPageStep(self.yStepSize*1000)
-        self.livemon.setStepSize([self.xScanStep, self.yScanStep, self.zScanStep]) 
+        self.ySlider.setPageStep(self.yStepSize*1000) 
         
     def zSpinBoxChange(self):
         self.zStepSize = self.zSpinBox.value() 
         self.zSlider.setPageStep(self.zStepSize*1000)
-        self.livemon.setStepSize([self.xScanStep, self.yScanStep, self.zScanStep])
+        
         
     def showXPos(self):
         sleep(0.5)
@@ -569,32 +567,41 @@ class Window(QWidget):
  
     def xLimLowChange(self):
         self.acqControl.setXmin(self.xlimlow.value())
+        self.livemon.setPlotLimits([self.acqControl.xScanMin, self.acqControl.xScanMax, self.acqControl.yScanMin, self.acqControl.yScanMax, self.acqControl.zScanMin, self.acqControl.zScanMax])
         
     def xLimHighChange(self):
         self.acqControl.setXmax(self.xlimhigh.value())
+        self.livemon.setPlotLimits([self.acqControl.xScanMin, self.acqControl.xScanMax, self.acqControl.yScanMin, self.acqControl.yScanMax, self.acqControl.zScanMin, self.acqControl.zScanMax])
         
     def xStepChange(self):
         self.acqControl.setStepX(self.xstep.value())
+        self.livemon.setStepSize([self.acqControl.xScanStep, self.acqControl.yScanStep, self.acqControl.zScanStep])
         
         
     def yLimLowChange(self):
         self.acqControl.setYmin(self.ylimlow.value())
+        self.livemon.setPlotLimits([self.acqControl.xScanMin, self.acqControl.xScanMax, self.acqControl.yScanMin, self.acqControl.yScanMax, self.acqControl.zScanMin, self.acqControl.zScanMax])
         
     def yLimHighChange(self):
         self.acqControl.setYmax(self.ylimhigh.value())
+        self.livemon.setPlotLimits([self.acqControl.xScanMin, self.acqControl.xScanMax, self.acqControl.yScanMin, self.acqControl.yScanMax, self.acqControl.zScanMin, self.acqControl.zScanMax])
         
     def yStepChange(self):
         self.acqControl.setStepY(self.ystep.value())
+        self.livemon.setStepSize([self.acqControl.xScanStep, self.acqControl.yScanStep, self.acqControl.zScanStep])
      
         
     def zLimLowChange(self):
         self.acqControl.setZmin(self.zlimlow.value())
+        self.livemon.setPlotLimits([self.acqControl.xScanMin, self.acqControl.xScanMax, self.acqControl.yScanMin, self.acqControl.yScanMax, self.acqControl.zScanMin, self.acqControl.zScanMax])
         
     def zLimHighChange(self):
         self.acqControl.setZmax(self.zlimhigh.value())
+        self.livemon.setPlotLimits([self.acqControl.xScanMin, self.acqControl.xScanMax, self.acqControl.yScanMin, self.acqControl.yScanMax, self.acqControl.zScanMin, self.acqControl.zScanMax])
         
     def zStepChange(self):
         self.acqControl.setStepZ(self.zstep.value())
+        self.livemon.setStepSize([self.acqControl.xScanStep, self.acqControl.yScanStep, self.acqControl.zScanStep])
   
     
     def btnstate(self,b):
