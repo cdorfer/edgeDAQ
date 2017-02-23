@@ -644,24 +644,31 @@ class Window(QWidget):
              
     def diamNameSlot(self):
         self.datahandler.setDiamondName(self.diamond_name.currentText())
+        self.newFile.setEnabled(False)
         
     def diamSideSlot(self):
-        self.datahandler.setSide(self.diamond_side.currentText())    
+        self.datahandler.setSide(self.diamond_side.currentText())
+        self.newFile.setEnabled(False)   
  
     def AmplifierSlot(self):
         self.datahandler.setAmplifier(self.amplifier.currentText())
+        self.newFile.setEnabled(False)
        
     def PCBSlot(self):
         self.datahandler.setPCB(self.pcb.currentText())
+        self.newFile.setEnabled(False)
         
     def nwfSlot(self):
         self.datahandler.setNWf(self.nwf.value())
+        self.newFile.setEnabled(False)
         
     def pulseEnergySlot(self):
         self.datahandler.setLaserPulseEnergy(self.pulse_energy.value())
+        self.newFile.setEnabled(False)
 
     def biasVoltageSlot(self):
         self.datahandler.setBiasVoltage(self.bias_voltage.value())
+        self.newFile.setEnabled(False)
 
     def newFileSlot(self):
         comment = str(self.comments.toPlainText())
@@ -742,3 +749,5 @@ class Window(QWidget):
                 self.collectWf.setEnabled(False)
                 self.startScan.setEnabled(False)
                 self.closeFile.setEnabled(False)
+        
+        self.newFile.setEnabled(True)

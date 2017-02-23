@@ -1,6 +1,6 @@
 from time import sleep, time
 import datetime
-import threading
+from _thread import start_new_thread
 import numpy as np
 import h5py
 
@@ -83,7 +83,8 @@ class DataHandling(object):
         self.livemon.setWaveform(time_axis, wfarr[0:len(time_axis)], wfarr[len(wfarr)-len(time_axis):len(wfarr)]) #wf plot
         #self.livemon.setScanPoint(x, y, z, np.sum(wfarr[0:len(time_axis)]))
         self.livemon.setScanPoint(x, y, z, np.sum(wfarr[0:len(time_axis)]))
-        self.livemon.updatePlots()
+        
+        start_new_thread(self.livemon.updatePlots, ())
         
     
     def increaseRunNumber(self):

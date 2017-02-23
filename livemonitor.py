@@ -76,8 +76,6 @@ class LiveMonitor(object):
         plt.hold(False) #discards the old graph
         if(len(self.x) != 0):
             plt.scatter(self.x, self.y, c=self.sp, s=100, cmap='jet',edgecolors='none', marker='s')
-
-
         plt.tight_layout(pad=1, w_pad=0.5, h_pad=2)
         self.canvas.draw()
          
