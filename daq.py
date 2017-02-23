@@ -81,6 +81,7 @@ class DataHandling(object):
             
         #send data to online monitor
         self.livemon.setWaveform(time_axis, wfarr[0:len(time_axis)], wfarr[len(wfarr)-len(time_axis):len(wfarr)]) #wf plot
+        #self.livemon.setScanPoint(x, y, z, np.sum(wfarr[0:len(time_axis)]))
         self.livemon.setScanPoint(x, y, z, np.sum(wfarr[0:len(time_axis)]))
         self.livemon.updatePlots()
         
@@ -326,6 +327,7 @@ class AcquisitionControl(object):
         if not self.xactive:
             xsteps = 0
         
+        
         for idz in range(int(zsteps)+1):
             if self.zactive:
                 znext = self.zScanMin+idz*self.zScanStep
@@ -345,13 +347,16 @@ class AcquisitionControl(object):
                     
                     
                     #check if thread was terminated
-                    if stop_event.wait(0.1):
+                    startt = datetime.datetime.now()
+                    if stop_event.wait(0.005):
                         print('Scan finished.')
                         return
                     
                     #print("x: %.2f" %self.xaxis.position, " y: %.2f" %self.yaxis.position, " z: %.2f" %self.zaxis.position)
                     self.collectNWfs()
-   
+                    endt = datetime.datetime.now()
+                    print('Time per scanpoint: ', (endt-startt).total_seconds()*1000)
+                    
         print('Scan finished.')
         return 1
 

@@ -110,7 +110,7 @@ class TektronixMSO5204B(object):
             try:
                 done = int(self.inst.ask('*opc?'))
             except:
-                sleep(0.15)                        
+                sleep(0.05)                        
         
         
         self.inst.write('curve?')

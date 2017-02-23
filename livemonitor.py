@@ -53,9 +53,9 @@ class LiveMonitor(object):
         self.wfo_arr = wfo
     
     def setScanPoint(self, x, y, z, val):
-        self.x.append(x)
-        self.y.append(y)
-        self.z.append(z)
+        self.x.append(round(x, 4))
+        self.y.append(round(y,4))
+        self.z.append(round(z,4))
         self.sp.append(val)
 
     def setStepSize(self, ss):
@@ -64,24 +64,23 @@ class LiveMonitor(object):
     def setPlotLimits(self, sl):
         (self.xmin, self.xmax, self.ymin, self.ymax, self.zmin, self.zmax) = sl
 
-    def updatePlots(self):
-        
+
+    def updatePlots(self): 
         
         self.fig.add_subplot(211)
         plt.hold(False) #discards the old graph
-        if(self.time_arr != None):
-            plt.plot(self.time_arr, self.wfa_arr, 'k', self.time_arr, self.wfo_arr, 'r') #first wf: black, second one: red
+        plt.plot(self.time_arr, self.wfa_arr, 'k', self.time_arr, self.wfo_arr, 'r') #first wf: black, second one: red
          
     
         self.fig.add_subplot(212)
         plt.hold(False) #discards the old graph
         if(len(self.x) != 0):
-            plt.scatter(-1.0*np.array(self.x), -1.0*np.array(self.y), c='r',edgecolors='none')
+            plt.scatter(self.x, self.y, c=self.sp, s=100, cmap='jet',edgecolors='none', marker='s')
 
 
         plt.tight_layout(pad=1, w_pad=0.5, h_pad=2)
         self.canvas.draw()
-        
+         
 
 
         
