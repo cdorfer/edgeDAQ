@@ -1,3 +1,9 @@
+####################################
+# File name: daq.py                
+# Author: Christian Dorfer
+# Email: cdorfer@phys.ethz.ch                                  
+####################################
+
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 import matplotlib.pyplot as plt
 import numpy as np

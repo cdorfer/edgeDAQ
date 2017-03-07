@@ -1,5 +1,8 @@
-#EDGE-TCT DAQ SOFTWARE
-#dorfer@phys.ethz.ch
+####################################
+# File name: daq.py                
+# Author: Christian Dorfer
+# Email: cdorfer@phys.ethz.ch                                  
+####################################
 
 import sys
 from configobj import ConfigObj

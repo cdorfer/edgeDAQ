@@ -1,3 +1,9 @@
+####################################
+# File name: daq.py                
+# Author: Christian Dorfer
+# Email: cdorfer@phys.ethz.ch                                  
+####################################
+
 import visa
 import numpy
 from struct import unpack

@@ -1,3 +1,9 @@
+####################################
+# File name: daq.py                
+# Author: Christian Dorfer
+# Email: cdorfer@phys.ethz.ch                                  
+####################################
+
 from time import sleep, time
 import datetime
 from _thread import start_new_thread

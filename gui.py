@@ -1,3 +1,9 @@
+####################################
+# File name: daq.py                
+# Author: Christian Dorfer
+# Email: cdorfer@phys.ethz.ch                                  
+####################################
+
 from PyQt5.QtWidgets import QWidget, QPushButton, QHBoxLayout, QVBoxLayout, QSlider, QCheckBox, QComboBox, QSpinBox, QTextEdit
 from PyQt5.Qt import QLabel, QGridLayout, Qt, QDoubleSpinBox,QLCDNumber
 from time import sleep

@@ -1,3 +1,5 @@
+#Found on: https://pythonhosted.org/NewportESP/
+
 """Driver for Newport's ESP (and compatible) motion controllers over a serial port (RS232). 
 
 Refer to the controller's manual for detailed operational instructions: http://assets.newport.com/webDocuments-EN/images/ESP300_User_Manual.pdf
