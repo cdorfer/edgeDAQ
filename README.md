@@ -12,12 +12,13 @@ The software allows to collect waveforms at certain positions and perform 3D sca
 - Tektronix DPO5204B 2GHz
 
 ###Software Requirements:
-- Python3 (ConfigObj, PyQt5, numpy, matplotlib, pyserial)
+- Python3 (ConfigObj, PyQt5, numpy, matplotlib, pyserial, pyvisa)
 - Qt5
 - NI VISA
 
 ###Use:
 After all packages were installed the software can be easily started with:
+
 python main.py
 
 
