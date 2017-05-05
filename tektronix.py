@@ -70,6 +70,7 @@ class TektronixMSO5204B(object):
         self.inst.write('ch1:scale {0}'.format(self.voltsperdiv))                       #set vertical scale
         self.inst.write('ch1:ch1_offset {0}'.format(self.ch1_offset))                   #set vertical position
         self.inst.write('ch1:termination {0}'.format(self.ch1_termination))             #set channel 1 termination
+        self.inst.write('ch1:coupling ac')						#set channel 1 coupling
         self.inst.write('ch2:termination {0}'.format(self.ch2_termination))             #set channel 2 termination
         #print('Channel settings configured.')
         

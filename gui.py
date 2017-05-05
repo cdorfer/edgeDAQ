@@ -180,10 +180,12 @@ class Window(QWidget):
         self.defHome = QPushButton()
         self.defHome.setText('Define Home')
         self.defHome.clicked.connect(self.defHomeSlot)
+        self.defHome.setEnabled(False) #fixme, limits are screwed up after this.
         #self.defHome.setMinimumWidth(200)
         
         self.defHWLim = QPushButton()
         self.defHWLim.setText('Find HW Limits')
+        self.defHWLim.setEnabled(False) #fixme
         self.defHWLim.clicked.connect(self.positionControl.findHardwareLimits)
         #self.defHWLim.setMinimumWidth(60)
         

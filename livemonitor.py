@@ -5,19 +5,20 @@
 
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 import matplotlib.pyplot as plt
-import numpy as np
 
 
 class LiveMonitor(object):
     
     def __init__(self):
-        self.fig = plt.figure()                             #instance to plot on
+        self.fig, self.ax = plt.figure()                             #instance to plot on
         self.canvas = FigureCanvas(self.fig)                #canvas widget to display figure
         
         #waveform plot
         self.time_arr = None
         self.wfa_arr = None     #fist wf
         self.wfo_arr = None     #last wf
+        self.fig1 = None
+        self.fig2 = None
         
         #2D scan plot parameters
         self.xmin = 0
@@ -61,7 +62,7 @@ class LiveMonitor(object):
         self.x.append(round(x, 4))
         self.y.append(round(y,4))
         self.z.append(round(z,4))
-        self.sp.append(val)
+        self.sp.append(str(((val+50.0)/500))) #fixme - value can only be between 0-1
 
     def setStepSize(self, ss):
         (self.xstep, self.ystep, self.zstep) = ss
@@ -71,19 +72,20 @@ class LiveMonitor(object):
 
 
     def updatePlots(self): 
-        
         self.fig.add_subplot(211)
         plt.hold(False) #discards the old graph
-        plt.plot(self.time_arr, self.wfa_arr, 'k', self.time_arr, self.wfo_arr, 'r') #first wf: black, second one: red
+        self.fig1 = plt.plot(self.time_arr, self.wfa_arr, 'k', self.time_arr, self.wfo_arr, 'r') #first wf: black, second one: red
          
-    
-        self.fig.add_subplot(212)
-        plt.hold(False) #discards the old graph
-        if(len(self.x) != 0):
-            plt.scatter(self.x, self.y, c=self.sp, s=100, cmap='jet',edgecolors='none', marker='s')
-        plt.tight_layout(pad=1, w_pad=0.5, h_pad=2)
-        self.canvas.draw()
-         
+        
+        #self.fig.add_subplot(212)
+        #plt.hold(False) #discards the old graph
+        #if(len(self.x) != 0):
+        #    self.fig2 = plt.scatter(self.x, self.y, c=self.sp, s=100, cmap='jet',edgecolors='none', marker='s')
+        try:
+            plt.tight_layout(pad=1, w_pad=0.5, h_pad=2)
+            self.canvas.draw()
+        except:
+            pass
 
 
         
