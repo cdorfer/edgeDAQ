@@ -10,7 +10,7 @@ import matplotlib.pyplot as plt
 class LiveMonitor(object):
     
     def __init__(self):
-        self.fig, self.ax = plt.figure()                             #instance to plot on
+        self.fig = plt.figure()                             #instance to plot on
         self.canvas = FigureCanvas(self.fig)                #canvas widget to display figure
         
         #waveform plot
