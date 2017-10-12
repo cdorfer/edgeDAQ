@@ -15,6 +15,8 @@ class TektronixMSO5204B(object):
     :Usage: 
     >>> tek = TektronixMSO5204('TCPIP0::192.168.1.111::inst0::INSTR') # open communication with the scope
     """
+
+    #fixme: select channel upon selecting scan type
     
     def __init__(self, conf):
     

@@ -302,7 +302,8 @@ class Window(QWidget):
         self.zactive.setChecked(True)
         self.zactive.stateChanged.connect(lambda:self.btnstate(self.zactive))
 
-        #FIXME: add time approximation here...  
+        #FIXME: add time approximation here... 
+
         
         self.scanCtrLayout = QGridLayout()
         self.scanCtrLayout.setContentsMargins(4, 4, 4, 4)
@@ -335,7 +336,7 @@ class Window(QWidget):
         self.scanCtrLayout.addWidget(self.zstep, 15,6,1,1,Qt.AlignLeft)
         self.scanCtrLayout.addWidget(self.zactive, 15,7,1,1,Qt.AlignCenter)
         self.scanCtrLayout.addWidget(QLabel('<br>'), 16,1,1,1,Qt.AlignCenter)
-        
+
         
         self.scanWin = QHBoxLayout()
         self.scanWin.addLayout(self.scanCtrLayout)
@@ -569,40 +570,49 @@ class Window(QWidget):
  
     def xLimLowChange(self):
         self.acqControl.setXmin(self.xlimlow.value())
+        self.estimateScanTime()
         self.livemon.setPlotLimits([self.acqControl.xScanMin, self.acqControl.xScanMax, self.acqControl.yScanMin, self.acqControl.yScanMax, self.acqControl.zScanMin, self.acqControl.zScanMax])
         
     def xLimHighChange(self):
         self.acqControl.setXmax(self.xlimhigh.value())
+        self.estimateScanTime()
         self.livemon.setPlotLimits([self.acqControl.xScanMin, self.acqControl.xScanMax, self.acqControl.yScanMin, self.acqControl.yScanMax, self.acqControl.zScanMin, self.acqControl.zScanMax])
         
     def xStepChange(self):
         self.acqControl.setStepX(self.xstep.value())
+        self.estimateScanTime()
         self.livemon.setStepSize([self.acqControl.xScanStep, self.acqControl.yScanStep, self.acqControl.zScanStep])
         
         
     def yLimLowChange(self):
         self.acqControl.setYmin(self.ylimlow.value())
+        self.estimateScanTime()
         self.livemon.setPlotLimits([self.acqControl.xScanMin, self.acqControl.xScanMax, self.acqControl.yScanMin, self.acqControl.yScanMax, self.acqControl.zScanMin, self.acqControl.zScanMax])
         
     def yLimHighChange(self):
         self.acqControl.setYmax(self.ylimhigh.value())
+        self.estimateScanTime()
         self.livemon.setPlotLimits([self.acqControl.xScanMin, self.acqControl.xScanMax, self.acqControl.yScanMin, self.acqControl.yScanMax, self.acqControl.zScanMin, self.acqControl.zScanMax])
         
     def yStepChange(self):
         self.acqControl.setStepY(self.ystep.value())
+        self.estimateScanTime()
         self.livemon.setStepSize([self.acqControl.xScanStep, self.acqControl.yScanStep, self.acqControl.zScanStep])
      
         
     def zLimLowChange(self):
         self.acqControl.setZmin(self.zlimlow.value())
+        self.estimateScanTime()
         self.livemon.setPlotLimits([self.acqControl.xScanMin, self.acqControl.xScanMax, self.acqControl.yScanMin, self.acqControl.yScanMax, self.acqControl.zScanMin, self.acqControl.zScanMax])
         
     def zLimHighChange(self):
         self.acqControl.setZmax(self.zlimhigh.value())
+        self.estimateScanTime()
         self.livemon.setPlotLimits([self.acqControl.xScanMin, self.acqControl.xScanMax, self.acqControl.yScanMin, self.acqControl.yScanMax, self.acqControl.zScanMin, self.acqControl.zScanMax])
         
     def zStepChange(self):
         self.acqControl.setStepZ(self.zstep.value())
+        self.estimateScanTime()
         self.livemon.setStepSize([self.acqControl.xScanStep, self.acqControl.yScanStep, self.acqControl.zScanStep])
   
     
@@ -754,3 +764,14 @@ class Window(QWidget):
                 self.closeFile.setEnabled(False)
         
         self.newFile.setEnabled(True)
+
+    def estimateScanTime(self):
+        #calculate a time extimate for the scan
+        spsum = 0
+        if self.zactive:
+            spsum += abs(self.zScanMax-self.zScanMin)/abs(self.zScanStep)
+        if self.yactive:
+            spsum += abs(self.yScanMax-self.yScanMin)/abs(self.yScanStep)
+        if self.xactive:
+            spsum += abs(self.xScanMax-self.xScanMin)/abs(self.xScanStep)
+        print("Total number of scanpoints: ", spsum)
