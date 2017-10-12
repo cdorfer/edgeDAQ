@@ -22,18 +22,21 @@ class TektronixMSO5204B(object):
         self.config = conf
         self.rm = None
         self.inst = None
-        
-        #get settings form config file
-        self.resource = self.config['Tektronix']['address']
-        self.horizscale = self.config['Tektronix']['horizscale']  #sec/div
-        self.samplerate = self.config['Tektronix']['samplerate']  #S/sec
-        self.numberofwf = int(self.config['AcquisitionControl']['number_of_waveforms'])
-        self.voltsperdiv = float(self.config['Tektronix']['voltsperdiv'])
-        self.ch1_offset = float(self.config['Tektronix']['ch1_offset'])
-        self.ch2_trig_level =  float(self.config['Tektronix']['ch2_trig_level'])
-        self.ch1_termination = int(self.config['Tektronix']['ch1_termination'])
-        self.ch2_termination = int(self.config['Tektronix']['ch1_termination'])
-        
+        self.scan_type = 'regular'
+
+        #from config file:
+        self.resource = 0
+        self.horizscale = 0
+        self.samplerate = 0
+        self.numberofwf = 0
+        self.voltsperdiv = 0
+        self.ch1_offset = 0
+        self.ch2_trig_level =  0
+        self.ch1_termination = 0
+        self.ch2_termination = 0
+
+        self.readConfig()
+
         #class variables for data processing
         self.yoffset = 0
         self.ymult = 0
@@ -41,19 +44,35 @@ class TektronixMSO5204B(object):
         self.numberofpoints = 0
         self.xincrement = 0
         self.xzero = 0
-        
-        #self.configure()
 
 
     def open(self):
         #configure VISA resource
-        self.rm = visa.ResourceManager()
+        self.rm = visa.ResourceManager('@py')
         self.inst = self.rm.open_resource(self.resource) 
         
         print('Connected to: ', self.inst.ask('*idn?').rstrip())
         self.inst.write('*rst')  #default the instrument
-    
-    
+
+    def readConfig(self):
+        tekConfig = 'TektronixDiamond'
+        if scan_type == 'knive_edge':
+            tekConfig = 'TektronixDiode'
+
+        self.resource = self.config[tekConfig]['address']
+        self.horizscale = self.config[tekConfig]['horizscale']  #sec/div
+        self.samplerate = self.config[tekConfig]['samplerate']  #S/sec
+        self.numberofwf = int(self.config[tekConfig]['number_of_waveforms'])
+        self.voltsperdiv = float(self.config[tekConfig]['voltsperdiv'])
+        self.ch1_offset = float(self.config[tekConfig]['ch1_offset'])
+        self.ch2_trig_level =  float(self.config[tekConfig]['ch2_trig_level'])
+        self.ch1_termination = int(self.config[tekConfig]['ch1_termination'])
+        self.ch2_termination = int(self.config[tekConfig]['ch1_termination'])
+
+    #gui interface to select different oscilloscope configurations
+    def setScanType(self, scantype):
+        self.scan_type = scantype
+        self.readConfig()
 
     def configure(self):
         #update number of waveforms to be acquired

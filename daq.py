@@ -40,6 +40,7 @@ class DataHandling(object):
         self.side = int(self.config['AcquisitionControl']['side'])
         self.bias_voltage = float(self.config['AcquisitionControl']['bias_voltage'])
         self.amplifier = self.config['AcquisitionControl']['amplifier']
+        self.scan_type = self.config['AcquisitionControl']['scan_type']
         self.laser_pulse_energy = float(self.config['AcquisitionControl']['laser_pulse_energy'])
         self.pcb = self.config['AcquisitionControl']['pcb']
         self.nwf = int(self.config['AcquisitionControl']['number_of_waveforms'])
@@ -68,6 +69,7 @@ class DataHandling(object):
         self.tctdata.attrs['laser_pulse_energy'] = self.laser_pulse_energy
         self.tctdata.attrs['side'] = self.side
         self.tctdata.attrs['amplifier'] = self.amplifier
+        self.tctdata.attrs['scan_type'] = self.scan_type
         self.tctdata.attrs['pcb'] = self.pcb
         self.tctdata.attrs['comments'] = comment
         print('File ', fname, ' created.')
@@ -130,11 +132,19 @@ class DataHandling(object):
         self.laser_pulse_energy = val
         self.config['AcquisitionControl']['laser_pulse_energy'] = val
         self.config.write()
-        
+    
+    ''' function replaced by set scan type
     def setAmplifier(self, val):
         self.amplifier = val
         self.config['AcquisitionControl']['amplifier'] = val
         self.config.write()
+    '''
+
+    def setScanType(self, val):
+        self.scan_type = val
+        self.config['AcquisitionControl']['scan_type'] = val
+        self.config.write()
+
 
     def setPCB(self, val):
         self.pcb = val
@@ -150,6 +160,7 @@ class DataHandling(object):
 
 class PositionControl(object):
     def __init__(self, stage, axes, config):
+        self.config = config
         self.stage = stage
         self.xaxis = axes[0]
         self.yaxis = axes[1]
@@ -160,13 +171,16 @@ class PositionControl(object):
         self.zStepSize = float(config['PositionControl']['zStepSize'])
                                                        
         #hardware limits:
-        self.xlimlow = -50 # all in mm
-        self.xlimhigh = 50
-        self.ylimlow = -2.5
-        self.ylimhigh = 2.5
-        self.zlimlow = -75
-        self.zlimhigh = 75
+        self.xlimlow = float(config['PositionControl']['xLimLow'])
+        self.xlimhigh = float(config['PositionControl']['xLimHigh'])
+
+        self.ylimlow = float(config['PositionControl']['yLimLow'])
+        self.ylimhigh = float(config['PositionControl']['yLimHigh'])
+
+        self.zlimlow = float(config['PositionControl']['zLimLow'])
+        self.zlimhigh = float(config['PositionControl']['zLimHigh'])
             
+
     def moveAbsoluteX(self, position): 
         self.xaxis.on()
         self.xaxis.move_to((position), wait=True)
@@ -219,9 +233,7 @@ class PositionControl(object):
                         
     def getCurrentHome(self):  
         return (self.xaxis.home, self.yaxis.home, self.zaxis.home)
-     
-     
-                
+               
     def setHome(self):
         self.xlimlow =  self.xlimlow -self.xaxis.position
         self.xlimhigh = self.xlimhigh - self.xaxis.position
@@ -266,6 +278,15 @@ class PositionControl(object):
         self.yaxis.move_to_hardware_limit(1, wait=True)
         self.ylimhigh = self.yaxis.position
         self.yaxis.move_to((self.ylimlow+self.ylimhigh)/2, wait=True)
+                                        
+        #save the limits in the config
+        self.config['PositionControl']['xLimLow'] = self.xlimlow
+        self.config['PositionControl']['xLimHigh'] = self.xlimhigh
+        self.config['PositionControl']['yLimLow'] = self.ylimlow
+        self.config['PositionControl']['yLimHigh'] = self.ylimhigh
+        self.config['PositionControl']['zLimLow'] = self.zlimlow
+        self.config['PositionControl']['zLimHigh'] = self.zlimhigh
+        self.config.write()
         
 
 

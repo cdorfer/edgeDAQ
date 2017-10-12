@@ -65,34 +65,33 @@ class Window(QWidget):
         
         self.xSlider = QSlider()
         self.xSlider.setOrientation(Qt.Horizontal)
-        self.xSlider.setValue(self.positionControl.getXPosition()*(10**6)) #to nm
+        self.xSlider.setMinimumWidth(220)  
         self.xSlider.setTickInterval(1)
+        self.xSlider.setPageStep(self.xStepSize*1000) #1000 to display um not nm        
         self.xSlider.setMaximum(self.positionControl.getXMax()*(10**6)) #to nm
         self.xSlider.setMinimum(self.positionControl.getXMin()*(10**6)) #to nm
+        self.xSlider.setValue(self.positionControl.getXPosition()*(10**6)) #to nm
         self.xSlider.valueChanged.connect(self.sliderXChange)
-        self.xSlider.setPageStep(self.xStepSize*1000) #1000 to display um not nm
-        self.xSlider.setMinimumWidth(220)   
-          
+
         self.ySlider = QSlider()
-        self.ySlider.setOrientation(Qt.Horizontal)   
-        self.ySlider.setValue(self.positionControl.getYPosition()*(10**6)) #to nm
+        self.ySlider.setOrientation(Qt.Horizontal)  
+        self.ySlider.setMinimumWidth(220)
         self.ySlider.setTickInterval(1)
+        self.ySlider.setPageStep(self.yStepSize*1000) #1000 to display um not nm
         self.ySlider.setMaximum(self.positionControl.getYMax()*(10**6)) #to nm
         self.ySlider.setMinimum(self.positionControl.getYMin()*(10**6)) #to nm
+        self.ySlider.setValue(self.positionControl.getYPosition()*(10**6)) #to nm
         self.ySlider.valueChanged.connect(self.sliderYChange)
-        self.ySlider.setPageStep(self.yStepSize*1000) #1000 to display um not nm
-        self.ySlider.setMinimumWidth(220)
-        
+
         self.zSlider = QSlider()
         self.zSlider.setOrientation(Qt.Horizontal)
-        self.zSlider.setValue(self.positionControl.getZPosition()*(10**6)) #to nm
+        self.zSlider.setMinimumWidth(220)
         self.zSlider.setTickInterval(1)
+        self.zSlider.setPageStep(self.zStepSize*1000) #1000 to display um not nm
         self.zSlider.setMaximum(self.positionControl.getZMax()*(10**6)) #to nm
         self.zSlider.setMinimum(self.positionControl.getZMin()*(10**6)) #to nm
+        self.zSlider.setValue(self.positionControl.getZPosition()*(10**6)) #to nm
         self.zSlider.valueChanged.connect(self.sliderZChange)
-        self.zSlider.setPageStep(self.zStepSize*1000) #1000 to display um not nm
-        self.zSlider.setMinimumWidth(220)
-    
     
         self.xSpinBox = QDoubleSpinBox()
         self.xSpinBox.setMaximum(10000)
@@ -180,12 +179,12 @@ class Window(QWidget):
         self.defHome = QPushButton()
         self.defHome.setText('Define Home')
         self.defHome.clicked.connect(self.defHomeSlot)
-        self.defHome.setEnabled(False) #fixme, limits are screwed up after this.
+        self.defHome.setEnabled(True) #fixme, limits are screwed up after this.
         #self.defHome.setMinimumWidth(200)
         
         self.defHWLim = QPushButton()
         self.defHWLim.setText('Find HW Limits')
-        self.defHWLim.setEnabled(False) #fixme
+        self.defHWLim.setEnabled(True) #fixme
         self.defHWLim.clicked.connect(self.positionControl.findHardwareLimits)
         #self.defHWLim.setMinimumWidth(60)
         
@@ -198,12 +197,7 @@ class Window(QWidget):
         
         self.posWin = QHBoxLayout()
         self.posWin.addLayout(self.posCtrLayout)
-        
-
-
-
-
-            
+                    
         self.xlimlow = QDoubleSpinBox()
         self.xlimlow.setMaximum(100)
         self.xlimlow.setMinimum(-100)
@@ -307,7 +301,8 @@ class Window(QWidget):
         self.zactive = QCheckBox('onZ')
         self.zactive.setChecked(True)
         self.zactive.stateChanged.connect(lambda:self.btnstate(self.zactive))
-        
+
+        #FIXME: add time approximation here...  
         
         self.scanCtrLayout = QGridLayout()
         self.scanCtrLayout.setContentsMargins(4, 4, 4, 4)
@@ -410,13 +405,13 @@ class Window(QWidget):
         self.diamond_side.currentIndexChanged.connect(self.diamSideSlot)
         self.acqCtrLayout.addWidget(self.diamond_side, 4,4,1,1, Qt.AlignLeft)
         
-        self.acqCtrLayout.addWidget(QLabel('        Amplifier:'), 5,3,1,1,Qt.AlignLeft)
-        self.amplifier = QComboBox()
-        self.amplifier.addItems(['cividec', 'particulars'])
-        self.amplifier.setMinimumWidth(104)
-        self.amplifier.setCurrentText(self.datahandler.amplifier)
-        self.amplifier.currentIndexChanged.connect(self.AmplifierSlot)
-        self.acqCtrLayout.addWidget(self.amplifier, 5,4,1,1, Qt.AlignLeft)
+        self.acqCtrLayout.addWidget(QLabel('        Scan Type:'), 5,3,1,1,Qt.AlignLeft)
+        self.scan_type = QComboBox()
+        self.scan_type.addItems(['regular', 'knive_edge'])
+        self.scan_type.setMinimumWidth(104)
+        self.scan_type.setCurrentText(self.datahandler.scan_type)
+        self.scan_type.currentIndexChanged.connect(self.ScanTypeSlot)
+        self.acqCtrLayout.addWidget(self.scan_type, 5,4,1,1, Qt.AlignLeft)
           
         self.acqCtrLayout.addWidget(QLabel('        PCB Version:'), 6,3,1,1,Qt.AlignLeft) 
         self.pcb = QComboBox()
@@ -657,8 +652,9 @@ class Window(QWidget):
         self.datahandler.setSide(self.diamond_side.currentText())
         self.newFile.setEnabled(False)   
  
-    def AmplifierSlot(self):
-        self.datahandler.setAmplifier(self.amplifier.currentText())
+    def ScanTypeSlot(self):
+        self.datahandler.setScanType(self.scan_type.currentText())
+        acqC.tek.setScanType(self.scan_type.currentText())
         self.newFile.setEnabled(False)
        
     def PCBSlot(self):
@@ -693,7 +689,7 @@ class Window(QWidget):
         self.nwf.setEnabled(False)
         self.pulse_energy.setEnabled(False)
         self.diamond_side.setEnabled(False)
-        self.amplifier.setEnabled(False)
+        self.scan_type.setEnabled(False)
         self.pcb.setEnabled(False)
         self.comments.setEnabled(False)
         
@@ -712,7 +708,7 @@ class Window(QWidget):
         self.nwf.setEnabled(True)
         self.pulse_energy.setEnabled(True)
         self.diamond_side.setEnabled(True)
-        self.amplifier.setEnabled(True)
+        self.scan_type.setEnabled(True)
         self.pcb.setEnabled(True)
         self.comments.setEnabled(True)
         self.livemon.resetPlots()
