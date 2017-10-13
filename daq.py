@@ -84,7 +84,7 @@ class DataHandling(object):
         self.tctdata[sp].attrs['z'] = z
         self.tctdata[sp].attrs['time_axis'] = time_axis
         self.spcount += 1
-        print('Scanpoint ', sp, ' written to file.')
+        #print('Scanpoint ', sp, ' written to file.')
             
         #send data to online monitor
         self.livemon.setWaveform(time_axis, wfarr[0:len(time_axis)], wfarr[len(wfarr)-len(time_axis):len(wfarr)]) #wf plot
@@ -92,6 +92,7 @@ class DataHandling(object):
         self.livemon.setScanPoint(x, y, z, np.sum(wfarr[0:len(time_axis)]))
         
         start_new_thread(self.livemon.updatePlots, ())
+        return sp
         
     
     def increaseRunNumber(self):
@@ -317,6 +318,8 @@ class AcquisitionControl(object):
         self.yactive = True
         self.zactive = True
         self.running = False
+
+        self.nScanPoints = 0
  
     
     def startScan(self, stop_event, arg):        
@@ -380,9 +383,9 @@ class AcquisitionControl(object):
                         return
                     
                     #print("x: %.2f" %self.xaxis.position, " y: %.2f" %self.yaxis.position, " z: %.2f" %self.zaxis.position)
-                    self.collectNWfs()
+                    nsp = self.collectNWfs()
                     endt = datetime.datetime.now()
-                    print('Time per scanpoint: ', (endt-startt).total_seconds()*1000)
+                    print('Scanpoint ', nsp, '/', self.nScanPoints, ' written to file (', round(((endt-startt).total_seconds()*1000),1), ' ms )')
                     
         print('Scan finished.')
         return 1
@@ -402,8 +405,8 @@ class AcquisitionControl(object):
     def collectNWfs(self):
         timestamp = time()
         (scaleddata, scaledtime) = self.tek.acquireWaveforms()
-        self.dh.addScanPointData(timestamp, self.xaxis.position, self.yaxis.position, self.zaxis.position, scaledtime, scaleddata)
-        
+        nsp = self.dh.addScanPointData(timestamp, self.xaxis.position, self.yaxis.position, self.zaxis.position, scaledtime, scaleddata)
+        return nsp
 
     def setXactive(self, val):
         self.xactive = val
@@ -499,5 +502,6 @@ class AcquisitionControl(object):
                 xpts = abs(self.xScanMin-self.xScanMax)/abs(self.xScanStep)
         xpts = int(xpts) + 1
 
-        print("Scan steps: ", zpts*ypts*xpts)
+        self.nScanPoints = zpts*ypts*xpts
+        print("Scan steps: ", self.nScanPoints)
     

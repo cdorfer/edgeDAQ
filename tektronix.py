@@ -152,13 +152,14 @@ class TektronixMSO5204B(object):
         scaleddata = (data-self.yoffset)*self.ymult+self.yzero
         #scale data to volts
         scaledtime = numpy.arange(self.xzero,self.xzero+(self.xincrement*self.numberofpoints),self.xincrement)  #always the same time
-        print('Waveforms acquired.')
+        #print('Waveforms acquired.')
         return (scaleddata.astype(numpy.float32), scaledtime.astype(numpy.float32))
 
     def reset(self):
         #reset to normal working mode
         self.inst.write('horizontal:fastframe:state 0') #turn  FastFrame off
-        self.inst.write('acquire:state 0') 
+        self.inst.write('acquire:state 1') 
+        print('Hi there.')
 
 
 

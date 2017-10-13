@@ -11,6 +11,8 @@ class LiveMonitor(object):
     
     def __init__(self):
         self.fig = plt.figure()                             #instance to plot on
+        self.g1 = self.fig.add_subplot(211)                 #graph for waveform plotting
+        self.g2 = self.fig.add_subplot(212)                 #graph to plot 2d scan map
         self.canvas = FigureCanvas(self.fig)                #canvas widget to display figure
         
         #waveform plot
@@ -49,14 +51,16 @@ class LiveMonitor(object):
         self.z = []
         self.sp = []
         
-        self.fig.clf()
+        self.g1.clear()
+        self.g2.clear()
+
         self.canvas.draw()
     
       
     def setWaveform(self, timea, wfa, wfo):
-        self.time_arr = timea
-        self.wfa_arr = wfa
-        self.wfo_arr = wfo
+        self.time_arr = timea*1e9
+        self.wfa_arr = wfa*1e3
+        self.wfo_arr = wfo*1e3
     
     def setScanPoint(self, x, y, z, val):
         self.x.append(round(x, 4))
@@ -72,15 +76,17 @@ class LiveMonitor(object):
 
 
     def updatePlots(self): 
-        self.fig.add_subplot(211)
-        plt.hold(False) #discards the old graph
-        self.fig1 = plt.plot(self.time_arr, self.wfa_arr, 'k', self.time_arr, self.wfo_arr, 'r') #first wf: black, second one: red
-         
-        
-        #self.fig.add_subplot(212)
-        #plt.hold(False) #discards the old graph
-        #if(len(self.x) != 0):
-        #    self.fig2 = plt.scatter(self.x, self.y, c=self.sp, s=100, cmap='jet',edgecolors='none', marker='s')
+        self.g1.clear()
+        self.g1.set_xlabel('Time [ns]')
+        self.g1.set_ylabel('Amplitude [mv]')
+        self.g1.plot(self.time_arr, self.wfa_arr, 'k', self.time_arr, self.wfo_arr, 'r') #first wf: black, second one: red
+
+        if(len(self.x) != 0):
+            self.g2.clear()
+            self.g2.set_xlabel('x [mm]')
+            self.g2.set_ylabel('y [mm]')
+
+            self.g2.scatter(self.x, self.y, c=self.sp, s=100, cmap='jet',edgecolors='none', marker='s')
         try:
             plt.tight_layout(pad=1, w_pad=0.5, h_pad=2)
             self.canvas.draw()

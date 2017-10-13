@@ -4,7 +4,7 @@
 ####################################
 
 from PyQt5.QtWidgets import QWidget, QPushButton, QHBoxLayout, QVBoxLayout, QSlider, QCheckBox, QComboBox, QSpinBox, QTextEdit, QProgressBar
-from PyQt5.Qt import QLabel, QGridLayout, Qt, QDoubleSpinBox,QLCDNumber
+from PyQt5.Qt import QLabel, QGridLayout, Qt, QDoubleSpinBox, QLCDNumber
 from time import sleep
 from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as NavigationToolbar
 import threading
@@ -184,7 +184,7 @@ class Window(QWidget):
         
         self.defHWLim = QPushButton()
         self.defHWLim.setText('Find HW Limits')
-        self.defHWLim.setEnabled(True) #fixme
+        self.defHWLim.setEnabled(False) #fixme
         self.defHWLim.clicked.connect(self.positionControl.findHardwareLimits)
         #self.defHWLim.setMinimumWidth(60)
         
@@ -207,6 +207,11 @@ class Window(QWidget):
         self.xlimlow.setValue(self.xScanMin)
         self.xlimlow.valueChanged.connect(self.xLimLowChange)
         self.xLimLowChange()
+
+        self.xlimlowset = QPushButton()
+        self.xlimlowset.setText(("X\u2098\u1D62\u2099"))
+        self.xlimlowset.clicked.connect(self.xLimLowSet)
+        self.xlimlowset.setMaximumWidth(45)
         
         self.xlimhigh = QDoubleSpinBox()
         self.xlimhigh.setMaximum(100)
@@ -217,6 +222,11 @@ class Window(QWidget):
         self.xlimhigh.setValue(self.xScanMax)
         self.xlimhigh.valueChanged.connect(self.xLimHighChange) 
         self.xLimHighChange()
+
+        self.xlimhighset = QPushButton()
+        self.xlimhighset.setText(("X\u2098\u2090\u2093"))
+        self.xlimhighset.clicked.connect(self.xLimHighSet)
+        self.xlimhighset.setMaximumWidth(45)
         
         self.xstep = QDoubleSpinBox()
         self.xstep.setMaximum(20)
@@ -242,6 +252,11 @@ class Window(QWidget):
         self.ylimlow.setValue(self.yScanMin)
         self.ylimlow.valueChanged.connect(self.yLimLowChange)
         self.yLimLowChange()
+
+        self.ylimlowset = QPushButton()
+        self.ylimlowset.setText(("Y\u2098\u1D62\u2099"))
+        self.ylimlowset.clicked.connect(self.yLimLowSet)
+        self.ylimlowset.setMaximumWidth(45)
         
         self.ylimhigh = QDoubleSpinBox()
         self.ylimhigh.setMaximum(5)
@@ -252,6 +267,11 @@ class Window(QWidget):
         self.ylimhigh.setValue(self.yScanMax)
         self.ylimhigh.valueChanged.connect(self.yLimHighChange) 
         self.yLimHighChange()
+
+        self.ylimhighset = QPushButton()
+        self.ylimhighset.setText(("Y\u2098\u2090\u2093"))
+        self.ylimhighset.clicked.connect(self.yLimHighSet)
+        self.ylimhighset.setMaximumWidth(45)
         
         self.ystep = QDoubleSpinBox()
         self.ystep.setMaximum(1)
@@ -267,7 +287,6 @@ class Window(QWidget):
         self.yactive.setChecked(True)
         self.yactive.stateChanged.connect(lambda:self.btnstate(self.yactive))
        
-         
         self.zlimlow = QDoubleSpinBox()
         self.zlimlow.setMaximum(150)
         self.zlimlow.setMinimum(-150)
@@ -277,6 +296,11 @@ class Window(QWidget):
         self.zlimlow.setValue(self.zScanMin)
         self.zlimlow.valueChanged.connect(self.zLimLowChange)
         self.zLimLowChange()
+
+        self.zlimlowset = QPushButton()
+        self.zlimlowset.setText(("Z\u2098\u1D62\u2099"))
+        self.zlimlowset.clicked.connect(self.zLimLowSet)
+        self.zlimlowset.setMaximumWidth(45)
         
         self.zlimhigh = QDoubleSpinBox()
         self.zlimhigh.setMaximum(150)
@@ -287,6 +311,11 @@ class Window(QWidget):
         self.zlimhigh.setValue(self.zScanMax)
         self.zlimhigh.valueChanged.connect(self.zLimHighChange)
         self.zLimLowChange() 
+
+        self.zlimhighset = QPushButton()
+        self.zlimhighset.setText(("Z\u2098\u2090\u2093"))
+        self.zlimhighset.clicked.connect(self.zLimHighSet)
+        self.zlimhighset.setMaximumWidth(45)
         
         self.zstep = QDoubleSpinBox()
         self.zstep.setMaximum(20)
@@ -312,25 +341,26 @@ class Window(QWidget):
    
         self.scanCtrLayout.addWidget(QLabel('Limits for Automatic Scan<br>'), 10,1,1,7,Qt.AlignCenter)
         #scan limits and steps     
-        self.scanCtrLayout.addWidget(QLabel('X<sub>min</sub>'), 13,1,1,1,Qt.AlignCenter)
+
+        self.scanCtrLayout.addWidget(self.xlimlowset, 13,1,1,1,Qt.AlignCenter)
         self.scanCtrLayout.addWidget(self.xlimlow, 13,2,1,1,Qt.AlignLeft)
-        self.scanCtrLayout.addWidget(QLabel('X<sub>max</sub>'), 13,3,1,1,Qt.AlignCenter)
+        self.scanCtrLayout.addWidget(self.xlimhighset, 13,3,1,1,Qt.AlignCenter)
         self.scanCtrLayout.addWidget(self.xlimhigh, 13,4,1,1,Qt.AlignLeft)
         self.scanCtrLayout.addWidget(QLabel('X<sub>step</sub>'), 13,5,1,1,Qt.AlignCenter)
         self.scanCtrLayout.addWidget(self.xstep, 13,6,1,1,Qt.AlignLeft)
         self.scanCtrLayout.addWidget(self.xactive, 13,7,1,1,Qt.AlignCenter)
         
-        self.scanCtrLayout.addWidget(QLabel('Y<sub>min</sub>'), 14,1,1,1,Qt.AlignCenter)
+        self.scanCtrLayout.addWidget(self.ylimlowset, 14,1,1,1,Qt.AlignCenter)
         self.scanCtrLayout.addWidget(self.ylimlow, 14,2,1,1,Qt.AlignLeft)
-        self.scanCtrLayout.addWidget(QLabel('Y<sub>max</sub>'), 14,3,1,1,Qt.AlignCenter)
+        self.scanCtrLayout.addWidget(self.ylimhighset, 14,3,1,1,Qt.AlignCenter)
         self.scanCtrLayout.addWidget(self.ylimhigh, 14,4,1,1,Qt.AlignLeft)
         self.scanCtrLayout.addWidget(QLabel('Y<sub>step</sub>'), 14,5,1,1,Qt.AlignCenter)
         self.scanCtrLayout.addWidget(self.ystep, 14,6,1,1,Qt.AlignLeft)
         self.scanCtrLayout.addWidget(self.yactive, 14,7,1,1,Qt.AlignCenter)
 
-        self.scanCtrLayout.addWidget(QLabel('Z<sub>min</sub>'), 15,1,1,1,Qt.AlignCenter)
+        self.scanCtrLayout.addWidget(self.zlimlowset, 15,1,1,1,Qt.AlignCenter)
         self.scanCtrLayout.addWidget(self.zlimlow, 15,2,1,1,Qt.AlignLeft)
-        self.scanCtrLayout.addWidget(QLabel('Z<sub>max</sub>'), 15,3,1,1,Qt.AlignCenter)
+        self.scanCtrLayout.addWidget(self.zlimhighset, 15,3,1,1,Qt.AlignCenter)
         self.scanCtrLayout.addWidget(self.zlimhigh, 15,4,1,1,Qt.AlignLeft)
         self.scanCtrLayout.addWidget(QLabel('Z<sub>step</sub>'), 15,5,1,1,Qt.AlignCenter)
         self.scanCtrLayout.addWidget(self.zstep, 15,6,1,1,Qt.AlignLeft)
@@ -573,11 +603,19 @@ class Window(QWidget):
     def xLimLowChange(self):
         self.acqControl.setXmin(self.xlimlow.value())
         self.livemon.setPlotLimits([self.acqControl.xScanMin, self.acqControl.xScanMax, self.acqControl.yScanMin, self.acqControl.yScanMax, self.acqControl.zScanMin, self.acqControl.zScanMax])
-        
+    
+    def xLimLowSet(self):
+        val = self.positionControl.getXPosition()
+        self.xlimlow.setValue(val)
+
     def xLimHighChange(self):
         self.acqControl.setXmax(self.xlimhigh.value())
         self.livemon.setPlotLimits([self.acqControl.xScanMin, self.acqControl.xScanMax, self.acqControl.yScanMin, self.acqControl.yScanMax, self.acqControl.zScanMin, self.acqControl.zScanMax])
         
+    def xLimHighSet(self):
+        val = self.positionControl.getXPosition()
+        self.xlimhigh.setValue(val)
+
     def xStepChange(self):
         self.acqControl.setStepX(self.xstep.value())
         self.livemon.setStepSize([self.acqControl.xScanStep, self.acqControl.yScanStep, self.acqControl.zScanStep])
@@ -586,11 +624,19 @@ class Window(QWidget):
     def yLimLowChange(self):
         self.acqControl.setYmin(self.ylimlow.value())
         self.livemon.setPlotLimits([self.acqControl.xScanMin, self.acqControl.xScanMax, self.acqControl.yScanMin, self.acqControl.yScanMax, self.acqControl.zScanMin, self.acqControl.zScanMax])
-        
+
+    def yLimLowSet(self):
+        val = self.positionControl.getYPosition()
+        self.ylimlow.setValue(val)
+
     def yLimHighChange(self):
         self.acqControl.setYmax(self.ylimhigh.value())
         self.livemon.setPlotLimits([self.acqControl.xScanMin, self.acqControl.xScanMax, self.acqControl.yScanMin, self.acqControl.yScanMax, self.acqControl.zScanMin, self.acqControl.zScanMax])
-        
+ 
+    def yLimHighSet(self):
+        val = self.positionControl.getYPosition()
+        self.ylimhigh.setValue(val)
+       
     def yStepChange(self):
         self.acqControl.setStepY(self.ystep.value())
         self.livemon.setStepSize([self.acqControl.xScanStep, self.acqControl.yScanStep, self.acqControl.zScanStep])
@@ -599,11 +645,19 @@ class Window(QWidget):
     def zLimLowChange(self):
         self.acqControl.setZmin(self.zlimlow.value())
         self.livemon.setPlotLimits([self.acqControl.xScanMin, self.acqControl.xScanMax, self.acqControl.yScanMin, self.acqControl.yScanMax, self.acqControl.zScanMin, self.acqControl.zScanMax])
-        
+
+    def zLimLowSet(self):
+        val = self.positionControl.getZPosition()
+        self.zlimlow.setValue(val)
+
     def zLimHighChange(self):
         self.acqControl.setZmax(self.zlimhigh.value())
         self.livemon.setPlotLimits([self.acqControl.xScanMin, self.acqControl.xScanMax, self.acqControl.yScanMin, self.acqControl.yScanMax, self.acqControl.zScanMin, self.acqControl.zScanMax])
-        
+
+    def zLimHighSet(self):
+        val = self.positionControl.getZPosition()
+        self.zlimhigh.setValue(val)
+
     def zStepChange(self):
         self.acqControl.setStepZ(self.zstep.value())
         self.livemon.setStepSize([self.acqControl.xScanStep, self.acqControl.yScanStep, self.acqControl.zScanStep])
