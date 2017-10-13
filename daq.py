@@ -392,6 +392,7 @@ class AcquisitionControl(object):
         self.tek.open()
         
     def closeTek(self):
+        self.tek.reset()
         self.tek.close()
     
     def configureTek(self):
@@ -418,45 +419,85 @@ class AcquisitionControl(object):
         self.xScanMin = val
         self.config['AcquisitionControl']['xMin'] = val
         self.config.write()
+        self.estimateScanSteps()
         
     def setXmax(self, val):
         self.xScanMax = val
         self.config['AcquisitionControl']['xMax'] = val
         self.config.write()
+        self.estimateScanSteps()
         
+
     def setYmin(self, val):
         self.yScanMin = val
         self.config['AcquisitionControl']['yMin'] = val
         self.config.write()
+        self.estimateScanSteps()
         
     def setYmax(self, val):
         self.yScanMax = val
         self.config['AcquisitionControl']['yMax'] = val
         self.config.write()
+        self.estimateScanSteps()
         
+
     def setZmin(self, val):
         self.zScanMin = val
         self.config['AcquisitionControl']['zMin'] = val
         self.config.write()
-        
+        self.estimateScanSteps()
         
     def setZmax(self, val):
         self.zScanMax = val
         self.config['AcquisitionControl']['zMax'] = val
         self.config.write()
+        self.estimateScanSteps()
        
+
     def setStepX(self, val):
         self.xScanStep = val
         self.config['AcquisitionControl']['xStep'] = val
         self.config.write()
+        self.estimateScanSteps()
         
     def setStepY(self, val):
         self.yScanStep = val
         self.config['AcquisitionControl']['yStep'] = val
         self.config.write()
+        self.estimateScanSteps()
         
     def setStepZ(self, val):
         self.zScanStep = val
         self.config['AcquisitionControl']['zStep'] = val
         self.config.write()
+        self.estimateScanSteps()
+
+
+    def estimateScanSteps(self):
+        #calculate a time extimate for the scan
+        zpts = 0
+        if self.zactive and self.zScanStep != 0:
+            if self.zScanMax >= self.zScanMin:
+                zpts = abs(self.zScanMax-self.zScanMin)/abs(self.zScanStep)
+            else:
+                zpts = abs(self.zScanMin-self.zScanMax)/abs(self.zScanStep)
+        zpts = int(zpts) + 1
+
+        ypts = 0
+        if self.yactive and self.yScanStep != 0:
+            if self.yScanMax >= self.yScanMin:
+                ypts = abs(self.yScanMax-self.yScanMin)/abs(self.yScanStep)
+            else:
+                ypts = abs(self.yScanMin-self.yScanMax)/abs(self.yScanStep)
+        ypts = int(ypts) + 1
+
+        xpts = 0
+        if self.xactive and self.xScanStep != 0:
+            if self.xScanMax >= self.xScanMin:
+                xpts = abs(self.xScanMax-self.xScanMin)/abs(self.xScanStep)
+            else:
+                xpts = abs(self.xScanMin-self.xScanMax)/abs(self.xScanStep)
+        xpts = int(xpts) + 1
+
+        print("Scan steps: ", zpts*ypts*xpts)
     

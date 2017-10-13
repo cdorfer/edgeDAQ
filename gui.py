@@ -3,7 +3,7 @@
 # Email: cdorfer@phys.ethz.ch                                  
 ####################################
 
-from PyQt5.QtWidgets import QWidget, QPushButton, QHBoxLayout, QVBoxLayout, QSlider, QCheckBox, QComboBox, QSpinBox, QTextEdit
+from PyQt5.QtWidgets import QWidget, QPushButton, QHBoxLayout, QVBoxLayout, QSlider, QCheckBox, QComboBox, QSpinBox, QTextEdit, QProgressBar
 from PyQt5.Qt import QLabel, QGridLayout, Qt, QDoubleSpinBox,QLCDNumber
 from time import sleep
 from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as NavigationToolbar
@@ -302,9 +302,9 @@ class Window(QWidget):
         self.zactive.setChecked(True)
         self.zactive.stateChanged.connect(lambda:self.btnstate(self.zactive))
 
-        #FIXME: add time approximation here... 
+        #self.progress = QProgressBar(self)
+        #self.progress.resetProgressBar()
 
-        
         self.scanCtrLayout = QGridLayout()
         self.scanCtrLayout.setContentsMargins(4, 4, 4, 4)
         self.scanCtrLayout.setSpacing(2)
@@ -335,7 +335,9 @@ class Window(QWidget):
         self.scanCtrLayout.addWidget(QLabel('Z<sub>step</sub>'), 15,5,1,1,Qt.AlignCenter)
         self.scanCtrLayout.addWidget(self.zstep, 15,6,1,1,Qt.AlignLeft)
         self.scanCtrLayout.addWidget(self.zactive, 15,7,1,1,Qt.AlignCenter)
-        self.scanCtrLayout.addWidget(QLabel('<br>'), 16,1,1,1,Qt.AlignCenter)
+        #self.scanCtrLayout.addWidget(QLabel('    Progress: '), 16,1,1,1,Qt.AlignCenter)
+        #self.scanCtrLayout.addWidget(self.progress, 16,2,1,6, Qt.AlignLeft)
+        self.scanCtrLayout.addWidget(QLabel('<br>'), 17,1,1,1,Qt.AlignCenter)
 
         
         self.scanWin = QHBoxLayout()
@@ -570,49 +572,40 @@ class Window(QWidget):
  
     def xLimLowChange(self):
         self.acqControl.setXmin(self.xlimlow.value())
-        self.estimateScanTime()
         self.livemon.setPlotLimits([self.acqControl.xScanMin, self.acqControl.xScanMax, self.acqControl.yScanMin, self.acqControl.yScanMax, self.acqControl.zScanMin, self.acqControl.zScanMax])
         
     def xLimHighChange(self):
         self.acqControl.setXmax(self.xlimhigh.value())
-        self.estimateScanTime()
         self.livemon.setPlotLimits([self.acqControl.xScanMin, self.acqControl.xScanMax, self.acqControl.yScanMin, self.acqControl.yScanMax, self.acqControl.zScanMin, self.acqControl.zScanMax])
         
     def xStepChange(self):
         self.acqControl.setStepX(self.xstep.value())
-        self.estimateScanTime()
         self.livemon.setStepSize([self.acqControl.xScanStep, self.acqControl.yScanStep, self.acqControl.zScanStep])
         
         
     def yLimLowChange(self):
         self.acqControl.setYmin(self.ylimlow.value())
-        self.estimateScanTime()
         self.livemon.setPlotLimits([self.acqControl.xScanMin, self.acqControl.xScanMax, self.acqControl.yScanMin, self.acqControl.yScanMax, self.acqControl.zScanMin, self.acqControl.zScanMax])
         
     def yLimHighChange(self):
         self.acqControl.setYmax(self.ylimhigh.value())
-        self.estimateScanTime()
         self.livemon.setPlotLimits([self.acqControl.xScanMin, self.acqControl.xScanMax, self.acqControl.yScanMin, self.acqControl.yScanMax, self.acqControl.zScanMin, self.acqControl.zScanMax])
         
     def yStepChange(self):
         self.acqControl.setStepY(self.ystep.value())
-        self.estimateScanTime()
         self.livemon.setStepSize([self.acqControl.xScanStep, self.acqControl.yScanStep, self.acqControl.zScanStep])
      
         
     def zLimLowChange(self):
         self.acqControl.setZmin(self.zlimlow.value())
-        self.estimateScanTime()
         self.livemon.setPlotLimits([self.acqControl.xScanMin, self.acqControl.xScanMax, self.acqControl.yScanMin, self.acqControl.yScanMax, self.acqControl.zScanMin, self.acqControl.zScanMax])
         
     def zLimHighChange(self):
         self.acqControl.setZmax(self.zlimhigh.value())
-        self.estimateScanTime()
         self.livemon.setPlotLimits([self.acqControl.xScanMin, self.acqControl.xScanMax, self.acqControl.yScanMin, self.acqControl.yScanMax, self.acqControl.zScanMin, self.acqControl.zScanMax])
         
     def zStepChange(self):
         self.acqControl.setStepZ(self.zstep.value())
-        self.estimateScanTime()
         self.livemon.setStepSize([self.acqControl.xScanStep, self.acqControl.yScanStep, self.acqControl.zScanStep])
   
     
@@ -664,7 +657,7 @@ class Window(QWidget):
  
     def ScanTypeSlot(self):
         self.datahandler.setScanType(self.scan_type.currentText())
-        acqC.tek.setScanType(self.scan_type.currentText())
+        self.acqControl.tek.setScanType(self.scan_type.currentText())
         self.newFile.setEnabled(False)
        
     def PCBSlot(self):
@@ -765,13 +758,9 @@ class Window(QWidget):
         
         self.newFile.setEnabled(True)
 
-    def estimateScanTime(self):
-        #calculate a time extimate for the scan
-        spsum = 0
-        if self.zactive:
-            spsum += abs(self.zScanMax-self.zScanMin)/abs(self.zScanStep)
-        if self.yactive:
-            spsum += abs(self.yScanMax-self.yScanMin)/abs(self.yScanStep)
-        if self.xactive:
-            spsum += abs(self.xScanMax-self.xScanMin)/abs(self.xScanStep)
-        print("Total number of scanpoints: ", spsum)
+    #def setProgressBarStep(self, val):
+    #    self.progress.setValue(val)
+
+    #def resetProgressBar(self):
+    #    self.progress.reset()
+    #    self.progress.setRange(0, self.acqControl.estimateScanSteps())

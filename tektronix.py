@@ -58,7 +58,7 @@ class TektronixMSO5204B(object):
 
     def readConfig(self):
         tekConfig = 'TektronixDiamond'
-        if scan_type == 'knive_edge':
+        if self.scan_type == 'knive_edge':
             tekConfig = 'TektronixDiode'
 
         self.resource = self.config[tekConfig]['address']
@@ -155,10 +155,15 @@ class TektronixMSO5204B(object):
         print('Waveforms acquired.')
         return (scaleddata.astype(numpy.float32), scaledtime.astype(numpy.float32))
 
+    def reset(self):
+        #reset to normal working mode
+        self.inst.write('horizontal:fastframe:state 0') #turn  FastFrame off
+        self.inst.write('acquire:state 0') 
+
+
 
     def close(self):
         if(self.inst):
-            self.inst.write('horizontal:fastframe:state 0') #turn  FastFrame off
             self.inst.close()
             self.rm = None
             self.inst = None
