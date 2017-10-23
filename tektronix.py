@@ -17,10 +17,8 @@ class TektronixMSO5204B(object):
     """
 
     #fixme: select channel upon selecting scan type
-    
+
     def __init__(self, conf):
-    
-        
         self.config = conf
         self.rm = None
         self.inst = None
@@ -52,13 +50,13 @@ class TektronixMSO5204B(object):
         #configure VISA resource
         self.rm = visa.ResourceManager('@py')
         self.inst = self.rm.open_resource(self.resource) 
-        
+
         print('Connected to: ', self.inst.ask('*idn?').rstrip())
         self.inst.write('*rst')  #default the instrument
 
     def readConfig(self):
         tekConfig = 'TektronixDiamond'
-        if self.scan_type == 'knive_edge':
+        if self.scan_type == 'knife_edge':
             tekConfig = 'TektronixDiode'
 
         self.resource = self.config[tekConfig]['address']
@@ -79,7 +77,7 @@ class TektronixMSO5204B(object):
     def configure(self):
         #update number of waveforms to be acquired
         self.numberofwf = int(self.config['AcquisitionControl']['number_of_waveforms'])
-        
+
         #configure general settings and channels
         self.inst.write('acquire:state 0')                                          #turn off the acquisition system
         self.inst.write('horizontal:mode auto')                                     #set horizontal settings to auto

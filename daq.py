@@ -410,12 +410,15 @@ class AcquisitionControl(object):
 
     def setXactive(self, val):
         self.xactive = val
+        self.estimateScanSteps()
 
     def setYactive(self, val):
         self.yactive = val
+        self.estimateScanSteps()
 
     def setZactive(self, val):
         self.zactive = val
+        self.estimateScanSteps()
   
     #setter methods
     def setXmin(self, val):
@@ -478,30 +481,30 @@ class AcquisitionControl(object):
 
     def estimateScanSteps(self):
         #calculate a time extimate for the scan
-        zpts = 0
+        zpts = 1
         if self.zactive and self.zScanStep != 0:
             if self.zScanMax >= self.zScanMin:
-                zpts = abs(self.zScanMax-self.zScanMin)/abs(self.zScanStep)
+                zpts = abs(self.zScanMax-self.zScanMin)/abs(self.zScanStep) + 1
             else:
-                zpts = abs(self.zScanMin-self.zScanMax)/abs(self.zScanStep)
-        zpts = int(zpts) + 1
+                zpts = abs(self.zScanMin-self.zScanMax)/abs(self.zScanStep) + 1
 
-        ypts = 0
+
+        ypts = 1
         if self.yactive and self.yScanStep != 0:
             if self.yScanMax >= self.yScanMin:
-                ypts = abs(self.yScanMax-self.yScanMin)/abs(self.yScanStep)
+                ypts = abs(self.yScanMax-self.yScanMin)/abs(self.yScanStep) + 1
             else:
-                ypts = abs(self.yScanMin-self.yScanMax)/abs(self.yScanStep)
-        ypts = int(ypts) + 1
+                ypts = abs(self.yScanMin-self.yScanMax)/abs(self.yScanStep) + 1
 
-        xpts = 0
+
+        xpts = 1
         if self.xactive and self.xScanStep != 0:
             if self.xScanMax >= self.xScanMin:
-                xpts = abs(self.xScanMax-self.xScanMin)/abs(self.xScanStep)
+                xpts = abs(self.xScanMax-self.xScanMin)/abs(self.xScanStep) + 1
             else:
-                xpts = abs(self.xScanMin-self.xScanMax)/abs(self.xScanStep)
-        xpts = int(xpts) + 1
+                xpts = abs(self.xScanMin-self.xScanMax)/abs(self.xScanStep) + 1
 
-        self.nScanPoints = zpts*ypts*xpts
+
+        self.nScanPoints = int(zpts*ypts*xpts)
         print("Scan steps: ", self.nScanPoints)
     

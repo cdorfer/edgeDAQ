@@ -420,7 +420,7 @@ class Window(QWidget):
         self.nwf.valueChanged.connect(self.nwfSlot) 
         self.acqCtrLayout.addWidget(self.nwf, 6,2,1,1, Qt.AlignLeft)
                 
-        self.acqCtrLayout.addWidget(QLabel('        Pulse Energy [pJ]:   '), 3,3,1,1,Qt.AlignLeft)
+        self.acqCtrLayout.addWidget(QLabel('        Pulse Energy [nJ]:   '), 3,3,1,1,Qt.AlignLeft)
         self.pulse_energy = QDoubleSpinBox()
         self.pulse_energy.setMinimum(0)
         self.pulse_energy.setMaximum(10000)
@@ -440,7 +440,7 @@ class Window(QWidget):
         
         self.acqCtrLayout.addWidget(QLabel('        Scan Type:'), 5,3,1,1,Qt.AlignLeft)
         self.scan_type = QComboBox()
-        self.scan_type.addItems(['regular', 'knive_edge'])
+        self.scan_type.addItems(['regular', 'knife_edge'])
         self.scan_type.setMinimumWidth(104)
         self.scan_type.setCurrentText(self.datahandler.scan_type)
         self.scan_type.currentIndexChanged.connect(self.ScanTypeSlot)

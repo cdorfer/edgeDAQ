@@ -4,6 +4,7 @@
 ####################################
 
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
+#from drawnow import drawnow
 import matplotlib.pyplot as plt
 
 
@@ -12,9 +13,14 @@ class LiveMonitor(object):
     def __init__(self):
         self.fig = plt.figure()                             #instance to plot on
         self.g1 = self.fig.add_subplot(211)                 #graph for waveform plotting
+        self.g1.set_xlabel('Time [ns]')
+        self.g1.set_ylabel('Amplitude [mv]')
         self.g2 = self.fig.add_subplot(212)                 #graph to plot 2d scan map
+        self.g2.set_xlabel('x [mm]')
+        self.g2.set_ylabel('y [mm]')
         self.canvas = FigureCanvas(self.fig)                #canvas widget to display figure
-        
+        self.canvas.draw()
+
         #waveform plot
         self.time_arr = None
         self.wfa_arr = None     #fist wf
@@ -77,18 +83,20 @@ class LiveMonitor(object):
 
     def updatePlots(self): 
         self.g1.clear()
-        self.g1.set_xlabel('Time [ns]')
-        self.g1.set_ylabel('Amplitude [mv]')
         self.g1.plot(self.time_arr, self.wfa_arr, 'k', self.time_arr, self.wfo_arr, 'r') #first wf: black, second one: red
 
         if(len(self.x) != 0):
             self.g2.clear()
-            self.g2.set_xlabel('x [mm]')
-            self.g2.set_ylabel('y [mm]')
 
-            self.g2.scatter(self.x, self.y, c=self.sp, s=100, cmap='jet',edgecolors='none', marker='s')
+            if len(self.x) == len(self.y) == len(self.sp):
+                self.g2.scatter(self.x, self.y, c=self.sp, s=100, cmap='jet',edgecolors='none', marker='s')
+
+                
         try:
-            plt.tight_layout(pad=1, w_pad=0.5, h_pad=2)
+            #plt.tight_layout(pad=1, w_pad=0.5, h_pad=2)
+            #drawnow(self.g1)
+            #drawnow(self.g2)
+            #drawnow(self.canvas)
             self.canvas.draw()
         except:
             pass
