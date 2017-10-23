@@ -239,7 +239,7 @@ class Window(QWidget):
         self.xStepChange()
         
         self.xactive = QCheckBox('onX')
-        self.xactive.setChecked(True)
+        self.xactive.setChecked(False)
         self.xactive.stateChanged.connect(lambda:self.btnstate(self.xactive))
           
 
@@ -284,7 +284,7 @@ class Window(QWidget):
         self.yStepChange()
         
         self.yactive = QCheckBox('onY')
-        self.yactive.setChecked(True)
+        self.yactive.setChecked(False)
         self.yactive.stateChanged.connect(lambda:self.btnstate(self.yactive))
        
         self.zlimlow = QDoubleSpinBox()
@@ -328,7 +328,7 @@ class Window(QWidget):
         self.zStepChange()
         
         self.zactive = QCheckBox('onZ')
-        self.zactive.setChecked(True)
+        self.zactive.setChecked(False)
         self.zactive.stateChanged.connect(lambda:self.btnstate(self.zactive))
 
         #self.progress = QProgressBar(self)
@@ -521,6 +521,13 @@ class Window(QWidget):
         plotLayout.addWidget(self.livemon.canvas)
         self.toolbar = NavigationToolbar(self.livemon.canvas, self) #navigation widget
         plotLayout.addWidget(self.toolbar)
+
+        #button to enable/disable plotting
+        self.switchPlotting = QPushButton()
+        self.switchPlotting.setText('Disable Plotting')
+        self.switchPlotting.clicked.connect(self.switchPlottingSlot)
+        self.switchPlotting.setEnabled(True)
+        plotLayout.addWidget(self.switchPlotting)
         
         
         ############################     end plotting       ##############################
@@ -811,6 +818,15 @@ class Window(QWidget):
                 self.closeFile.setEnabled(False)
         
         self.newFile.setEnabled(True)
+
+    def switchPlottingSlot(self):
+        if(self.switchPlotting.text() == 'Disable Plotting'):
+            self.switchPlotting.setText('Enable Plotting')
+            self.livemon.enablePlotting(False)
+        else:
+            self.switchPlotting.setText('Disable Plotting')
+            self.livemon.enablePlotting(True)
+
 
     #def setProgressBarStep(self, val):
     #    self.progress.setValue(val)

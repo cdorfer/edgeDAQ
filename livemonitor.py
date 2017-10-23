@@ -21,6 +21,8 @@ class LiveMonitor(object):
         self.canvas = FigureCanvas(self.fig)                #canvas widget to display figure
         self.canvas.draw()
 
+        self.enabled = True
+
         #waveform plot
         self.time_arr = None
         self.wfa_arr = None     #fist wf
@@ -46,7 +48,19 @@ class LiveMonitor(object):
         self.y = []
         self.z = []
         self.sp = []
+
         
+
+    def enablePlotting(self, arg):
+        if arg == True:
+            self.enabled = True
+
+        else:
+            self.enabled = False
+            self.g1.clear()
+            self.g2.clear()
+            self.canvas.draw()
+
     def resetPlots(self):
         self.time_arr = None
         self.wfa_arr = None     #fist wf
@@ -82,24 +96,23 @@ class LiveMonitor(object):
 
 
     def updatePlots(self): 
-        self.g1.clear()
-        self.g1.plot(self.time_arr, self.wfa_arr, 'k', self.time_arr, self.wfo_arr, 'r') #first wf: black, second one: red
+        if self.enabled: #if plotting is enabled
+            self.g1.clear()
+            self.g1.plot(self.time_arr, self.wfa_arr, 'k', self.time_arr, self.wfo_arr, 'r') #first wf: black, second one: red
 
-        if(len(self.x) != 0):
-            self.g2.clear()
+            if(len(self.x) != 0):
+                self.g2.clear()
 
-            if len(self.x) == len(self.y) == len(self.sp):
-                self.g2.scatter(self.x, self.y, c=self.sp, s=100, cmap='jet',edgecolors='none', marker='s')
-
-                
-        try:
+                if len(self.x) == len(self.y) == len(self.sp):
+                    self.g2.scatter(self.x, self.y, c=self.sp, s=100, cmap='jet',edgecolors='none', marker='s')   
+            try:
             #plt.tight_layout(pad=1, w_pad=0.5, h_pad=2)
             #drawnow(self.g1)
             #drawnow(self.g2)
             #drawnow(self.canvas)
-            self.canvas.draw()
-        except:
-            pass
+                self.canvas.draw()
+            except:
+                pass
 
 
         

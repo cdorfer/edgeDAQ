@@ -314,9 +314,9 @@ class AcquisitionControl(object):
         self.zScanMax = float(self.config['AcquisitionControl']['zMax'])
         self.zScanStep = float(self.config['AcquisitionControl']['zStep'])
         
-        self.xactive = True
-        self.yactive = True
-        self.zactive = True
+        self.xactive = False
+        self.yactive = False
+        self.zactive = False
         self.running = False
 
         self.nScanPoints = 0
