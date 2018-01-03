@@ -9,6 +9,7 @@ from configobj import ConfigObj
 #Hardware imports
 from tektronix import TektronixMSO5204B
 from newportESP import ESP
+from shutter import Shutter
 
 #DAQ imports
 from daq import PositionControl, AcquisitionControl, DataHandling
@@ -43,9 +44,12 @@ if __name__ == '__main__':
     posContr = PositionControl(esp, axes, config) #todo: remove setter and getter functions
     acqContr = AcquisitionControl(esp, axes, tek, dh, config) #todo: remove setter and getter functions
     
+    shutaddr = config['Shutter']['address']
+    shutter = Shutter(shutaddr)
+
     #create an instance of the application window and run it
     app = QApplication(sys.argv)
-    window = Window(posContr, acqContr, dh, livemon)
+    window = Window(posContr, acqContr, dh, livemon, shutter)
     sys.exit(app.exec_())
     
     

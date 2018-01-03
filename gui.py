@@ -12,7 +12,7 @@ import threading
 class Window(QWidget):
     
     
-    def __init__(self, posC, acqC, dh, mon):
+    def __init__(self, posC, acqC, dh, mon, shut):
         super().__init__()   
         
         #defaults for position control
@@ -40,7 +40,9 @@ class Window(QWidget):
         self.livemon = mon
         self.livemon.setStepSize([self.xScanStep, self.yScanStep, self.zScanStep])
         self.livemon.setPlotLimits([self.xScanMin, self.xScanMax, self.yScanMin, self.yScanMax, self.zScanMin, self.zScanMax])
-        
+        self.shutter = shut
+
+
         #thread for the scan loop
         self.pill2kill = threading.Event()
         self.scanThread = threading.Thread(target=self.acqControl.startScan, args=(self.pill2kill, 'test'))
@@ -179,7 +181,7 @@ class Window(QWidget):
         self.defHome = QPushButton()
         self.defHome.setText('Define Home')
         self.defHome.clicked.connect(self.defHomeSlot)
-        self.defHome.setEnabled(True) #fixme, limits are screwed up after this.
+        self.defHome.setEnabled(False) #fixme, limits are screwed up after this.
         #self.defHome.setMinimumWidth(200)
         
         self.defHWLim = QPushButton()
@@ -394,7 +396,7 @@ class Window(QWidget):
         
         self.acqCtrLayout.addWidget(QLabel('    Diamond Name:'), 4,1,1,1,Qt.AlignLeft)
         self.diamond_name = QComboBox()
-        self.diamond_name.addItems(['S116', 'S118', 'Heisenberg', 'Dirac', 'Einstein', 'Higgs', 'Other'])
+        self.diamond_name.addItems(['S116', 'S118', 'S97', 'S86', 'S83', 'S30', 'Heisenberg', 'Dirac', 'Einstein', 'Higgs', 'Other'])
         self.diamond_name.setMinimumWidth(104)
         self.diamond_name.setCurrentText(self.datahandler.diamond_name)
         self.diamond_name.currentIndexChanged.connect(self.diamNameSlot)
@@ -510,6 +512,22 @@ class Window(QWidget):
         
         self.acq2Win = QHBoxLayout()
         self.acq2Win.addLayout(self.acqCtr2Layout)
+
+        #shutter button
+        self.acqCtr3Layout = QGridLayout()
+        self.acqCtr3Layout.setContentsMargins(4, 4, 4, 4)
+        self.acqCtr3Layout.setSpacing(2)
+        self.acqCtr3Layout.setObjectName("acqCtr3Layout") 
+
+        self.shutterCtr = QPushButton()
+        self.shutterCtr.setText('Open Shutter')
+        self.shutterCtr.setStyleSheet("background-color: red")
+        self.shutterCtr.clicked.connect(self.shutterCtrSlot)
+
+        self.acqCtr3Layout.addWidget(self.shutterCtr, 1,1,1,1,Qt.AlignCenter)
+
+        self.acq3Win = QHBoxLayout()
+        self.acq3Win.addLayout(self.acqCtr3Layout)       
     
 
         ############################ end acquisiton control ##############################
@@ -542,6 +560,7 @@ class Window(QWidget):
         self.controlLayout.addLayout(self.scanWin)
         self.controlLayout.addLayout(self.acqWin)
         self.controlLayout.addLayout(self.acq2Win)
+        self.controlLayout.addLayout(self.acq3Win)
         self.mainLayout.addLayout(self.controlLayout)
         
         #add plot layout to master layout
@@ -827,6 +846,19 @@ class Window(QWidget):
             self.switchPlotting.setText('Disable Plotting')
             self.livemon.enablePlotting(True)
 
+
+    def shutterCtrSlot(self):
+        if(self.shutterCtr.text() == 'Open Shutter'):
+            self.shutter.open()
+            self.shutterCtr.setText('Close Shutter')
+            self.shutterCtr.setStyleSheet("background-color: green")
+            print('Shutter opened.')
+        else:
+            self.shutter.shut()
+            self.shutterCtr.setText('Open Shutter')
+            self.shutterCtr.setStyleSheet("background-color: red")
+            print('Shutter closed.')
+            
 
     #def setProgressBarStep(self, val):
     #    self.progress.setValue(val)
