@@ -37,12 +37,12 @@ class TektronixMSO5204B(object):
         self.ch2_trig_level =  0
         self.ch1_termination = 0
         self.ch2_termination = 0
+        self.samplesInWf = 2000 #default, updated from config
         
         self.readConfig()
 
 
         #class variables for data processing
-        self.samplesInWf = 2000
         self.yoffset = 0
         self.ymult = 0
         self.yzero = 0
@@ -79,10 +79,10 @@ class TektronixMSO5204B(object):
         self.ch2_trig_level =  float(self.config[tekConfig]['ch2_trig_level'])
         self.ch1_termination = int(self.config[tekConfig]['ch1_termination'])
         self.ch2_termination = int(self.config[tekConfig]['ch2_termination'])
+        self.samplesInWf = int(self.config[tekConfig]['samples_in_wf'])
 
     #gui interface to select different oscilloscope configurations
     def setScanType(self, scantype):
-        print('Hi, setting scan type!')
         self.scan_type = scantype
         self.readConfig()
 
@@ -109,7 +109,7 @@ class TektronixMSO5204B(object):
             self.inst.write('select:ch1 OFF')                                           #this is stupid, but necessary
             self.inst.write('select:ch3 ON')                                            #this is stupid, but necessary
 
-        else:
+        if self.scan_type == 'regular':
             self.inst.write('data:source ch1')
             self.inst.write('ch1:scale {0}'.format(self.voltsperdiv))                   #set vertical scale (CH3 for knive edge scan (same as ch1))
             self.inst.write('ch1:offset {0}'.format(self.ch1_offset))                   #set vertical position (CH3 for knive edge scan (same as ch1))
