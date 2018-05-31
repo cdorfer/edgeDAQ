@@ -17,6 +17,9 @@ class TektronixMSO5204B(object):
     """
 
     #fixme: select channel upon selecting scan type
+    #CH1: Diamond
+    #CH2: Trigger
+    #CH3: Diode
 
     def __init__(self, conf):
         self.config = conf
@@ -34,10 +37,12 @@ class TektronixMSO5204B(object):
         self.ch2_trig_level =  0
         self.ch1_termination = 0
         self.ch2_termination = 0
-
+        
         self.readConfig()
 
+
         #class variables for data processing
+        self.samplesInWf = 2000
         self.yoffset = 0
         self.ymult = 0
         self.yzero = 0
@@ -50,29 +55,37 @@ class TektronixMSO5204B(object):
         #configure VISA resource
         self.rm = visa.ResourceManager('@py')
         self.inst = self.rm.open_resource(self.resource) 
+        self.inst.Timeout = 60
 
         print('Connected to: ', self.inst.ask('*idn?').rstrip())
         self.inst.write('*rst')  #default the instrument
 
+
     def readConfig(self):
-        tekConfig = 'TektronixDiamond'
+        self.scan_type = self.config['AcquisitionControl']['scan_type']
+
         if self.scan_type == 'knife_edge':
             tekConfig = 'TektronixDiode'
+
+        if self.scan_type == 'regular':
+            tekConfig = 'TektronixDiamond'
 
         self.resource = self.config[tekConfig]['address']
         self.horizscale = self.config[tekConfig]['horizscale']  #sec/div
         self.samplerate = self.config[tekConfig]['samplerate']  #S/sec
-        self.numberofwf = int(self.config[tekConfig]['number_of_waveforms'])
+        self.numberofwf = int(self.config['AcquisitionControl']['number_of_waveforms'])
         self.voltsperdiv = float(self.config[tekConfig]['voltsperdiv'])
         self.ch1_offset = float(self.config[tekConfig]['ch1_offset'])
         self.ch2_trig_level =  float(self.config[tekConfig]['ch2_trig_level'])
         self.ch1_termination = int(self.config[tekConfig]['ch1_termination'])
-        self.ch2_termination = int(self.config[tekConfig]['ch1_termination'])
+        self.ch2_termination = int(self.config[tekConfig]['ch2_termination'])
 
     #gui interface to select different oscilloscope configurations
     def setScanType(self, scantype):
+        print('Hi, setting scan type!')
         self.scan_type = scantype
         self.readConfig()
+
 
     def configure(self):
         #update number of waveforms to be acquired
@@ -86,32 +99,50 @@ class TektronixMSO5204B(object):
         self.inst.write('acquire:mode sample')                                      #set acquire mode to sample
         self.inst.write('horizontal:fastframe:state 1')                             #turn on FastFrame
         self.inst.write('horizontal:fastframe:count {0}'.format(self.numberofwf))   #specify number of frames
-        self.inst.write('ch1:scale {0}'.format(self.voltsperdiv))                       #set vertical scale
-        self.inst.write('ch1:ch1_offset {0}'.format(self.ch1_offset))                   #set vertical position
-        self.inst.write('ch1:termination {0}'.format(self.ch1_termination))             #set channel 1 termination
-        self.inst.write('ch1:coupling ac')						#set channel 1 coupling
-        self.inst.write('ch2:termination {0}'.format(self.ch2_termination))             #set channel 2 termination
-        #print('Channel settings configured.')
         
-        #configure triggering:
+        if self.scan_type == 'knife_edge':
+            self.inst.write('data:source ch3')                                          #set data source
+            self.inst.write('ch3:scale {0}'.format(self.voltsperdiv))                   #set vertical scale
+            self.inst.write('ch3:offset {0}'.format(self.ch1_offset))                   #set vertical position
+            self.inst.write('ch3:termination {0}'.format(self.ch1_termination))         #set channel 1 termination
+            self.inst.write('ch3:coupling ac')						                    #set channel 1 coupling  
+            self.inst.write('select:ch1 OFF')                                           #this is stupid, but necessary
+            self.inst.write('select:ch3 ON')                                            #this is stupid, but necessary
+
+        else:
+            self.inst.write('data:source ch1')
+            self.inst.write('ch1:scale {0}'.format(self.voltsperdiv))                   #set vertical scale (CH3 for knive edge scan (same as ch1))
+            self.inst.write('ch1:offset {0}'.format(self.ch1_offset))                   #set vertical position (CH3 for knive edge scan (same as ch1))
+            self.inst.write('ch1:termination {0}'.format(self.ch1_termination))         #set channel 1 termination (CH3 for knive edge scan (same as ch1))
+            self.inst.write('ch1:coupling ac')                                          #set channel 1 coupling (CH3 for knive edge scan (same as ch1))
+            self.inst.write('select:ch3 OFF')                                           #this is stupid, but necessary
+            self.inst.write('select:ch1 ON')                                            #this is stupid, but necessary
+
+        
+        #configure triggering on CH2:
+        self.inst.write('select:ch2 ON')
+        self.inst.write('ch2:termination {0}'.format(self.ch2_termination))     #set channel 2 termination (trigger channel)
         self.inst.write('trigger:a:type edge')                                  #set trigger type to pulse
         self.inst.write('trigger:a:mode normal')                                #set trigger mode to normal
         self.inst.write('trigger:a:edge:coupling dc')                           #couple dc
         self.inst.write('trigger:a:edge:slope rise')                            #rising edge triggering
         self.inst.write('trigger:a:edge:source ch2')                            #set trigger channel
-        self.inst.write('trigger:a:level:ch2 {0}'.format(self.ch2_trig_level))      #set trigger level
+        self.inst.write('trigger:a:level:ch2 {0}'.format(self.ch2_trig_level))  #set trigger level
         self.inst.write('trigger:a:level:ch2 1')                                #set trigger level voltage
         #print('Trigger settings configured.')
         
-        ## Configure data transfer settings
-        self.inst.write('header 0')                    #turn the header off
-        self.inst.write('horizontal:fastframe:sumframe none') #tell the scope to create a summary frame that is the average of all frames
-        self.inst.write('data:encdg fastest')          #set encoding type to fast binary
-        self.inst.write('data:source ch1')             #set data source
-        self.inst.write('data:stop 100000')            #set end of record
-        self.inst.write('wfmoutpre:byt_n 1')           #set number of bytes per data point
+        
+        self.inst.write('data:encdg fastest')                   #set encoding type to fast binary
+        self.inst.write('wfmoutpre:byt_n 1')                    #set number of bytes per data point
+        
+        self.inst.write('data:start 1')                         #transfer from the first data point of the first waveform
+        self.inst.write('data:stop {0}'.format(self.samplesInWf))
+
+        self.inst.write('header 0')                             #turn the header off
+        self.inst.write('horizontal:fastframe:sumframe none')   #tell the scope not to create a summary frame that is the average of all frames
+
         self.inst.write('data:framestart 1')           #as long as start/stop frames are greater than the total number of frames,
-        self.inst.write('data:framestop 1000')         #the program will only capture the last frame, which is the summary frame, which is what we want
+        self.inst.write('data:framestop 2000')         #the program will only capture the last frame, which is the summary frame, which is what we want
         #print('Data transfer settings configured.')
 
         #vertical data
@@ -123,41 +154,42 @@ class TektronixMSO5204B(object):
         self.numberofpoints = int(self.inst.ask('wfmoutpre:nr_pt?'))     #number of points in the waveform acquisition
         self.xincrement = float(self.inst.ask('wfmoutpre:xincr?'))       #amount of time between data points
         self.xzero = float(self.inst.ask('wfmoutpre:xzero?'))            #absolute time value of the beginning of the waveform record
+        print("Data channel:", self.inst.ask('data:source?'))
         print("Tektronix DPO5204B configured!")
-    
+
     
     def acquireWaveforms(self):
-        self.inst.Timeout = 60
         self.inst.write('acquire:stopafter sequence')  #set scope to single acquisition mode
         self.inst.write('acquire:state 1')             #start acquisition 
+
         done = 0
         while(done != 1):                              #wait until scope has finished acquiring waveforms
             try:
                 done = int(self.inst.ask('*opc?'))
             except:
-                sleep(0.05)                        
-        
-        
+                sleep(0.01)                        
+
         self.inst.write('curve?')
         rawdata = self.inst.read_raw()
-
 
         headerlength = len(rawdata)%100 - 1 #determining the length of the header (dirty fix)
         #header = rawdata[:headerlength]     #header for later use?
         rawdata = rawdata[headerlength:-1]  #strip the header
+
         #format string gives (size of array)b - where b is the unsigned char, osci data is only 8 bit but 32 bit is faster in the CPU?
         data = numpy.array(unpack('{0}b'.format(self.numberofpoints*self.numberofwf), rawdata), dtype=numpy.int32)  #unpack data to numpy array
         scaleddata = (data-self.yoffset)*self.ymult+self.yzero
         #scale data to volts
-        scaledtime = numpy.arange(self.xzero,self.xzero+(self.xincrement*self.numberofpoints),self.xincrement)  #always the same time
+        #scaledtime = numpy.arange(self.xzero,self.xzero+(self.xincrement*self.numberofpoints),self.xincrement)  #always the same time
+        scaledtime = numpy.arange(self.xzero,(self.xincrement*self.numberofpoints),self.xincrement) #it gave 1 point too much
         #print('Waveforms acquired.')
-        return (scaleddata.astype(numpy.float32), scaledtime.astype(numpy.float32))
+        return (scaleddata.astype(numpy.float32), scaledtime.astype(numpy.float32)[0:self.samplesInWf])
+
 
     def reset(self):
         #reset to normal working mode
         self.inst.write('horizontal:fastframe:state 0') #turn  FastFrame off
         self.inst.write('acquire:state 1') 
-        print('Hi there.')
 
 
 

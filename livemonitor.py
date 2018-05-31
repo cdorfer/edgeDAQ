@@ -102,14 +102,10 @@ class LiveMonitor(object):
 
             if(len(self.x) != 0):
                 self.g2.clear()
-
-                if len(self.x) == len(self.y) == len(self.sp):
-                    self.g2.scatter(self.x, self.y, c=self.sp, s=100, cmap='jet',edgecolors='none', marker='s')   
+                n = len(self.sp) #to prevent racing conditions
+                self.g2.scatter(self.x[0:n], self.y[0:n], c=self.sp[0:n], s=100, cmap='jet',edgecolors='none', marker='s')   
+            
             try:
-            #plt.tight_layout(pad=1, w_pad=0.5, h_pad=2)
-            #drawnow(self.g1)
-            #drawnow(self.g2)
-            #drawnow(self.canvas)
                 self.canvas.draw()
             except:
                 pass

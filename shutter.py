@@ -92,8 +92,8 @@ class Shutter(object):
         time.sleep(0.5)
 
         #The pins are hard coded depending on how the Arduino is wired up.
-        self.PIN0 = 7
-        self.PIN1 = 5
+        self.PIN0 = 5
+        self.PIN1 = 7
 
         self.initialize()
 

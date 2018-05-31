@@ -72,6 +72,9 @@ class Window(QWidget):
         self.xSlider.setPageStep(self.xStepSize*1000) #1000 to display um not nm        
         self.xSlider.setMaximum(self.positionControl.getXMax()*(10**6)) #to nm
         self.xSlider.setMinimum(self.positionControl.getXMin()*(10**6)) #to nm
+        #print(self.positionControl.getXMin())
+        #print(self.positionControl.getXMax())
+        #print(self.positionControl.getXPosition())
         self.xSlider.setValue(self.positionControl.getXPosition()*(10**6)) #to nm
         self.xSlider.valueChanged.connect(self.sliderXChange)
 
@@ -181,12 +184,12 @@ class Window(QWidget):
         self.defHome = QPushButton()
         self.defHome.setText('Define Home')
         self.defHome.clicked.connect(self.defHomeSlot)
-        self.defHome.setEnabled(False) #fixme, limits are screwed up after this.
+        self.defHome.setEnabled(True) #fixme, limits are screwed up after this.
         #self.defHome.setMinimumWidth(200)
         
         self.defHWLim = QPushButton()
         self.defHWLim.setText('Find HW Limits')
-        self.defHWLim.setEnabled(False) #fixme
+        self.defHWLim.setEnabled(True) #fixme
         self.defHWLim.clicked.connect(self.positionControl.findHardwareLimits)
         #self.defHWLim.setMinimumWidth(60)
         
@@ -404,8 +407,8 @@ class Window(QWidget):
         
         self.acqCtrLayout.addWidget(QLabel('    Bias Voltage [V]:'), 5,1,1,1,Qt.AlignLeft)
         self.bias_voltage = QDoubleSpinBox()
-        self.bias_voltage.setMinimum(-1500)
-        self.bias_voltage.setMaximum(1500)
+        self.bias_voltage.setMinimum(-5000)
+        self.bias_voltage.setMaximum(5000)
         self.bias_voltage.setAlignment(Qt.AlignLeft)
         self.bias_voltage.setMinimumWidth(104)
         self.bias_voltage.setValue(self.datahandler.bias_voltage)
