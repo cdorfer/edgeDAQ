@@ -80,6 +80,7 @@ class TektronixMSO5204B(object):
         self.ch1_termination = int(self.config[tekConfig]['ch1_termination'])
         self.ch2_termination = int(self.config[tekConfig]['ch2_termination'])
         self.samplesInWf = int(self.config[tekConfig]['samples_in_wf'])
+        print(self.samplesInWf)
 
     #gui interface to select different oscilloscope configurations
     def setScanType(self, scantype):
@@ -142,7 +143,8 @@ class TektronixMSO5204B(object):
         self.inst.write('horizontal:fastframe:sumframe none')   #tell the scope not to create a summary frame that is the average of all frames
 
         self.inst.write('data:framestart 1')           #as long as start/stop frames are greater than the total number of frames,
-        self.inst.write('data:framestop 2000')         #the program will only capture the last frame, which is the summary frame, which is what we want
+        #self.inst.write('data:framestop 2000')         #the program will only capture the last frame, which is the summary frame, which is what we want
+        self.inst.write('data:framestop {0}'.format(self.samplesInWf))
         #print('Data transfer settings configured.')
 
         #vertical data
@@ -152,6 +154,7 @@ class TektronixMSO5204B(object):
 
         #horizontal data
         self.numberofpoints = int(self.inst.ask('wfmoutpre:nr_pt?'))     #number of points in the waveform acquisition
+        print("We take: " + str(self.numberofpoints) + " data points in each wf!")
         self.xincrement = float(self.inst.ask('wfmoutpre:xincr?'))       #amount of time between data points
         self.xzero = float(self.inst.ask('wfmoutpre:xzero?'))            #absolute time value of the beginning of the waveform record
         print("Data channel:", self.inst.ask('data:source?'))
