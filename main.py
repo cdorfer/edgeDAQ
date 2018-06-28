@@ -22,6 +22,8 @@ import numpy as np
 
     
 if __name__ == '__main__':
+    app = QApplication(sys.argv)
+    
     #get a configuration object   
     config = ConfigObj('config.ini')
     
@@ -48,7 +50,6 @@ if __name__ == '__main__':
     shutter = Shutter(shutaddr)
 
     #create an instance of the application window and run it
-    app = QApplication(sys.argv)
     window = Window(posContr, acqContr, dh, livemon, shutter)
     sys.exit(app.exec_())
     

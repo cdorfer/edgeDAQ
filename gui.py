@@ -5,12 +5,13 @@
 
 from PyQt5.QtWidgets import QWidget, QPushButton, QHBoxLayout, QVBoxLayout, QSlider, QCheckBox, QComboBox, QSpinBox, QTextEdit, QProgressBar
 from PyQt5.Qt import QLabel, QGridLayout, Qt, QDoubleSpinBox, QLCDNumber
+from PyQt5.QtCore import QTimer
 from time import sleep
-from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as NavigationToolbar
+#from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as NavigationToolbar
 import threading
+import pyqtgraph as pg
 
 class Window(QWidget):
-    
     
     def __init__(self, posC, acqC, dh, mon, shut):
         super().__init__()   
@@ -37,10 +38,17 @@ class Window(QWidget):
         self.acqControl = acqC
         self.positionControl = posC
         self.datahandler = dh
+        
         self.livemon = mon
         self.livemon.setStepSize([self.xScanStep, self.yScanStep, self.zScanStep])
         self.livemon.setPlotLimits([self.xScanMin, self.xScanMax, self.yScanMin, self.yScanMax, self.zScanMin, self.zScanMax])
+        self.timer = QTimer() #updates the plot
+        self.timer.timeout.connect(self.updateGraphs)
+        self.timer.start(1000)
+
+
         self.shutter = shut
+
 
 
         #thread for the scan loop
@@ -48,6 +56,7 @@ class Window(QWidget):
         self.scanThread = threading.Thread(target=self.acqControl.startScan, args=(self.pill2kill, 'test'))
         
         self.initUI()
+
 
 
     def initUI(self):
@@ -538,10 +547,16 @@ class Window(QWidget):
         ############################    start plotting      ##############################
         
         # generate layout
+        '''
         plotLayout = QVBoxLayout()
         plotLayout.addWidget(self.livemon.canvas)
         self.toolbar = NavigationToolbar(self.livemon.canvas, self) #navigation widget
         plotLayout.addWidget(self.toolbar)
+        '''
+
+        plotLayout = QVBoxLayout()
+        plotLayout.addWidget(self.livemon.wf)
+        plotLayout.addWidget(self.livemon.canvas)
 
         #button to enable/disable plotting
         self.switchPlotting = QPushButton()
@@ -549,7 +564,6 @@ class Window(QWidget):
         self.switchPlotting.clicked.connect(self.switchPlottingSlot)
         self.switchPlotting.setEnabled(True)
         plotLayout.addWidget(self.switchPlotting)
-        
         
         ############################     end plotting       ##############################
         
@@ -571,8 +585,12 @@ class Window(QWidget):
         
         self.setLayout(self.mainLayout)
         self.show()
-    
-    
+
+   
+
+    def updateGraphs(self):
+        self.livemon.updatePlots()
+
     def sliderXChange(self):
         self.positionControl.moveAbsoluteX(1.0*self.xSlider.value()/(10**6))
         self.showXPos()

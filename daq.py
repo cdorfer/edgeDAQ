@@ -91,7 +91,7 @@ class DataHandling(object):
         #self.livemon.setScanPoint(x, y, z, np.sum(wfarr[0:len(time_axis)]))
         self.livemon.setScanPoint(x, y, z, np.sum(wfarr[0:len(time_axis)]))
         
-        start_new_thread(self.livemon.updatePlots, ())
+        #start_new_thread(self.livemon.updatePlots, ())
         return sp
         
     
@@ -341,7 +341,7 @@ class AcquisitionControl(object):
                 print('Check z-limits and step direction/size.')
                 return
             self.zaxis.on()
-             
+
         sleep(1)  
         
         #calculate number of required steps
@@ -364,17 +364,16 @@ class AcquisitionControl(object):
                 self.zaxis.move_to(znext, wait=True)
             
             #along y-axis (up - down)
-            for idx in range(int(ysteps)+1):
+            for idy in range(int(ysteps)+1):
                 if self.yactive:
-                    ynext = self.yScanMin+idx*self.yScanStep
+                    ynext = self.yScanMin+idy*self.yScanStep
                     self.yaxis.move_to(ynext, wait=True)
         
                 #along x-axis (left - right)
-                for idy in range(int(xsteps)+1):
+                for idx in range(int(xsteps)+1):
                     if self.xactive:
-                        xnext = self.xScanMin+idy*self.xScanStep
+                        xnext = self.xScanMin+idx*self.xScanStep
                         self.xaxis.move_to(xnext, wait=True)
-                    
                     
                     #check if thread was terminated
                     startt = datetime.datetime.now()
@@ -404,8 +403,11 @@ class AcquisitionControl(object):
   
     def collectNWfs(self):
         timestamp = time()
+        #print('1: targety: ', round(xnext,4), 'actualy: ', self.yaxis.position, 'difference=', round(xnext-self.yaxis.position,4))
         (scaleddata, scaledtime) = self.tek.acquireWaveforms()
         nsp = self.dh.addScanPointData(timestamp, self.xaxis.position, self.yaxis.position, self.zaxis.position, scaledtime, scaleddata)
+        #print('2: targety: ', round(xnext,4), 'actualy: ', self.yaxis.position, 'difference=', round(xnext-self.yaxis.position,4))
+
         return nsp
 
     def setXactive(self, val):
