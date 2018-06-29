@@ -63,7 +63,7 @@ class LiveMonitor(object):
     def enablePlotting(self, arg):
         if arg:
             self.enabled = True
-            self.resetPlots()
+            self.updatePlots()
         else:
             self.enabled = False
 
@@ -110,5 +110,9 @@ class LiveMonitor(object):
     def resetPlots(self):
         self.pl.clear()
         self.wf.clear()
+        self.x = []
+        self.y = []
+        self.z = []
+        self.sp = []
 
 

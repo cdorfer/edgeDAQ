@@ -109,6 +109,7 @@ class DataHandling(object):
     def closeFile(self):
         self.hdf.flush()
         self.hdf.close()
+        self.livemon.resetPlots()
         print('File for run ', str(self.runnumber), ' closed.')
     
 
