@@ -8,7 +8,7 @@ class Shutter(object):
     def __init__(self, serial_port='/dev/shutter', baud_rate=9600, read_timeout=5):
         self.conn = serial.Serial(serial_port, baud_rate)
         self.conn.timeout = read_timeout # Timeout for readline()
-        time.sleep(0.2)
+        time.sleep(1)
         print('Connection to Arduino opened.')
 
     def open(self, state):
@@ -25,6 +25,7 @@ class Shutter(object):
 
     def getTemperature(self):
         self.conn.write(b'T')
+        time.sleep(0.010)
         ret = self.conn.readline()
         print(ret)
 

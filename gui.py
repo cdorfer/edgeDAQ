@@ -38,6 +38,7 @@ class Window(QWidget):
         self.acqControl = acqC
         self.positionControl = posC
         self.datahandler = dh
+        self.shutter = shut
         
         self.livemon = mon
         self.livemon.setStepSize([self.xScanStep, self.yScanStep, self.zScanStep])
@@ -45,10 +46,6 @@ class Window(QWidget):
         self.timer = QTimer() #updates the plot
         self.timer.timeout.connect(self.updateGraphs)
         self.timer.start(1000)
-
-
-        self.shutter = shut
-
 
 
         #thread for the scan loop

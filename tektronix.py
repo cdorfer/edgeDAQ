@@ -80,7 +80,7 @@ class TektronixMSO5204B(object):
         self.ch1_termination = int(self.config[tekConfig]['ch1_termination'])
         self.ch2_termination = int(self.config[tekConfig]['ch2_termination'])
         self.samplesInWf = int(self.config[tekConfig]['samples_in_wf'])
-        print(self.samplesInWf)
+
 
     #gui interface to select different oscilloscope configurations
     def setScanType(self, scantype):
