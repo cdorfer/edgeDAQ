@@ -536,7 +536,13 @@ class Window(QWidget):
         self.shutterCtr.setStyleSheet("background-color: red")
         self.shutterCtr.clicked.connect(self.shutterCtrSlot)
 
+        self.lightCtr = QPushButton()
+        self.lightCtr.setText('Light ON')
+        self.lightCtr.setStyleSheet("background-color: red")
+        self.lightCtr.clicked.connect(self.lightCtrSlot)
+
         self.acqCtr3Layout.addWidget(self.shutterCtr, 1,1,1,1,Qt.AlignCenter)
+        self.acqCtr3Layout.addWidget(self.lightCtr, 1,2,1,1,Qt.AlignCenter)
 
         self.acq3Win = QHBoxLayout()
         self.acq3Win.addLayout(self.acqCtr3Layout)       
@@ -870,15 +876,29 @@ class Window(QWidget):
 
     def shutterCtrSlot(self):
         if(self.shutterCtr.text() == 'Open Shutter'):
-            self.shutter.open()
+            self.shutter.open(True)
             self.shutterCtr.setText('Close Shutter')
             self.shutterCtr.setStyleSheet("background-color: green")
             print('Shutter opened.')
         else:
-            self.shutter.shut()
+            self.shutter.open(False)
             self.shutterCtr.setText('Open Shutter')
             self.shutterCtr.setStyleSheet("background-color: red")
             print('Shutter closed.')
+
+
+    def lightCtrSlot(self):
+        if(self.lightCtr.text() == 'Light ON'):
+            self.shutter.lightOn(True)
+            self.lightCtr.setText('Light OFF')
+            self.lightCtr.setStyleSheet("background-color: green")
+            print('Light ON!.')
+        else:
+            self.shutter.lightOn(False)
+            self.lightCtr.setText('Light ON')
+            self.lightCtr.setStyleSheet("background-color: red")
+            print('Light OFF.')
+
             
 
     #def setProgressBarStep(self, val):
