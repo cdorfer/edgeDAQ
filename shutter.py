@@ -24,10 +24,15 @@ class Shutter(object):
             self.conn.write(b'D')
 
     def getTemperature(self):
-        self.conn.write(b'T')
-        time.sleep(0.010)
-        ret = self.conn.readline()
-        print(ret)
+        try:
+            self.conn.write(b'T')
+            ret = self.conn.readline()
+            ret = ret.decode()
+            return float(ret)
+        except:
+            return 0
+            pass
+
 
     def close(self):
         self.a.close()
