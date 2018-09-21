@@ -1,6 +1,6 @@
 ####################################               
 # Author: Christian Dorfer
-# Email: cdorfer@phys.ethz.ch                                  
+# Email: dorfer@phys.ethz.ch                                  
 ####################################
 
 import sys
@@ -9,7 +9,9 @@ from configobj import ConfigObj
 #Hardware imports
 from tektronix import TektronixMSO5204B
 from newportESP import ESP
-from shutter import Shutter
+from lowvoltage import LowVoltage
+from tempcontrol import TemperatureControl
+from arduino import Arduino
 
 #DAQ imports
 from daq import PositionControl, AcquisitionControl, DataHandling
@@ -20,7 +22,11 @@ from gui import Window
 from PyQt5.QtWidgets import QApplication
 import numpy as np
 
-    
+'''
+pass 'temp' as first argument to get the temperature control option
+'''
+
+
 if __name__ == '__main__':
     app = QApplication(sys.argv)
     
@@ -49,8 +55,15 @@ if __name__ == '__main__':
     arduinoaddr = config['Arduino']['address']
     arduino = Arduino(arduinoaddr)
 
+    tempctrl = None
+    if sys.argv[1] == "temp":
+        lvaddr = config['LV']['address']
+        lvcontrol = LowVoltage(lvaddr)
+        tempctrl = TemperatureControl(arduino, lvcontrol)
+
+
     #create an instance of the application window and run it
-    window = Window(posContr, acqContr, dh, livemon, arduino)
+    window = Window(posContr, acqContr, dh, livemon, arduino, tempctrl)
     sys.exit(app.exec_())
     
     

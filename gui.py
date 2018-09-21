@@ -13,7 +13,7 @@ import pyqtgraph as pg
 
 class Window(QWidget):
     
-    def __init__(self, posC, acqC, dh, mon, shut):
+    def __init__(self, posC, acqC, dh, mon, ard, temp):
         super().__init__()   
         
         #defaults for position control
@@ -31,6 +31,8 @@ class Window(QWidget):
         self.zScanMin = acqC.zScanMin
         self.zScanMax = acqC.zScanMax
         self.zScanStep = acqC.zScanStep
+
+        self.setpointTemp = 30
         
         self.tekconfigured = False
         self.fileOpen = False
@@ -38,13 +40,15 @@ class Window(QWidget):
         self.acqControl = acqC
         self.positionControl = posC
         self.datahandler = dh
-        self.shutter = shut
+        self.ard = ard
+        self.temp = temp
         
         self.livemon = mon
         self.livemon.setStepSize([self.xScanStep, self.yScanStep, self.zScanStep])
         self.livemon.setPlotLimits([self.xScanMin, self.xScanMax, self.yScanMin, self.yScanMax, self.zScanMin, self.zScanMax])
         self.timer = QTimer() #updates the plot
         self.timer.timeout.connect(self.updateGraphs)
+        self.timer.timeout.connect(self.displayTemperature)
         self.timer.start(1000)
 
 
@@ -541,6 +545,29 @@ class Window(QWidget):
         self.acqCtr3Layout.addWidget(self.shutterCtr, 1,1,1,1,Qt.AlignCenter)
         self.acqCtr3Layout.addWidget(self.lightCtr, 1,2,1,1,Qt.AlignCenter)
 
+
+        if self.temp is not None:
+            self.tempDispl = QLCDNumber()
+            self.tempDispl.setMinimumWidth(100)
+            self.tempDispl.setMinimumHeight(25)
+            self.tempDispl.setDigitCount(6)
+            self.displayTemperature()
+            self.acqCtr3Layout.addWidget(self.tempDispl, 1,3,1,1,Qt.AlignCenter)
+
+            self.tempSpinBox = QDoubleSpinBox()
+            self.tempSpinBox.setMaximum(100)
+            self.tempSpinBox.setMinimum(20)
+            self.tempSpinBox.setAlignment(Qt.AlignRight)
+            self.tempSpinBox.setValue(self.setpointTemp)
+            self.tempSpinBox.valueChanged.connect(self.tempSpinBoxChange)
+            self.acqCtr3Layout.addWidget(self.tempSpinBox, 1,4,1,1,Qt.AlignCenter)
+
+            self.setTemp = QPushButton()
+            self.setTemp.setText('Set Temp')
+            self.setTemp.setStyleSheet("background-color: red")
+            self.setTemp.clicked.connect(self.setTemperature)
+            self.acqCtr3Layout.addWidget(self.setTemp, 1,5,1,1,Qt.AlignCenter)
+
         self.acq3Win = QHBoxLayout()
         self.acq3Win.addLayout(self.acqCtr3Layout)       
     
@@ -873,12 +900,12 @@ class Window(QWidget):
 
     def shutterCtrSlot(self):
         if(self.shutterCtr.text() == 'Open Shutter'):
-            self.shutter.open(True)
+            self.ard.open(True)
             self.shutterCtr.setText('Close Shutter')
             self.shutterCtr.setStyleSheet("background-color: green")
             print('Shutter opened.')
         else:
-            self.shutter.open(False)
+            self.ard.open(False)
             self.shutterCtr.setText('Open Shutter')
             self.shutterCtr.setStyleSheet("background-color: red")
             print('Shutter closed.')
@@ -886,17 +913,42 @@ class Window(QWidget):
 
     def lightCtrSlot(self):
         if(self.lightCtr.text() == 'Light ON'):
-            self.shutter.lightOn(True)
+            self.ard.lightOn(True)
             self.lightCtr.setText('Light OFF')
             self.lightCtr.setStyleSheet("background-color: green")
             print('Light ON!.')
         else:
-            self.shutter.lightOn(False)
+            self.ard.lightOn(False)
             self.lightCtr.setText('Light ON')
             self.lightCtr.setStyleSheet("background-color: red")
             print('Light OFF.')
 
-            
+    
+    def displayTemperature(self):
+        if self.temp is not None:
+            temp = self.ard.getStoredTemperature()
+            self.tempDispl.display(temp)
+
+    def tempSpinBoxChange(self):
+        self.setpointTemp = self.tempSpinBox.value()
+
+    def setTemperature(self):
+        self.temp.setTemperature(self.setpointTemp)
+        if self.temp is not None:
+            if(self.setTemp.text() == 'Set Temp'):
+                self.setTemp.setText('Unset Temp')
+                self.setTemp.setStyleSheet("background-color: green")
+                self.temp.controlThread.start()
+            else:
+                self.setTemp.setText('Set Temp')
+                self.setTemp.setStyleSheet("background-color: red")
+                print('Stopping to control the temperature.')
+                self.temp.stopControl()
+
+
+
+            #self.temp.controlThread.start()
+
 
     #def setProgressBarStep(self, val):
     #    self.progress.setValue(val)
