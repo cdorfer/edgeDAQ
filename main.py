@@ -46,11 +46,11 @@ if __name__ == '__main__':
     posContr = PositionControl(esp, axes, config) #todo: remove setter and getter functions
     acqContr = AcquisitionControl(esp, axes, tek, dh, config) #todo: remove setter and getter functions
     
-    shutaddr = config['Shutter']['address']
-    shutter = Shutter(shutaddr)
+    arduinoaddr = config['Arduino']['address']
+    arduino = Arduino(arduinoaddr)
 
     #create an instance of the application window and run it
-    window = Window(posContr, acqContr, dh, livemon, shutter)
+    window = Window(posContr, acqContr, dh, livemon, arduino)
     sys.exit(app.exec_())
     
     
