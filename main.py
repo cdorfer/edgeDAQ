@@ -4,6 +4,7 @@
 ####################################
 
 import sys
+import argparse
 from configobj import ConfigObj
 
 #Hardware imports
@@ -28,6 +29,9 @@ pass 'temp' as first argument to get the temperature control option
 
 
 if __name__ == '__main__':
+    parser = argparse.ArgumentParser()
+    parser.add_argument("-tc", "--tempCtrl", action="store_true", help="Turn temperature control on/off.")  
+    args = parser.parse_args()
     app = QApplication(sys.argv)
     
     #get a configuration object   
@@ -47,16 +51,16 @@ if __name__ == '__main__':
     espaddr = config['Newport']['address']
     esp = ESP(espaddr)
     axes = [esp.axis(2), esp.axis(3), esp.axis(1)] #x, y, z
-    
-    #initialize position and scan control
-    posContr = PositionControl(esp, axes, config) #todo: remove setter and getter functions
-    acqContr = AcquisitionControl(esp, axes, tek, dh, config) #todo: remove setter and getter functions
-    
+
     arduinoaddr = config['Arduino']['address']
     arduino = Arduino(arduinoaddr)
-
+    
+    #initialize position and scan control
+    posContr = PositionControl(esp, axes, config)
+    acqContr = AcquisitionControl(esp, axes, tek, dh, config, arduino)
+    
     tempctrl = None
-    if sys.argv[1] == "temp":
+    if args.tempCtrl:
         lvaddr = config['LV']['address']
         lvcontrol = LowVoltage(lvaddr)
         tempctrl = TemperatureControl(arduino, lvcontrol)

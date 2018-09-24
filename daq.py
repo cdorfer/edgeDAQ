@@ -94,7 +94,10 @@ class DataHandling(object):
         #start_new_thread(self.livemon.updatePlots, ())
         return sp
         
-    
+    def setTemperature(self, val):
+        self.tctdata.attrs['temperature'] = val
+        print('Setting temperature!')
+
     def increaseRunNumber(self):
         with open('data/runnumber.dat', "r+") as f:
             runnumber = int(f.readline())
@@ -157,6 +160,9 @@ class DataHandling(object):
         self.nwf = val
         self.config['AcquisitionControl']['number_of_waveforms'] = int(val)
         self.config.write()
+
+
+
 
 
 
@@ -293,7 +299,7 @@ class PositionControl(object):
 
 
 class AcquisitionControl(object):
-    def __init__(self, stage, axes, tektronix, datahandler, configuration): # plus osci later
+    def __init__(self, stage, axes, tektronix, datahandler, configuration, arduino): # plus osci later
         self.stage = stage
         self.xaxis = axes[0]
         self.yaxis = axes[1]
@@ -302,6 +308,7 @@ class AcquisitionControl(object):
         self.tek = tektronix
         self.dh = datahandler
         self.config = configuration
+        self.ard = arduino
 
         self.xScanMin = float(self.config['AcquisitionControl']['xMin'])
         self.xScanMax = float(self.config['AcquisitionControl']['xMax'])
@@ -323,7 +330,9 @@ class AcquisitionControl(object):
         self.nScanPoints = 0
  
     
-    def startScan(self, stop_event, arg):        
+    def startScan(self, stop_event, arg): 
+        self.dh.setTemperature(self.ard.getStoredTemperature())
+
         #some sanity checks
         if(self.xactive):
             if (self.xScanMax > self.xScanMin and self.xScanStep <= 0) or (self.xScanMin > self.xScanMax and self.xScanStep >= 0) or (abs(self.xScanStep) > abs(self.xScanMax - self.xScanMin)):

@@ -13,7 +13,7 @@ import pyqtgraph as pg
 
 class Window(QWidget):
     
-    def __init__(self, posC, acqC, dh, mon, ard, temp):
+    def __init__(self, posC, acqC, dh, mon, ard, tempctrl):
         super().__init__()   
         
         #defaults for position control
@@ -41,7 +41,7 @@ class Window(QWidget):
         self.positionControl = posC
         self.datahandler = dh
         self.ard = ard
-        self.temp = temp
+        self.tempctrl = tempctrl
         
         self.livemon = mon
         self.livemon.setStepSize([self.xScanStep, self.yScanStep, self.zScanStep])
@@ -545,15 +545,14 @@ class Window(QWidget):
         self.acqCtr3Layout.addWidget(self.shutterCtr, 1,1,1,1,Qt.AlignCenter)
         self.acqCtr3Layout.addWidget(self.lightCtr, 1,2,1,1,Qt.AlignCenter)
 
+        self.tempDispl = QLCDNumber()
+        self.tempDispl.setMinimumWidth(100)
+        self.tempDispl.setMinimumHeight(25)
+        self.tempDispl.setDigitCount(6)
+        self.displayTemperature()
+        self.acqCtr3Layout.addWidget(self.tempDispl, 1,3,1,1,Qt.AlignCenter)
 
-        if self.temp is not None:
-            self.tempDispl = QLCDNumber()
-            self.tempDispl.setMinimumWidth(100)
-            self.tempDispl.setMinimumHeight(25)
-            self.tempDispl.setDigitCount(6)
-            self.displayTemperature()
-            self.acqCtr3Layout.addWidget(self.tempDispl, 1,3,1,1,Qt.AlignCenter)
-
+        if self.tempctrl is not None:
             self.tempSpinBox = QDoubleSpinBox()
             self.tempSpinBox.setMaximum(100)
             self.tempSpinBox.setMinimum(20)
@@ -925,29 +924,37 @@ class Window(QWidget):
 
     
     def displayTemperature(self):
-        if self.temp is not None:
+        if self.tempctrl is not None:
+            if self.tempctrl.running:
+                temp = self.ard.getStoredTemperature()
+                self.tempDispl.display(temp)
+            else:
+                _ = self.ard.getTemperature() #call to fill data for averaging
+                temp = self.ard.getStoredTemperature()
+                self.tempDispl.display(temp)
+        else:
+            _ = self.ard.getTemperature() #call to fill data for averaging
             temp = self.ard.getStoredTemperature()
             self.tempDispl.display(temp)
+
 
     def tempSpinBoxChange(self):
         self.setpointTemp = self.tempSpinBox.value()
 
+
     def setTemperature(self):
-        self.temp.setTemperature(self.setpointTemp)
-        if self.temp is not None:
+        self.tempctrl.setTemperature(self.setpointTemp)
+        if self.tempctrl is not None:
             if(self.setTemp.text() == 'Set Temp'):
                 self.setTemp.setText('Unset Temp')
                 self.setTemp.setStyleSheet("background-color: green")
-                self.temp.controlThread.start()
+                self.tempctrl.controlThread.start()
             else:
                 self.setTemp.setText('Set Temp')
                 self.setTemp.setStyleSheet("background-color: red")
                 print('Stopping to control the temperature.')
-                self.temp.stopControl()
+                self.tempctrl.stopControl()
 
-
-
-            #self.temp.controlThread.start()
 
 
     #def setProgressBarStep(self, val):
