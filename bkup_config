@@ -1,0 +1,90 @@
+[PositionControl]
+	xStepSize = 400
+	yStepSize = 100
+	zStepSize = 1000
+	
+	xLimLow = -50.7785
+	xLimHigh = 50.7815
+	yLimLow = -2.57107
+	yLimHigh = 2.5715
+	zLimLow = -75.8165
+	zLimHigh = 75.814
+
+[AcquisitionControl]
+	diamond_name = Other
+	
+	#standard side = 1, other one = 2
+	side = 0
+	
+	bias_voltage = 35.0
+	
+	#amplifier (cividec, particulars)
+	amplifier = cividec
+	
+	scan_type = regular
+	
+	#pJ per pulse
+	laser_pulse_energy = 0.0
+	
+	#pcb version (simple, car)
+	pcb = simple
+	
+	number_of_waveforms = 1
+	
+	xMin = 4.75
+	xMax = 5.25
+	xStep = 0.1
+	
+	yMin = 0.0
+	yMax = 0.5
+	yStep = 0.1
+	
+	zMin = 58.64
+	zMax = 64.0
+	zStep = 0.08
+
+
+
+[TektronixDiode]
+	address = TCPIP0::192.168.1.111::inst0::INSTR
+	
+	#seconds per div
+	horizscale = 200000e-9
+	
+	#samples per second
+	samplerate = 10e5
+	
+	#number of waveforms to be recorded
+	number_of_waveforms = 50
+	
+	voltsperdiv = .2
+	ch1_offset = 0
+	ch2_trig_level = 0.5
+	ch1_termination = 1000000
+	ch2_termination = 50
+
+
+[TektronixDiamond]
+	address = TCPIP0::192.168.1.111::inst0::INSTR
+	
+	#seconds per div
+	horizscale = 20e-9	#fixme was 200000
+	
+	#samples per second
+	samplerate = 10e9	#fixme, was e5
+	
+	#number of waveforms to be recorded
+	number_of_waveforms = 50
+	
+	voltsperdiv = .1	#fixme was 0.2
+	ch1_offset = 0
+	ch2_trig_level = 0.5
+	ch1_termination = 50	#fixme, was 1000000
+	ch2_termination = 50
+
+
+[Newport]
+	address = /dev/newport
+
+[Shutter]
+	address = /dev/shutter
