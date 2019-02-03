@@ -12,6 +12,7 @@ from tektronix import TektronixMSO5204B
 from newportESP import ESP
 from lowvoltage import LowVoltage
 from tempcontrol import TemperatureControl
+from uvlight import UVLight
 from arduino import Arduino
 
 #DAQ imports
@@ -30,7 +31,8 @@ pass 'temp' as first argument to get the temperature control option
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
-    parser.add_argument("-tc", "--tempCtrl", action="store_true", help="Turn temperature control on/off.")  
+    parser.add_argument("-tc", "--tempCtrl", action="store_true", help="Turn temperature control on/off.") 
+    parser.add_argument("-uv", "--uvLight", action="store_true", help="Turn UV LEDs on/off.") 
     args = parser.parse_args()
     app = QApplication(sys.argv)
     
@@ -60,14 +62,20 @@ if __name__ == '__main__':
     acqContr = AcquisitionControl(esp, axes, tek, dh, config, arduino)
     
     tempctrl = None
-    if args.tempCtrl:
+    uvlight = None
+    if args.tempCtrl or args.uvLight:
         lvaddr = config['LV']['address']
         lvcontrol = LowVoltage(lvaddr)
-        tempctrl = TemperatureControl(arduino, lvcontrol)
+        
+        if args.tempCtrl:
+            tempctrl = TemperatureControl(arduino, lvcontrol)
+        if args.uvLight:
+            uvlight = UVLight(lvcontrol)
+
 
 
     #create an instance of the application window and run it
-    window = Window(posContr, acqContr, dh, livemon, arduino, tempctrl)
+    window = Window(posContr, acqContr, dh, livemon, arduino, tempctrl, uvlight)
     sys.exit(app.exec_())
     
     

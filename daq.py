@@ -95,8 +95,9 @@ class DataHandling(object):
         return sp
         
     def setTemperature(self, val):
+
         self.tctdata.attrs['temperature'] = val
-        print('Setting temperature!')
+        print('Setting temperature: {}'.format(val))
 
     def increaseRunNumber(self):
         with open('data/runnumber.dat', "r+") as f:
@@ -390,7 +391,7 @@ class AcquisitionControl(object):
                     if stop_event.wait(0.005):
                         print('Scan finished.')
                         return
-                    
+                        
                     #print("x: %.2f" %self.xaxis.position, " y: %.2f" %self.yaxis.position, " z: %.2f" %self.zaxis.position)
                     nsp = self.collectNWfs()
                     endt = datetime.datetime.now()

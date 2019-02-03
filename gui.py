@@ -13,7 +13,7 @@ import pyqtgraph as pg
 
 class Window(QWidget):
     
-    def __init__(self, posC, acqC, dh, mon, ard, tempctrl):
+    def __init__(self, posC, acqC, dh, mon, ard, tempctrl, uvlight):
         super().__init__()   
         
         #defaults for position control
@@ -42,6 +42,7 @@ class Window(QWidget):
         self.datahandler = dh
         self.ard = ard
         self.tempctrl = tempctrl
+        self.uvlight = uvlight
         
         self.livemon = mon
         self.livemon.setStepSize([self.xScanStep, self.yScanStep, self.zScanStep])
@@ -545,12 +546,19 @@ class Window(QWidget):
         self.acqCtr3Layout.addWidget(self.shutterCtr, 1,1,1,1,Qt.AlignCenter)
         self.acqCtr3Layout.addWidget(self.lightCtr, 1,2,1,1,Qt.AlignCenter)
 
+        if self.uvlight is not None:
+            self.switchLed = QPushButton()
+            self.switchLed.setText('UV ON')
+            self.switchLed.setStyleSheet("background-color: red")
+            self.switchLed.clicked.connect(self.switchUVLed)
+            self.acqCtr3Layout.addWidget(self.switchLed, 1,3,1,1,Qt.AlignCenter)
+
         self.tempDispl = QLCDNumber()
         self.tempDispl.setMinimumWidth(100)
         self.tempDispl.setMinimumHeight(25)
         self.tempDispl.setDigitCount(6)
         self.displayTemperature()
-        self.acqCtr3Layout.addWidget(self.tempDispl, 1,3,1,1,Qt.AlignCenter)
+        self.acqCtr3Layout.addWidget(self.tempDispl, 1,4,1,1,Qt.AlignCenter)
 
         if self.tempctrl is not None:
             self.tempSpinBox = QDoubleSpinBox()
@@ -559,13 +567,15 @@ class Window(QWidget):
             self.tempSpinBox.setAlignment(Qt.AlignRight)
             self.tempSpinBox.setValue(self.setpointTemp)
             self.tempSpinBox.valueChanged.connect(self.tempSpinBoxChange)
-            self.acqCtr3Layout.addWidget(self.tempSpinBox, 1,4,1,1,Qt.AlignCenter)
+            self.acqCtr3Layout.addWidget(self.tempSpinBox, 1,5,1,1,Qt.AlignCenter)
 
             self.setTemp = QPushButton()
             self.setTemp.setText('Set Temp')
             self.setTemp.setStyleSheet("background-color: red")
             self.setTemp.clicked.connect(self.setTemperature)
-            self.acqCtr3Layout.addWidget(self.setTemp, 1,5,1,1,Qt.AlignCenter)
+            self.acqCtr3Layout.addWidget(self.setTemp, 1,6,1,1,Qt.AlignCenter)
+
+
 
         self.acq3Win = QHBoxLayout()
         self.acq3Win.addLayout(self.acqCtr3Layout)       
@@ -956,6 +966,17 @@ class Window(QWidget):
                 self.tempctrl.stopControl()
 
 
+    def switchUVLed(self):
+        if(self.switchLed.text() == 'UV ON'):
+            self.uvlight.switchLED(1)
+            self.switchLed.setText('UV OFF')
+            self.switchLed.setStyleSheet("background-color: green")
+            print('UV Light ON!.')
+        else:
+            self.uvlight.switchLED(0)
+            self.switchLed.setText('UV ON')
+            self.switchLed.setStyleSheet("background-color: red")
+            print('UV Light OFF.')
 
     #def setProgressBarStep(self, val):
     #    self.progress.setValue(val)

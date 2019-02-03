@@ -186,7 +186,7 @@ class Axis(object):
 		self.read = self.esp.read
 		self.step_size_list = (1, 0.5, 0.1, 0.05, 0.01, 0.005, 0.001, 0.0005, 0.0001)
 		self.step_size = 6	# default increment for gotoRel (index in step_size_list)
-		self.polling_time = 0.02
+		self.polling_time = 0.05
 
 		self.abort = self.esp.abort		
 		self.read_error = self.esp.read_error
@@ -286,7 +286,7 @@ class Axis(object):
 		"""This method will block until current motion is finished."""
 		while self.moving:
 			sleep(self.polling_time)
-		sleep(0.050) #experience has shown that this is needed
+		sleep(0.020) #experience has shown that this is needed
 	
 	#catch_error
 	def move_to(self, pos, wait=False): 
