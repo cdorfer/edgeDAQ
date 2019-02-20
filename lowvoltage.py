@@ -3,11 +3,15 @@ import time
 
 class LowVoltage(object):
 	def __init__(self, addr):
-		self.lv = serial.Serial(addr, 9600)
-		time.sleep(0.2)
+		self.addr = addr
+		self.open()
 		self.initialize()
 		self.enabled = False
 
+	def open(self):
+		self.lv = serial.Serial(self.addr, 9600)
+		time.sleep(0.2)
+		
 	def initialize(self):
 		self.lv.write(b'*IDN?\r\n') 
 		val = self.lv.readline().decode()
@@ -21,7 +25,7 @@ class LowVoltage(object):
 		self.lv.write(b'OCP2 3\r\n') #current protection trip point
 
 
-	def turnChannelOn():
+	def turnChannelOn(self):
 		if self.enabled == False:
 			self.lv.write(b'OP2 1\r\n') #turn channel 1 on
 
@@ -40,10 +44,18 @@ class LowVoltage(object):
 			self.lv.write(cmd.encode()) #changes the current limit
 			self.lv.write(b'OP2 1\r\n')
 		except:
+			self.close()
+			self.open()
+			self.initialize()
+			self.turnLedOn()
 			pass
 
 	def turnLedOff(self):
-		try:	
+		try:
 			self.lv.write(b'OP2 0\r\n')
 		except:
+			self.close()
+			self.open()
+			self.initialize()
+			self.turnLedOff()
 			pass

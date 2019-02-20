@@ -391,6 +391,11 @@ class AcquisitionControl(object):
                     if stop_event.wait(0.005):
                         print('Scan finished.')
                         return
+
+                    #bias to zero
+                    #expose to UV
+                    #bias on again
+                    #take aseries of waveforms
                         
                     #print("x: %.2f" %self.xaxis.position, " y: %.2f" %self.yaxis.position, " z: %.2f" %self.zaxis.position)
                     nsp = self.collectNWfs()
