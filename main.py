@@ -6,6 +6,7 @@
 import sys
 import argparse
 from configobj import ConfigObj
+import logging
 
 #Hardware imports
 from tektronix import TektronixMSO5204B
@@ -24,9 +25,20 @@ from gui import Window
 from PyQt5.QtWidgets import QApplication
 import numpy as np
 
-'''
-pass 'temp' as first argument to get the temperature control option
-'''
+
+
+#set up logging
+logger = logging.getLogger('edgeTCT_Log')
+logger.setLevel(logging.DEBUG)
+fh = logging.FileHandler('main_edge_tct.log')
+fh.setLevel(logging.DEBUG)
+ch = logging.StreamHandler()
+ch.setLevel(logging.DEBUG)
+formatter = logging.Formatter('%(asctime)s : %(message)s', datefmt='%Y.%m.%d %H:%M:%S')
+fh.setFormatter(formatter)
+ch.setFormatter(formatter)
+logger.addHandler(fh)
+logger.addHandler(ch)
 
 
 if __name__ == '__main__':
@@ -55,27 +67,27 @@ if __name__ == '__main__':
     axes = [esp.axis(2), esp.axis(3), esp.axis(1)] #x, y, z
 
     arduinoaddr = config['Arduino']['address']
-    arduino = Arduino(arduinoaddr)
+    arduino = Arduino(logger, serial_port=arduinoaddr)
     
-    #initialize position and scan control
-    posContr = PositionControl(esp, axes, config)
-    acqContr = AcquisitionControl(esp, axes, tek, dh, config, arduino)
+
     
     tempctrl = None
     uvlight = None
     if args.tempCtrl or args.uvLight:
         lvaddr = config['LV']['address']
-        lvcontrol = LowVoltage(lvaddr)
+        lvcontrol = LowVoltage(lvaddr, logger)
         
         if args.tempCtrl:
             tempctrl = TemperatureControl(arduino, lvcontrol)
         if args.uvLight:
             uvlight = UVLight(lvcontrol)
 
-
+    #initialize position and scan control
+    posContr = PositionControl(esp, axes, config)
+    acqContr = AcquisitionControl(esp, axes, tek, dh, config, arduino, uvlight)
 
     #create an instance of the application window and run it
-    window = Window(posContr, acqContr, dh, livemon, arduino, tempctrl, uvlight)
+    window = Window(posContr, acqContr, dh, livemon, arduino, tempctrl, uvlight, logger)
     sys.exit(app.exec_())
     
     

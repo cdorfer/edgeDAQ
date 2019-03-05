@@ -8,6 +8,7 @@ import datetime
 from _thread import start_new_thread
 import numpy as np
 import h5py
+from hvinterface import HVInterface
 
 
 class DataHandling(object):
@@ -300,7 +301,7 @@ class PositionControl(object):
 
 
 class AcquisitionControl(object):
-    def __init__(self, stage, axes, tektronix, datahandler, configuration, arduino): # plus osci later
+    def __init__(self, stage, axes, tektronix, datahandler, configuration, arduino, uvlight): # plus osci later
         self.stage = stage
         self.xaxis = axes[0]
         self.yaxis = axes[1]
@@ -310,6 +311,8 @@ class AcquisitionControl(object):
         self.dh = datahandler
         self.config = configuration
         self.ard = arduino
+        self.hv = HVInterface()
+        self.uv = uvlight
 
         self.xScanMin = float(self.config['AcquisitionControl']['xMin'])
         self.xScanMax = float(self.config['AcquisitionControl']['xMax'])
@@ -333,6 +336,7 @@ class AcquisitionControl(object):
     
     def startScan(self, stop_event, arg): 
         self.dh.setTemperature(self.ard.getStoredTemperature())
+
 
         #some sanity checks
         if(self.xactive):
@@ -379,7 +383,7 @@ class AcquisitionControl(object):
                 if self.yactive:
                     ynext = self.yScanMin+idy*self.yScanStep
                     self.yaxis.move_to(ynext, wait=True)
-        
+
                 #along x-axis (left - right)
                 for idx in range(int(xsteps)+1):
                     if self.xactive:
@@ -392,13 +396,26 @@ class AcquisitionControl(object):
                         print('Scan finished.')
                         return
 
-                    #bias to zero
-                    #expose to UV
-                    #bias on again
-                    #take aseries of waveforms
-                        
+                    self.ard.open(False)
+                    self.hv.setVoltage(0)
+                    sleep(10)
+                    self.uv.switchLED(1)
+                    sleep(10)
+                    self.uv.switchLED(0)
+                    sleep(1)
+                    self.hv.setVoltage(500)
+                    sleep(10)
+                    self.ard.open(True) 
+
+                    sleep(0.1)
+                    for n in range(5):
+                        nsp = self.collectNWfs()
+                        sleep(4)
+
+
                     #print("x: %.2f" %self.xaxis.position, " y: %.2f" %self.yaxis.position, " z: %.2f" %self.zaxis.position)
-                    nsp = self.collectNWfs()
+
+                    #nsp = self.collectNWfs()
                     endt = datetime.datetime.now()
                     print('Scanpoint ', nsp, '/', self.nScanPoints, ' written to file (', round(((endt-startt).total_seconds()*1000),1), ' ms )')
                     

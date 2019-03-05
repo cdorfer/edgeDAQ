@@ -13,7 +13,7 @@ import pyqtgraph as pg
 
 class Window(QWidget):
     
-    def __init__(self, posC, acqC, dh, mon, ard, tempctrl, uvlight):
+    def __init__(self, posC, acqC, dh, mon, ard, tempctrl, uvlight, logger):
         super().__init__()   
         
         #defaults for position control
@@ -43,6 +43,7 @@ class Window(QWidget):
         self.ard = ard
         self.tempctrl = tempctrl
         self.uvlight = uvlight
+        self.logger = logger
         
         self.livemon = mon
         self.livemon.setStepSize([self.xScanStep, self.yScanStep, self.zScanStep])
@@ -912,12 +913,12 @@ class Window(QWidget):
             self.ard.open(True)
             self.shutterCtr.setText('Close Shutter')
             self.shutterCtr.setStyleSheet("background-color: green")
-            print('Shutter opened.')
+            self.logger.info('Shutter opened.')
         else:
             self.ard.open(False)
             self.shutterCtr.setText('Open Shutter')
             self.shutterCtr.setStyleSheet("background-color: red")
-            print('Shutter closed.')
+            self.logger.info('Shutter closed.')
 
 
     def lightCtrSlot(self):
@@ -925,12 +926,12 @@ class Window(QWidget):
             self.ard.lightOn(True)
             self.lightCtr.setText('Light OFF')
             self.lightCtr.setStyleSheet("background-color: green")
-            print('Light ON!.')
+            self.logger.info('Light ON!.')
         else:
             self.ard.lightOn(False)
             self.lightCtr.setText('Light ON')
             self.lightCtr.setStyleSheet("background-color: red")
-            print('Light OFF.')
+            self.logger.info('Light OFF.')
 
     
     def displayTemperature(self):
@@ -962,7 +963,7 @@ class Window(QWidget):
             else:
                 self.setTemp.setText('Set Temp')
                 self.setTemp.setStyleSheet("background-color: red")
-                print('Stopping to control the temperature.')
+                self.logger.info('Stopping to control the temperature.')
                 self.tempctrl.stopControl()
 
 
@@ -971,12 +972,12 @@ class Window(QWidget):
             self.uvlight.switchLED(1)
             self.switchLed.setText('UV OFF')
             self.switchLed.setStyleSheet("background-color: green")
-            print('UV Light ON!.')
+            self.logger.info('UV Light ON!.')
         else:
             self.uvlight.switchLED(0)
             self.switchLed.setText('UV ON')
             self.switchLed.setStyleSheet("background-color: red")
-            print('UV Light OFF.')
+            self.logger.info('UV Light OFF.')
 
     #def setProgressBarStep(self, val):
     #    self.progress.setValue(val)
