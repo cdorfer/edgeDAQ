@@ -396,23 +396,22 @@ class AcquisitionControl(object):
                         print('Scan finished.')
                         return
 
-                    self.ard.open(False)
+
+                    self.ard.openShutter(False)
                     self.hv.setVoltage(0)
                     sleep(10)
                     self.uv.switchLED(1)
                     sleep(10)
                     self.uv.switchLED(0)
                     sleep(1)
-                    self.hv.setVoltage(500)
+                    self.hv.setVoltage(-500)
                     sleep(10)
-                    self.ard.open(True) 
-
-                    sleep(0.1)
+                    self.ard.openShutter(True) 
                     for n in range(5):
                         nsp = self.collectNWfs()
                         sleep(4)
-
-
+                
+                    
                     #print("x: %.2f" %self.xaxis.position, " y: %.2f" %self.yaxis.position, " z: %.2f" %self.zaxis.position)
 
                     #nsp = self.collectNWfs()

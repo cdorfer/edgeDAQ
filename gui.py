@@ -910,12 +910,12 @@ class Window(QWidget):
 
     def shutterCtrSlot(self):
         if(self.shutterCtr.text() == 'Open Shutter'):
-            self.ard.open(True)
+            self.ard.openShutter(True)
             self.shutterCtr.setText('Close Shutter')
             self.shutterCtr.setStyleSheet("background-color: green")
             self.logger.info('Shutter opened.')
         else:
-            self.ard.open(False)
+            self.ard.openShutter(False)
             self.shutterCtr.setText('Open Shutter')
             self.shutterCtr.setStyleSheet("background-color: red")
             self.logger.info('Shutter closed.')
