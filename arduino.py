@@ -20,7 +20,7 @@ class Arduino(object):
         time.sleep(0.2)
         self.logger.info('Connection to Arduino opened.')
 
-        #self.temps = collections.deque([20,20,20,20,20],5)
+        self.temps = collections.deque([20,20,20,20,20],5)
         self.instruction_nr = 0
 
     def hard_reconnect(self):
@@ -65,22 +65,27 @@ class Arduino(object):
     def openShutter(self, state):
         if state:
             self.write(b'O')
+            self.logger.info('Opening shutter.')
         else:
             self.write(b'C')
+            self.logger.info('Closing shutter.')
 
 
     def lightOn(self, state):
         if state:
             self.write(b'L')
+            self.logger.info('Turning white LED on.')
         else:
             self.write(b'F')
+            self.logger.info('Turning white LED off.')
 
     def fireNShots(self, nr):
-        self.write(b'N {}'.format(nr))  
+        self.write(b'N {}'.format(nr))
+        self.logger.info('Fired {} shots.'.format(nr))  
 
     def fireNDelayedShots(self, nr):
-        self.write(b'D {}'.format(nr))     
-
+        self.write(b'D {}'.format(nr)) 
+        self.logger.info('Fired {} delayed shots.'.format(nr))     
 
     def write_read_float(self, command):
         return -1 #needed for temp readout in the future
