@@ -121,6 +121,7 @@ class TektronixMSO5204B(object):
 
         
         #configure triggering on CH2:
+        '''
         self.inst.write('select:ch2 ON')
         self.inst.write('ch2:termination {0}'.format(self.ch2_termination))     #set channel 2 termination (trigger channel)
         self.inst.write('trigger:a:type edge')                                  #set trigger type to pulse
@@ -130,9 +131,44 @@ class TektronixMSO5204B(object):
         self.inst.write('trigger:a:edge:source ch2')                            #set trigger channel
         self.inst.write('trigger:a:level:ch2 {0}'.format(self.ch2_trig_level))  #set trigger level
         self.inst.write('trigger:a:level:ch2 1')                                #set trigger level voltage
+        '''
         #print('Trigger settings configured.')
-        
-        
+
+
+
+        #chopper sync channel 4
+        self.inst.write('select:ch4 ON')
+        self.inst.write('ch4:scale 1')
+        self.inst.write('ch4:termination 1000000')                              #set channel 4 termination (trigger channel)
+        self.inst.write('TRIGger:a:STATE ON')
+        self.inst.write('trigger:a:type edge')                                  #set trigger type to pulse
+        self.inst.write('trigger:a:mode normal')                                #set trigger mode to normal
+        self.inst.write('trigger:a:edge:coupling dc')                           #couple dc
+        self.inst.write('trigger:a:edge:slope rise')                            #rising edge triggering
+        self.inst.write('trigger:a:edge:source ch4')                            #set trigger channel
+        self.inst.write('trigger:a:level:ch4 1.8')                              #set trigger level
+
+
+
+        #Trigger B
+        self.inst.write('select:ch2 ON')
+        self.inst.write('ch2:coupling ac')  
+        self.inst.write('ch2:scale 0.03')
+        self.inst.write('ch2:termination 1000000')                              #set channel 2 termination (trigger channel)
+        self.inst.write('TRIGger:b:STATE ON')
+        self.inst.write('trigger:b:type edge')                                  #set trigger type to pulse
+        self.inst.write('trigger:b:edge:coupling dc')                           #couple dc
+        self.inst.write('trigger:b:edge:slope fall')                            #falling edge triggering
+        self.inst.write('trigger:b:edge:source ch2')                            #set trigger channel
+        self.inst.write('trigger:b:level:ch2 -0.012')                            #set trigger level to 12mV
+
+
+        #combine with A->B sequence
+        self.inst.write('TRIGger:B:BY EVENTS')
+        self.inst.write('TRIGger:B:EVENTS:COUNt 1')
+
+
+        #data taking settings
         self.inst.write('data:encdg fastest')                   #set encoding type to fast binary
         self.inst.write('wfmoutpre:byt_n 1')                    #set number of bytes per data point
         
