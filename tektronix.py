@@ -167,6 +167,10 @@ class TektronixMSO5204B(object):
         self.inst.write('TRIGger:B:BY EVENTS')
         self.inst.write('TRIGger:B:EVENTS:COUNt 1')
 
+        #visual trigger setup
+        #self.inst.write('VIsual:ENAble ON')
+        #self.inst.write('VISual:FILE:RECALL "C:\\Users\\Tek_Local_Admin\\Tektronix\\TekScope\\VisualSetups\\edgetct.txt"')
+
 
         #data taking settings
         self.inst.write('data:encdg fastest')                   #set encoding type to fast binary
