@@ -396,9 +396,23 @@ class AcquisitionControl(object):
                         print('Scan finished.')
                         return
 
-                    self.ard.fireNDelayedShots(20)
-                    nsp = self.collectNWfs()
+                    '''
+                    self.hv.setVoltage(0)
+                    sleep(20)
+                    self.uv.switchLED(1)
+                    sleep(60)
+                    self.uv.switchLED(0)
+                    sleep(5)
+                    self.hv.setVoltage(-500)
+                    sleep(60)
+                    
+                    for n in range(200):
+                        self.ard.fireNDelayedShots(100)
+                        nsp = self.collectNWfs()
+                        sleep(2)
+                    '''
 
+                        
                     '''
                     self.ard.openShutter(False)
                     self.hv.setVoltage(0)
@@ -418,6 +432,8 @@ class AcquisitionControl(object):
                     
                     #print("x: %.2f" %self.xaxis.position, " y: %.2f" %self.yaxis.position, " z: %.2f" %self.zaxis.position)
 
+                    #self.ard.fireNDelayedShots(22)
+                    nsp = self.collectNWfs()
                     #nsp = self.collectNWfs()
                     endt = datetime.datetime.now()
                     print('Scanpoint ', nsp, '/', self.nScanPoints, ' written to file (', round(((endt-startt).total_seconds()*1000),1), ' ms )')

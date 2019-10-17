@@ -43,7 +43,7 @@ class LowVoltage(object):
 
 	def turnLedOn(self):
 		try:
-			cmd = 'I2 {}\r\n'.format(0.25)
+			cmd = 'I2 {}\r\n'.format(0.25) #0.25
 			self.lv.write(cmd.encode()) #changes the current limit
 			self.lv.write(b'OP2 1\r\n')
 		except Exception as e:

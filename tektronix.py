@@ -106,7 +106,7 @@ class TektronixMSO5204B(object):
             self.inst.write('ch3:scale {0}'.format(self.voltsperdiv))                   #set vertical scale
             self.inst.write('ch3:offset {0}'.format(self.ch1_offset))                   #set vertical position
             self.inst.write('ch3:termination {0}'.format(self.ch1_termination))         #set channel 1 termination
-            self.inst.write('ch3:coupling ac')						                    #set channel 1 coupling  
+            self.inst.write('ch3:coupling ac')                                          #set channel 1 coupling  
             self.inst.write('select:ch1 OFF')                                           #this is stupid, but necessary
             self.inst.write('select:ch3 ON')                                            #this is stupid, but necessary
 
@@ -121,7 +121,6 @@ class TektronixMSO5204B(object):
 
         
         #configure triggering on CH2:
-        '''
         self.inst.write('select:ch2 ON')
         self.inst.write('ch2:termination {0}'.format(self.ch2_termination))     #set channel 2 termination (trigger channel)
         self.inst.write('trigger:a:type edge')                                  #set trigger type to pulse
@@ -130,13 +129,13 @@ class TektronixMSO5204B(object):
         self.inst.write('trigger:a:edge:slope rise')                            #rising edge triggering
         self.inst.write('trigger:a:edge:source ch2')                            #set trigger channel
         self.inst.write('trigger:a:level:ch2 {0}'.format(self.ch2_trig_level))  #set trigger level
-        self.inst.write('trigger:a:level:ch2 1')                                #set trigger level voltage
-        '''
+        #self.inst.write('trigger:a:level:ch2 1')                                #set trigger level voltage
+        
         #print('Trigger settings configured.')
 
 
-
         #chopper sync channel 4
+        '''
         self.inst.write('select:ch4 ON')
         self.inst.write('ch4:scale 1')
         self.inst.write('ch4:termination 1000000')                              #set channel 4 termination (trigger channel)
@@ -149,10 +148,9 @@ class TektronixMSO5204B(object):
         self.inst.write('trigger:a:level:ch4 1.8')                              #set trigger level
 
 
-
         #Trigger B
         self.inst.write('select:ch2 ON')
-        self.inst.write('ch2:coupling ac')  
+        self.inst.write('ch2:coupling ac')
         self.inst.write('ch2:scale 0.03')
         self.inst.write('ch2:termination 1000000')                              #set channel 2 termination (trigger channel)
         self.inst.write('TRIGger:b:STATE ON')
@@ -161,11 +159,13 @@ class TektronixMSO5204B(object):
         self.inst.write('trigger:b:edge:slope fall')                            #falling edge triggering
         self.inst.write('trigger:b:edge:source ch2')                            #set trigger channel
         self.inst.write('trigger:b:level:ch2 -0.012')                            #set trigger level to 12mV
-
+        
 
         #combine with A->B sequence
         self.inst.write('TRIGger:B:BY EVENTS')
         self.inst.write('TRIGger:B:EVENTS:COUNt 1')
+        '''
+
 
         #visual trigger setup
         #self.inst.write('VIsual:ENAble ON')
@@ -224,6 +224,7 @@ class TektronixMSO5204B(object):
         scaleddata = (data-self.yoffset)*self.ymult+self.yzero
         #scale data to volts
         #scaledtime = numpy.arange(self.xzero,self.xzero+(self.xincrement*self.numberofpoints),self.xincrement)  #always the same time
+        #print('dt={}ns, nr points={}'.format(self.xincrement, self.numberofpoints)) #gives 0.2 and 1000
         scaledtime = numpy.arange(self.xzero,(self.xincrement*self.numberofpoints),self.xincrement) #it gave 1 point too much
         #print('Waveforms acquired.')
         return (scaleddata.astype(numpy.float32), scaledtime.astype(numpy.float32)[0:self.samplesInWf])
