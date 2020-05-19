@@ -301,7 +301,7 @@ class PositionControl(object):
 
 
 class AcquisitionControl(object):
-    def __init__(self, stage, axes, tektronix, datahandler, configuration, arduino, uvlight): # plus osci later
+    def __init__(self, stage, axes, tektronix, datahandler, configuration, arduino, illumination): # plus osci later
         self.stage = stage
         self.xaxis = axes[0]
         self.yaxis = axes[1]
@@ -312,7 +312,7 @@ class AcquisitionControl(object):
         self.config = configuration
         self.ard = arduino
         self.hv = HVInterface()
-        self.uv = uvlight
+        self.illum = illumination
 
         self.xScanMin = float(self.config['AcquisitionControl']['xMin'])
         self.xScanMax = float(self.config['AcquisitionControl']['xMax'])
@@ -399,9 +399,9 @@ class AcquisitionControl(object):
                     '''
                     self.hv.setVoltage(0)
                     sleep(20)
-                    self.uv.switchLED(1)
+                    self.illum.switchUVLED(1)
                     sleep(60)
-                    self.uv.switchLED(0)
+                    self.illum.switchUVLED(0)
                     sleep(5)
                     self.hv.setVoltage(-500)
                     sleep(60)
@@ -417,9 +417,9 @@ class AcquisitionControl(object):
                     self.ard.openShutter(False)
                     self.hv.setVoltage(0)
                     sleep(20)
-                    self.uv.switchLED(1)
+                    self.illum.switchUVLED(1)
                     sleep(60)
-                    self.uv.switchLED(0)
+                    self.illum.switchUVLED(0)
                     sleep(5)
                     self.hv.setVoltage(-500)
                     sleep(20)

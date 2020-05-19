@@ -13,7 +13,7 @@ import pyqtgraph as pg
 
 class Window(QWidget):
     
-    def __init__(self, posC, acqC, dh, mon, ard, tempctrl, uvlight, logger):
+    def __init__(self, posC, acqC, dh, mon, ard, tempctrl, illumination, logger):
         super().__init__()   
         
         #defaults for position control
@@ -42,7 +42,7 @@ class Window(QWidget):
         self.datahandler = dh
         self.ard = ard
         self.tempctrl = tempctrl
-        self.uvlight = uvlight
+        self.illum = illumination
         self.logger = logger
         
         self.livemon = mon
@@ -547,19 +547,26 @@ class Window(QWidget):
         self.acqCtr3Layout.addWidget(self.shutterCtr, 1,1,1,1,Qt.AlignCenter)
         self.acqCtr3Layout.addWidget(self.lightCtr, 1,2,1,1,Qt.AlignCenter)
 
-        if self.uvlight is not None:
-            self.switchLed = QPushButton()
-            self.switchLed.setText('UV ON')
-            self.switchLed.setStyleSheet("background-color: red")
-            self.switchLed.clicked.connect(self.switchUVLed)
-            self.acqCtr3Layout.addWidget(self.switchLed, 1,3,1,1,Qt.AlignCenter)
+        if self.illum is not None:
+            self.switchUVLed = QPushButton()
+            self.switchUVLed.setText('UV ON')
+            self.switchUVLed.setStyleSheet("background-color: red")
+            self.switchUVLed.clicked.connect(self.switchUVLedFunc)
+            self.acqCtr3Layout.addWidget(self.switchUVLed, 1,3,1,1,Qt.AlignCenter)
+
+            self.switchIRLed = QPushButton()
+            self.switchIRLed.setText('IR ON')
+            self.switchIRLed.setStyleSheet("background-color: red")
+            self.switchIRLed.clicked.connect(self.switchIRLedFunc)
+            self.acqCtr3Layout.addWidget(self.switchIRLed, 1,4,1,1,Qt.AlignCenter)
+
 
         self.tempDispl = QLCDNumber()
         self.tempDispl.setMinimumWidth(100)
         self.tempDispl.setMinimumHeight(25)
         self.tempDispl.setDigitCount(6)
         self.displayTemperature()
-        self.acqCtr3Layout.addWidget(self.tempDispl, 1,4,1,1,Qt.AlignCenter)
+        self.acqCtr3Layout.addWidget(self.tempDispl, 1,5,1,1,Qt.AlignCenter)
 
         if self.tempctrl is not None:
             self.tempSpinBox = QDoubleSpinBox()
@@ -967,17 +974,31 @@ class Window(QWidget):
                 self.tempctrl.stopControl()
 
 
-    def switchUVLed(self):
-        if(self.switchLed.text() == 'UV ON'):
-            self.uvlight.switchLED(1)
-            self.switchLed.setText('UV OFF')
-            self.switchLed.setStyleSheet("background-color: green")
+    def switchUVLedFunc(self):
+        if(self.switchUVLed.text() == 'UV ON'):
+            self.illum.switchUVLED(1)
+            self.switchUVLed.setText('UV OFF')
+            self.switchUVLed.setStyleSheet("background-color: green")
             self.logger.info('UV Light ON!.')
         else:
-            self.uvlight.switchLED(0)
-            self.switchLed.setText('UV ON')
-            self.switchLed.setStyleSheet("background-color: red")
+            self.illum.switchUVLED(0)
+            self.switchUVLed.setText('UV ON')
+            self.switchUVLed.setStyleSheet("background-color: red")
             self.logger.info('UV Light OFF.')
+
+
+    def switchIRLedFunc(self):
+        if(self.switchIRLed.text() == 'IR ON'):
+            self.illum.switchIRLED(1)
+            self.switchIRLed.setText('IR OFF')
+            self.switchIRLed.setStyleSheet("background-color: green")
+            self.logger.info('IR Light ON!.')
+        else:
+            self.illum.switchIRLED(0)
+            self.switchIRLed.setText('IR ON')
+            self.switchIRLed.setStyleSheet("background-color: red")
+            self.logger.info('IR Light OFF.')
+
 
     #def setProgressBarStep(self, val):
     #    self.progress.setValue(val)

@@ -13,7 +13,7 @@ from tektronix import TektronixMSO5204B
 from newportESP import ESP
 from lowvoltage import LowVoltage
 from tempcontrol import TemperatureControl
-from uvlight import UVLight
+from illumination import Illumination
 from arduino import Arduino
 
 #DAQ imports
@@ -44,7 +44,7 @@ logger.addHandler(ch)
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument("-tc", "--tempCtrl", action="store_true", help="Turn temperature control on/off.") 
-    parser.add_argument("-uv", "--uvLight", action="store_true", help="Turn UV LEDs on/off.") 
+    parser.add_argument("-il", "--illumination", action="store_true", help="Turn UV and IR LEDs on/off.") 
     args = parser.parse_args()
     app = QApplication(sys.argv)
     
@@ -72,22 +72,22 @@ if __name__ == '__main__':
 
     
     tempctrl = None
-    uvlight = None
-    if args.tempCtrl or args.uvLight:
+    illumination = None
+    if args.tempCtrl or args.illumination:
         lvaddr = config['LV']['address']
         lvcontrol = LowVoltage(lvaddr, logger)
         
         if args.tempCtrl:
             tempctrl = TemperatureControl(arduino, lvcontrol)
-        if args.uvLight:
-            uvlight = UVLight(lvcontrol)
+        if args.illumination:
+            illum = Illumination(lvcontrol)
 
     #initialize position and scan control
     posContr = PositionControl(esp, axes, config)
-    acqContr = AcquisitionControl(esp, axes, tek, dh, config, arduino, uvlight)
+    acqContr = AcquisitionControl(esp, axes, tek, dh, config, arduino, illum)
 
     #create an instance of the application window and run it
-    window = Window(posContr, acqContr, dh, livemon, arduino, tempctrl, uvlight, logger)
+    window = Window(posContr, acqContr, dh, livemon, arduino, tempctrl, illum, logger)
     sys.exit(app.exec_())
     
     

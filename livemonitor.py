@@ -80,8 +80,8 @@ class LiveMonitor(object):
         self.wfo_arr = wfo*1e3
     
     def setScanPoint(self, x, y, z, val):
-        self.x.append(round(x, 4))
-        self.y.append(round(y,4))
+        self.x.append(round(-1.0*x, 4))
+        self.y.append(round(-1.0*y,4))
         self.z.append(round(z,4))
         self.sp.append(val)
         self.idx = len(self.sp)
