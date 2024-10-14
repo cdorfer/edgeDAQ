@@ -14,11 +14,11 @@ if __name__ == '__main__':
 
     #group tctdata:
     tctdata = hdf['tctdata']
-    print('Diamond Name: ', tctdata.attrs['diamond_name'])
+    print('Sample Name: ', tctdata.attrs['sample_name'])
     print('Bias Voltage: ', tctdata.attrs['bias_voltage'])
     print('Number of waveforms: ', tctdata.attrs['number_of_waveforms'])
     print('Laser Pulse Energy: ', tctdata.attrs['laser_pulse_energy'])
-    print('Diamond Side: ', tctdata.attrs['side'])
+    print('Sample Side: ', tctdata.attrs['side'])
     print('Amplifier: ', tctdata.attrs['amplifier'])
     print('PCB: ', tctdata.attrs['pcb'])
     print('Comments:\n', tctdata.attrs['comments'], '\n')

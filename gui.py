@@ -49,7 +49,7 @@ class Window(QWidget):
         self.livemon.setPlotLimits([self.xScanMin, self.xScanMax, self.yScanMin, self.yScanMax, self.zScanMin, self.zScanMax])
         self.timer = QTimer() #updates the plot
         self.timer.timeout.connect(self.updateGraphs)
-        self.timer.timeout.connect(self.displayTemperature)
+        #self.timer.timeout.connect(self.displayTemperature)
         self.timer.start(1000)
 
 
@@ -80,33 +80,31 @@ class Window(QWidget):
         self.xSlider.setOrientation(Qt.Horizontal)
         self.xSlider.setMinimumWidth(220)  
         self.xSlider.setTickInterval(1)
-        self.xSlider.setPageStep(self.xStepSize*1000) #1000 to display um not nm        
-        self.xSlider.setMaximum(self.positionControl.getXMax()*(10**6)) #to nm
-        self.xSlider.setMinimum(self.positionControl.getXMin()*(10**6)) #to nm
-        #print(self.positionControl.getXMin())
-        #print(self.positionControl.getXMax())
-        #print(self.positionControl.getXPosition())
-        self.xSlider.setValue(self.positionControl.getXPosition()*(10**6)) #to nm
+
+        self.xSlider.setPageStep(int(self.xStepSize*1000)) #1000 to display um not nm        
+        self.xSlider.setMaximum(int(self.positionControl.getXMax()*(10**6))) #to nm
+        self.xSlider.setMinimum(int(self.positionControl.getXMin()*(10**6))) #to nm
+        self.xSlider.setValue(int(self.positionControl.getXPosition()*(10**6))) #to nm
         self.xSlider.valueChanged.connect(self.sliderXChange)
 
         self.ySlider = QSlider()
         self.ySlider.setOrientation(Qt.Horizontal)  
         self.ySlider.setMinimumWidth(220)
         self.ySlider.setTickInterval(1)
-        self.ySlider.setPageStep(self.yStepSize*1000) #1000 to display um not nm
-        self.ySlider.setMaximum(self.positionControl.getYMax()*(10**6)) #to nm
-        self.ySlider.setMinimum(self.positionControl.getYMin()*(10**6)) #to nm
-        self.ySlider.setValue(self.positionControl.getYPosition()*(10**6)) #to nm
+        self.ySlider.setPageStep(int(self.yStepSize*1000)) #1000 to display um not nm
+        self.ySlider.setMaximum(int(self.positionControl.getYMax()*(10**6))) #to nm
+        self.ySlider.setMinimum(int(self.positionControl.getYMin()*(10**6))) #to nm
+        self.ySlider.setValue(int(self.positionControl.getYPosition()*(10**6))) #to nm
         self.ySlider.valueChanged.connect(self.sliderYChange)
 
         self.zSlider = QSlider()
         self.zSlider.setOrientation(Qt.Horizontal)
         self.zSlider.setMinimumWidth(220)
         self.zSlider.setTickInterval(1)
-        self.zSlider.setPageStep(self.zStepSize*1000) #1000 to display um not nm
-        self.zSlider.setMaximum(self.positionControl.getZMax()*(10**6)) #to nm
-        self.zSlider.setMinimum(self.positionControl.getZMin()*(10**6)) #to nm
-        self.zSlider.setValue(self.positionControl.getZPosition()*(10**6)) #to nm
+        self.zSlider.setPageStep(int(self.zStepSize*1000)) #1000 to display um not nm
+        self.zSlider.setMaximum(int(self.positionControl.getZMax()*(10**6))) #to nm
+        self.zSlider.setMinimum(int(self.positionControl.getZMin()*(10**6))) #to nm
+        self.zSlider.setValue(int(self.positionControl.getZPosition()*(10**6))) #to nm
         self.zSlider.valueChanged.connect(self.sliderZChange)
     
         self.xSpinBox = QDoubleSpinBox()
@@ -198,15 +196,9 @@ class Window(QWidget):
         self.defHome.setEnabled(True) #fixme, limits are screwed up after this.
         #self.defHome.setMinimumWidth(200)
         
-        self.defHWLim = QPushButton()
-        self.defHWLim.setText('Find HW Limits')
-        self.defHWLim.setEnabled(True) #fixme
-        self.defHWLim.clicked.connect(self.positionControl.findHardwareLimits)
-        #self.defHWLim.setMinimumWidth(60)
         
         self.posCtrLayout.addWidget(self.goHome, 7,3,1,1,Qt.AlignLeft)
         self.posCtrLayout.addWidget(self.defHome, 8,3,1,1,Qt.AlignLeft)
-        self.posCtrLayout.addWidget(self.defHWLim, 9,3,1,1,Qt.AlignLeft)
         self.posCtrLayout.addWidget(QLabel(""), 10,1,1,4,Qt.AlignCenter)
         
         #----------------------------------------------------------------------
@@ -408,13 +400,13 @@ class Window(QWidget):
         
         self.acqCtrLayout.addWidget(self.run_number, 3,2,1,1, Qt.AlignCenter)
         
-        self.acqCtrLayout.addWidget(QLabel('    Diamond Name:'), 4,1,1,1,Qt.AlignLeft)
-        self.diamond_name = QComboBox()
-        self.diamond_name.addItems(['S116', 'S118', 'S97', 'S86', 'S83', 'S30', 'Heisenberg', 'Dirac', 'Einstein', 'Higgs', 'Other'])
-        self.diamond_name.setMinimumWidth(104)
-        self.diamond_name.setCurrentText(self.datahandler.diamond_name)
-        self.diamond_name.currentIndexChanged.connect(self.diamNameSlot)
-        self.acqCtrLayout.addWidget(self.diamond_name, 4,2,1,1, Qt.AlignLeft)
+        self.acqCtrLayout.addWidget(QLabel('    Sample Name:'), 4,1,1,1,Qt.AlignLeft)
+        self.sample_name = QComboBox()
+        self.sample_name.addItems(['1', '2', '3', '4', '5', '6' '7'])
+        self.sample_name.setMinimumWidth(104)
+        self.sample_name.setCurrentText(self.datahandler.sample_name)
+        self.sample_name.currentIndexChanged.connect(self.diamNameSlot)
+        self.acqCtrLayout.addWidget(self.sample_name, 4,2,1,1, Qt.AlignLeft)
         
         self.acqCtrLayout.addWidget(QLabel('    Bias Voltage [V]:'), 5,1,1,1,Qt.AlignLeft)
         self.bias_voltage = QDoubleSpinBox()
@@ -447,12 +439,12 @@ class Window(QWidget):
         self.acqCtrLayout.addWidget(self.pulse_energy, 3,4,1,1, Qt.AlignLeft)
         
         self.acqCtrLayout.addWidget(QLabel('        Side:'), 4,3,1,1,Qt.AlignLeft)
-        self.diamond_side = QComboBox()
-        self.diamond_side.addItems(['0', '1'])
-        self.diamond_side.setMinimumWidth(104)
-        self.diamond_side.setCurrentText(str(self.datahandler.side))
-        self.diamond_side.currentIndexChanged.connect(self.diamSideSlot)
-        self.acqCtrLayout.addWidget(self.diamond_side, 4,4,1,1, Qt.AlignLeft)
+        self.sample_side = QComboBox()
+        self.sample_side.addItems(['0', '1'])
+        self.sample_side.setMinimumWidth(104)
+        self.sample_side.setCurrentText(str(self.datahandler.side))
+        self.sample_side.currentIndexChanged.connect(self.diamSideSlot)
+        self.acqCtrLayout.addWidget(self.sample_side, 4,4,1,1, Qt.AlignLeft)
         
         self.acqCtrLayout.addWidget(QLabel('        Scan Type:'), 5,3,1,1,Qt.AlignLeft)
         self.scan_type = QComboBox()
@@ -644,15 +636,15 @@ class Window(QWidget):
               
     def xSpinBoxChange(self):
         self.xStepSize = self.xSpinBox.value() 
-        self.xSlider.setPageStep(self.xStepSize*1000)
+        self.xSlider.setPageStep(int(self.xStepSize*1000))
               
     def ySpinBoxChange(self):
         self.yStepSize = self.ySpinBox.value() 
-        self.ySlider.setPageStep(self.yStepSize*1000) 
+        self.ySlider.setPageStep(int(self.yStepSize*1000))
         
     def zSpinBoxChange(self):
         self.zStepSize = self.zSpinBox.value() 
-        self.zSlider.setPageStep(self.zStepSize*1000)
+        self.zSlider.setPageStep(int(self.zStepSize*1000))
         
         
     def showXPos(self):
@@ -681,9 +673,9 @@ class Window(QWidget):
         self.showXPos()
         self.showYPos()
         self.showZPos()
-        self.xSlider.setValue(self.positionControl.getXPosition())
-        self.ySlider.setValue(self.positionControl.getYPosition())
-        self.zSlider.setValue(self.positionControl.getZPosition())
+        self.xSlider.setValue(int(self.positionControl.getXPosition()))
+        self.ySlider.setValue(int(self.positionControl.getYPosition()))
+        self.zSlider.setValue(int(self.positionControl.getZPosition()))
         
  
     def xLimLowChange(self):
@@ -788,11 +780,11 @@ class Window(QWidget):
         self.scanThread = threading.Thread(target=self.acqControl.startScan, args=(self.pill2kill, 'test'))
              
     def diamNameSlot(self):
-        self.datahandler.setDiamondName(self.diamond_name.currentText())
+        self.datahandler.setSampleName(self.sample_name.currentText())
         self.newFile.setEnabled(False)
         
     def diamSideSlot(self):
-        self.datahandler.setSide(self.diamond_side.currentText())
+        self.datahandler.setSide(self.sample_side.currentText())
         self.newFile.setEnabled(False)   
  
     def ScanTypeSlot(self):
@@ -827,11 +819,11 @@ class Window(QWidget):
         self.fileOpen = True
         
         #disable other input options
-        self.diamond_name.setEnabled(False)
+        self.sample_name.setEnabled(False)
         self.bias_voltage.setEnabled(False)
         self.nwf.setEnabled(False)
         self.pulse_energy.setEnabled(False)
-        self.diamond_side.setEnabled(False)
+        self.sample_side.setEnabled(False)
         self.scan_type.setEnabled(False)
         self.pcb.setEnabled(False)
         self.comments.setEnabled(False)
@@ -846,11 +838,11 @@ class Window(QWidget):
         self.fileOpen = False
         
         #enable other input options
-        self.diamond_name.setEnabled(True)
+        self.sample_name.setEnabled(True)
         self.bias_voltage.setEnabled(True)
         self.nwf.setEnabled(True)
         self.pulse_energy.setEnabled(True)
-        self.diamond_side.setEnabled(True)
+        self.sample_side.setEnabled(True)
         self.scan_type.setEnabled(True)
         self.pcb.setEnabled(True)
         self.comments.setEnabled(True)

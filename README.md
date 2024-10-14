@@ -9,7 +9,9 @@ The software allows to collect waveforms at certain positions and perform 3D sca
 	- M-ILS150CC stage
 	- M-ILS100CC stage
 	- M-VP-5ZA stage
-- Tektronix DPO5204B 2GHz
+- Tektronix DPO5204B 2 GHz or
+- Tektronix MSO64B 2.5 GHz 
+
 
 ###Software Requirements:
 - Python3 (ConfigObj, PyQt5, numpy, matplotlib, pyserial, pyvisa)

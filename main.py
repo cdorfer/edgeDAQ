@@ -8,15 +8,17 @@ import argparse
 from configobj import ConfigObj
 
 #Hardware imports
-from tektronix import TektronixMSO5204B
-from newportESP import ESP
+from tektronixMSO64B import TektronixMSO64B
+from newportXPS import XPS
 from lowvoltage import LowVoltage
 from tempcontrol import TemperatureControl
 from uvlight import UVLight
 from arduino import Arduino
 
 #DAQ imports
-from daq import PositionControl, AcquisitionControl, DataHandling
+from positionControl import PositionControl
+from acquisitionControl import AcquisitionControl
+from dataHandling import DataHandling
 from livemonitor import LiveMonitor
 
 #GUI imports
@@ -33,6 +35,7 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument("-tc", "--tempCtrl", action="store_true", help="Turn temperature control on/off.") 
     parser.add_argument("-uv", "--uvLight", action="store_true", help="Turn UV LEDs on/off.") 
+
     args = parser.parse_args()
     app = QApplication(sys.argv)
     
@@ -46,31 +49,32 @@ if __name__ == '__main__':
     dh = DataHandling(config, livemon)
     
     #open connection to oscilloscope and pass on the configuration file
-    tek = TektronixMSO5204B(config)
-    #tek.configure()
+    tek = TektronixMSO64B(config)
+    tek.configure()
     
-    #open serial connection to newport table
-    espaddr = config['Newport']['address']
-    esp = ESP(espaddr)
-    axes = [esp.axis(2), esp.axis(3), esp.axis(1)] #x, y, z
+    #open ethernet connection to newport table
+    xps = XPS(config)
+    #axes = [esp.axis(2), esp.axis(3), esp.axis(1)] #x, y, z
 
     arduinoaddr = config['Arduino']['address']
     arduino = Arduino(arduinoaddr)
+
     
     #initialize position and scan control
-    posContr = PositionControl(esp, axes, config)
-    acqContr = AcquisitionControl(esp, axes, tek, dh, config, arduino)
+    posContr = PositionControl(xps, config)
+    #acqContr = AcquisitionControl(esp, axes, tek, dh, config, arduino)
+    acqContr = AcquisitionControl(xps, tek, dh, config)
     
     tempctrl = None
     uvlight = None
-    if args.tempCtrl or args.uvLight:
-        lvaddr = config['LV']['address']
-        lvcontrol = LowVoltage(lvaddr)
+    # if args.tempCtrl or args.uvLight:
+    #     lvaddr = config['LV']['address']
+    #     lvcontrol = LowVoltage(lvaddr)
         
-        if args.tempCtrl:
-            tempctrl = TemperatureControl(arduino, lvcontrol)
-        if args.uvLight:
-            uvlight = UVLight(lvcontrol)
+    #     if args.tempCtrl:
+    #         tempctrl = TemperatureControl(arduino, lvcontrol)
+    #     if args.uvLight:
+    #         uvlight = UVLight(lvcontrol)
 
 
 
@@ -83,66 +87,4 @@ if __name__ == '__main__':
     
     
     
-    #posContr.findHardwareLimits()
-
-    '''
-    tek = TektronixMSO5204B('TCPIP0::192.168.1.111::inst0::INSTR')
-    tek.configure()
-    
-    (wfdata, timedata) = tek.acquireWaveforms()
  
-    #plot the figure with correct scaling
-    plt.plot(timedata,wfdata[0:2000])
-    plt.plot(timedata,wfdata[2000:4000])
-    plt.plot(timedata,wfdata[98000:100000])
-    plt.ylabel('Voltage (V)')
-    plt.xlabel('Time (sec)')
-    plt.show()
-    print('Plot generated.')
-    '''
-
-    '''
-    dh = DataHandling()
-    dh.createFile()
-    
-    t = np.random.random(size=1000)
-    dh.setTimScale(t)
-    
-    a = np.random.random(size=(400,1000))
-    dh.addScanPointData(a)
-    dh.addScanPointData(a)
-    dh.addScanPointData(a)
-    
-    dh.closeFile()
-    '''
-
-
-
-    
-    #poscontr.findHardwareLimits()
-    #poscontr.setHome()
-    #axes[0].on()
-    #axes[1].on()
-    #axes[2].on()
-    #axes[0].move_by(20, wait=True)
-    #axes[1].move_by(1.5, wait=True)
-    #axes[2].move_by(-30, wait=True)
-    #poscontr.setHome()
-    
-    
-    #scancontr.setZmin(5) #zStart
-    #scancontr.setZmax(-5) #zStop
-    #scancontr.setStepZ(-0.1) #zStep
-    #
-    #scancontr.setXmin(0)
-    #scancontr.setXmax(5)
-    #scancontr.setStepX(0.1)
-    #
-    #scancontr.setYmin(0)
-    #scancontr.setYmax(1)
-    #scancontr.setStepY(0.1)
-    #
-    #print 'starting scan'
-    #scancontr.setXactive(0)
-    #scancontr.startScan()
-    

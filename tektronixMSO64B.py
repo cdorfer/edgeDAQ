@@ -3,21 +3,22 @@
 # Email: cdorfer@phys.ethz.ch                                  
 ####################################
 
-import visa
+import pyvisa as visa
 import numpy
 from struct import unpack
 from time import sleep
-import socket
+from configobj import ConfigObj
+import matplotlib.pyplot as plt
 
 
-class TektronixMSO5204B(object):
-    """ Readout class for the MSO5204 Oscilloscope.
+class TektronixMSO64B(object):
+    """ Readout class for the MSO64B Oscilloscope.
     :Usage: 
-    >>> tek = TektronixMSO5204('TCPIP0::192.168.1.111::inst0::INSTR') # open communication with the scope
+    >>> tek = TektronixMSO64B('TCPIP0::192.168.1.111::inst0::INSTR') # open communication with the scope
     """
 
     #fixme: select channel upon selecting scan type
-    #CH1: Diamond
+    #CH1: Sample
     #CH2: Trigger
     #CH3: Diode
 
@@ -50,14 +51,16 @@ class TektronixMSO5204B(object):
         self.xincrement = 0
         self.xzero = 0
 
+        self.open()
+
 
     def open(self):
         #configure VISA resource
         self.rm = visa.ResourceManager('@py')
-        self.inst = self.rm.open_resource(self.resource) 
+        #print('Resources available: ', self.rm.list_resources())
+        self.inst = self.rm.open_resource(self.resource)
         self.inst.Timeout = 60
-
-        print('Connected to: ', self.inst.ask('*idn?').rstrip())
+        print('Connected to: ', self.inst.query('*idn?').rstrip())
         self.inst.write('*rst')  #default the instrument
 
 
@@ -68,7 +71,7 @@ class TektronixMSO5204B(object):
             tekConfig = 'TektronixDiode'
 
         if self.scan_type == 'regular':
-            tekConfig = 'TektronixDiamond'
+            tekConfig = 'TektronixSample'
 
         self.resource = self.config[tekConfig]['address']
         self.horizscale = self.config[tekConfig]['horizscale']  #sec/div
@@ -148,17 +151,17 @@ class TektronixMSO5204B(object):
         #print('Data transfer settings configured.')
 
         #vertical data
-        self.yoffset = float(self.inst.ask('wfmoutpre:yoff?'))   #yoffset is unscaled offset data that is set by the ch<x>:offset
-        self.ymult = float(self.inst.ask('wfmoutpre:ymult?'))    #ymult is the scaling factor that is set by ch<x>:scale
-        self.yzero = float(self.inst.ask('wfmoutpre:yzero?'))    #yzero is scaled position data that is set by ch<x>:position
+        self.yoffset = float(self.inst.query('wfmoutpre:yoff?'))   #yoffset is unscaled offset data that is set by the ch<x>:offset
+        self.ymult = float(self.inst.query('wfmoutpre:ymult?'))    #ymult is the scaling factor that is set by ch<x>:scale
+        self.yzero = float(self.inst.query('wfmoutpre:yzero?'))    #yzero is scaled position data that is set by ch<x>:position
 
         #horizontal data
-        self.numberofpoints = int(self.inst.ask('wfmoutpre:nr_pt?'))     #number of points in the waveform acquisition
+        self.numberofpoints = int(self.inst.query('wfmoutpre:nr_pt?'))     #number of points in the waveform acquisition
         print("We take: " + str(self.numberofpoints) + " data points in each wf!")
-        self.xincrement = float(self.inst.ask('wfmoutpre:xincr?'))       #amount of time between data points
-        self.xzero = float(self.inst.ask('wfmoutpre:xzero?'))            #absolute time value of the beginning of the waveform record
-        print("Data channel:", self.inst.ask('data:source?'))
-        print("Tektronix DPO5204B configured!")
+        self.xincrement = float(self.inst.query('wfmoutpre:xincr?'))       #amount of time between data points
+        self.xzero = float(self.inst.query('wfmoutpre:xzero?'))            #absolute time value of the beginning of the waveform record
+        print("Data channel:", self.inst.query('data:source?'))
+        print("Tektronix MSO64B configured!")
 
     
     def acquireWaveforms(self):
@@ -168,7 +171,7 @@ class TektronixMSO5204B(object):
         done = 0
         while(done != 1):                              #wait until scope has finished acquiring waveforms
             try:
-                done = int(self.inst.ask('*opc?'))
+                done = int(self.inst.query('*opc?'))
             except:
                 sleep(0.01)                        
 
@@ -201,7 +204,29 @@ class TektronixMSO5204B(object):
             self.inst.close()
             self.rm = None
             self.inst = None
-            print("Connection to DPO5204B closed.")
+            print("Connection to MSO64B closed.")
+
+
+if __name__ == '__main__':
+    #get a configuration object   
+    config = ConfigObj('config.ini')
+    
+    #open connection to oscilloscope and pass on the configuration file
+    tek = TektronixMSO64B(config)
+    tek.open()
+    tek.configure()
+    # for i in range(10):
+    #     [wf, time] = tek.acquireWaveforms()
+    #     print(len(time))
+    #     sleep(0.1)
+
+    #plt.plot(time, wf)
+    #plt.show()
+
+    sleep(3)
+
+    tek.close()
+    
 
 
     
